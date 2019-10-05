@@ -104,10 +104,12 @@ namespace Graph2
                 {
                     if (element is NodeView)
                     {
-                        DestroyNode((element as NodeView).NodeData);
+                        Debug.Log("Destroy node");
+                        DestroyNode(element as NodeView);
                     }
                     else if (element is Edge)
                     {
+                        Debug.Log("Destroy edge");
                         DestroyEdge(element as Edge);
                     }
                 }
@@ -172,6 +174,7 @@ namespace Graph2
             }
             
             // Sync edges on the graph with our graph's connections 
+            // TODO: Deal with trash connections from bad imports
             foreach (var node in nodeMap)
             {
                 foreach (var port in node.Key.Inputs)
@@ -186,6 +189,7 @@ namespace Graph2
                     }
                 }
             }
+
         }
         
         public void CreateNode(Type type, Vector2 screenPosition, PortView connectedPort = null)
@@ -231,11 +235,29 @@ namespace Graph2
             }
         }
 
-        public void DestroyNode(AbstractNode node)
+        public void DestroyNode(NodeView node)
         {
-            m_Graph.RemoveNode(node);
+            // Remove all edges on the graph 
             
-            ScriptableObject.DestroyImmediate(node, true);
+            /*
+            foreach (var port in node.OutputPorts.Values)
+            {
+                foreach (var conn in port.connections)
+                {
+                    m_GraphView.RemoveElement(conn);
+                }
+            }
+            
+            foreach (var port in node.InputPorts.Values)
+            {
+                foreach (var conn in port.connections)
+                {
+                    m_GraphView.RemoveElement(conn);
+                }
+            }*/
+            
+            m_Graph.RemoveNode(node.NodeData);
+            ScriptableObject.DestroyImmediate(node.NodeData, true);
             AssetDatabase.SaveAssets();
         }
 
@@ -270,13 +292,17 @@ namespace Graph2
             inputPort.Connect(output.NodeData, edge.output.portName);
             outputPort.Connect(input.NodeData, edge.input.portName);
             
-            // Add visual edge
-            var edgeView = edge.input.ConnectTo(edge.output);
-            m_GraphView.AddElement(edge);
+            // Add visual edge. Note this cannot be the input edge as it 
+            // could be dropped from being tracked by the graph 
+            // (thus not properly cleaned up later). Instead, we need to 
+            // construct a new one and add that instead.
+            var newEdge = edge.input.ConnectTo(edge.output);
+            m_GraphView.AddElement(newEdge);
         }
 
         public void DestroyEdge(Edge edge)
         {
+            Debug.Log("rm Edge " + edge.input.portName + " to " + edge.output.portName);
             var input = edge.input.node as NodeView;
             var output = edge.output.node as NodeView;
             
@@ -285,6 +311,14 @@ namespace Graph2
 
             inputPort.Disconnect(output.NodeData, edge.output.portName);
             outputPort.Disconnect(input.NodeData, edge.input.portName);
+
+            edge.input.Disconnect(edge);
+            edge.output.Disconnect(edge);
+
+            edge.input = null;
+            edge.output = null;
+
+            m_GraphView.RemoveElement(edge);
         }
 
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)

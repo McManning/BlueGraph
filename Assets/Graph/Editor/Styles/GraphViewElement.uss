@@ -79,11 +79,6 @@ NodePort.Texture2D {
 
 /* And so on... */
 
-NodeView #collapsible-area {
-	background-color: #666666;
-	padding: 5px;
-}
-
 /* Gradients are apparently broken
 NodeView .ExtensionRow {
     flex: 1;
@@ -115,4 +110,31 @@ NodePort.port > #type
 
 NodePort.port > .unity-base-field {
 	flex: 1 0 0; 
+}
+
+PortView .unity-base-field__label {
+	min-width: 0px;
+}
+
+PortView .unity-base-field__input {
+	min-width: 60px;
+}
+
+NodeView #extension .unity-property-field__label {
+	min-width: 0;
+	flex: 1 0 0;
+	-unity-text-align: upper-right;
+	padding-right: 8px;
+}
+
+NodeView #extension .unity-property-field__input {
+	min-width: 60px;
+}
+
+NodeView #collapsible-area {
+	background-color: #3F3F3F;
+}
+
+NodeView #extension {
+	padding: 6px;
 }

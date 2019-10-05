@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6729544523930598130
+--- !u!114 &-8605028299902836667
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -16,46 +16,31 @@ MonoBehaviour:
   Inputs:
   - allowMany: 1
     fieldName: x
-    node: {fileID: -6729544523930598130}
+    node: {fileID: -8605028299902836667}
     Connections:
-    - FieldName: Out
-      Node: {fileID: 7296428729074911660}
+    - FieldName: result
+      Node: {fileID: 5161313272837633317}
   - allowMany: 1
     fieldName: y
-    node: {fileID: -6729544523930598130}
-    Connections: []
-  - allowMany: 1
-    fieldName: result
-    node: {fileID: -6729544523930598130}
+    node: {fileID: -8605028299902836667}
     Connections:
-    - FieldName: Out
-      Node: {fileID: 7296428729074911660}
-  - allowMany: 1
-    fieldName: Graph
-    node: {fileID: -6729544523930598130}
-    Connections: []
-  - allowMany: 1
-    fieldName: Inputs
-    node: {fileID: -6729544523930598130}
-    Connections: []
-  - allowMany: 1
-    fieldName: Outputs
-    node: {fileID: -6729544523930598130}
-    Connections: []
-  - allowMany: 1
-    fieldName: Position
-    node: {fileID: -6729544523930598130}
-    Connections: []
+    - FieldName: result
+      Node: {fileID: 5161313272837633317}
   Outputs:
   - allowMany: 0
     fieldName: Out
-    node: {fileID: -6729544523930598130}
+    node: {fileID: -8605028299902836667}
     Connections: []
-  Position: {x: 108, y: -81}
-  x: 0
-  y: 0
-  result: 0
---- !u!114 &-4569230400453927079
+  - allowMany: 1
+    fieldName: result
+    node: {fileID: -8605028299902836667}
+    Connections: []
+  Position: {x: 367, y: -506}
+  x: 4.91
+  y: 1.78
+  result: 1.15
+  fooBarBuzz: -0.72
+--- !u!114 &-4405958019291505302
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,119 +56,24 @@ MonoBehaviour:
   Inputs:
   - allowMany: 1
     fieldName: x
-    node: {fileID: -4569230400453927079}
-    Connections: []
+    node: {fileID: -4405958019291505302}
+    Connections:
+    - FieldName: result
+      Node: {fileID: 5161313272837633317}
   - allowMany: 1
     fieldName: y
-    node: {fileID: -4569230400453927079}
-    Connections:
-    - FieldName: Out
-      Node: {fileID: 7296428729074911660}
-  - allowMany: 1
-    fieldName: result
-    node: {fileID: -4569230400453927079}
-    Connections:
-    - FieldName: Out
-      Node: {fileID: 7296428729074911660}
-  - allowMany: 1
-    fieldName: Graph
-    node: {fileID: -4569230400453927079}
-    Connections: []
-  - allowMany: 1
-    fieldName: Inputs
-    node: {fileID: -4569230400453927079}
-    Connections: []
-  - allowMany: 1
-    fieldName: Outputs
-    node: {fileID: -4569230400453927079}
-    Connections: []
-  - allowMany: 1
-    fieldName: Position
-    node: {fileID: -4569230400453927079}
+    node: {fileID: -4405958019291505302}
     Connections: []
   Outputs:
-  - allowMany: 0
-    fieldName: Out
-    node: {fileID: -4569230400453927079}
-    Connections:
-    - FieldName: x
-      Node: {fileID: -3967138222034839619}
-  Position: {x: -65, y: 186}
-  x: 0
-  y: 0
-  result: 0
---- !u!114 &-3967138222034839619
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 437c8298294413745aed2e540d3e876b, type: 3}
-  m_Name: Graph2.TestNode
-  m_EditorClassIdentifier: 
-  Graph: {fileID: 11400000}
-  Inputs:
-  - allowMany: 1
-    fieldName: x
-    node: {fileID: -3967138222034839619}
-    Connections:
-    - FieldName: Out
-      Node: {fileID: -4569230400453927079}
-  - allowMany: 1
-    fieldName: y
-    node: {fileID: -3967138222034839619}
-    Connections: []
   - allowMany: 1
     fieldName: result
-    node: {fileID: -3967138222034839619}
+    node: {fileID: -4405958019291505302}
     Connections: []
-  - allowMany: 1
-    fieldName: Graph
-    node: {fileID: -3967138222034839619}
-    Connections: []
-  - allowMany: 1
-    fieldName: Inputs
-    node: {fileID: -3967138222034839619}
-    Connections: []
-  - allowMany: 1
-    fieldName: Outputs
-    node: {fileID: -3967138222034839619}
-    Connections: []
-  - allowMany: 1
-    fieldName: Position
-    node: {fileID: -3967138222034839619}
-    Connections: []
-  Outputs:
-  - allowMany: 0
-    fieldName: Out
-    node: {fileID: -3967138222034839619}
-    Connections: []
-  Position: {x: 235, y: 159}
+  Position: {x: 368, y: -288}
   x: 0
   y: 0
   result: 0
---- !u!114 &-1828594115631270302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 437c8298294413745aed2e540d3e876b, type: 3}
-  m_Name: Graph2.TestNode
-  m_EditorClassIdentifier: 
-  Graph: {fileID: 11400000}
-  Inputs: []
-  Outputs: []
-  Position: {x: 425.66486, y: 131.20755}
-  x: 0
-  y: 0
-  result: 0
+  fooBarBuzz: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,12 +87,27 @@ MonoBehaviour:
   m_Name: New Graph
   m_EditorClassIdentifier: 
   Nodes:
-  - {fileID: 7296428729074911660}
-  - {fileID: -6729544523930598130}
-  - {fileID: -4569230400453927079}
-  - {fileID: -3967138222034839619}
-  - {fileID: -1828594115631270302}
---- !u!114 &7296428729074911660
+  - {fileID: -8605028299902836667}
+  - {fileID: 5161313272837633317}
+  - {fileID: -4405958019291505302}
+  - {fileID: 1940204603244770067}
+--- !u!114 &1940204603244770067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Graph2.TypeTestNode
+  m_EditorClassIdentifier: Assembly-CSharp:Graph2:TypeTestNode
+  Graph: {fileID: 11400000}
+  Inputs: []
+  Outputs: []
+  Position: {x: 11, y: -304}
+--- !u!114 &5161313272837633317
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -217,59 +122,26 @@ MonoBehaviour:
   Graph: {fileID: 11400000}
   Inputs:
   - allowMany: 1
-    fieldName: In
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
-    fieldName: In
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
     fieldName: x
-    node: {fileID: 7296428729074911660}
+    node: {fileID: 5161313272837633317}
     Connections: []
   - allowMany: 1
     fieldName: y
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
-    fieldName: result
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
-    fieldName: Graph
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
-    fieldName: Inputs
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
-    fieldName: Outputs
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  - allowMany: 1
-    fieldName: Position
-    node: {fileID: 7296428729074911660}
+    node: {fileID: 5161313272837633317}
     Connections: []
   Outputs:
   - allowMany: 1
-    fieldName: Out
-    node: {fileID: 7296428729074911660}
+    fieldName: result
+    node: {fileID: 5161313272837633317}
     Connections:
-    - FieldName: x
-      Node: {fileID: -6729544523930598130}
     - FieldName: y
-      Node: {fileID: -4569230400453927079}
-    - FieldName: result
-      Node: {fileID: -4569230400453927079}
-    - FieldName: result
-      Node: {fileID: -6729544523930598130}
-  - allowMany: 1
-    fieldName: Out
-    node: {fileID: 7296428729074911660}
-    Connections: []
-  Position: {x: -267, y: -46}
-  x: 0
-  y: 0
-  result: 0
+      Node: {fileID: -8605028299902836667}
+    - FieldName: x
+      Node: {fileID: -8605028299902836667}
+    - FieldName: x
+      Node: {fileID: -4405958019291505302}
+  Position: {x: -24, y: -510}
+  x: 8.73
+  y: 19.37
+  result: -2.8
+  fooBarBuzz: -3.63

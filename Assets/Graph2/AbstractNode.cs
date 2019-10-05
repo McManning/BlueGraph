@@ -46,6 +46,24 @@ namespace Graph2
         }
     }
     
+    [AttributeUsage(AttributeTargets.Field)]
+    public class InputAttribute : Attribute
+    {
+
+    }
+    
+    [AttributeUsage(AttributeTargets.Field)]
+    public class OutputAttribute : Attribute
+    {
+
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class EditableAttribute : Attribute
+    {
+
+    }
+
     [Serializable]
     public class AbstractNode : ScriptableObject
     {

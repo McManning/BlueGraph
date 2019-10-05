@@ -1,0 +1,62 @@
+﻿
+/* Port themes by data type */
+
+PortView.type-System-String {
+    --port-color: #FCD76E;
+}
+
+PortView.type-System-Boolean {
+    --port-color: #BB0000;
+}
+
+PortView.type-System-Int {
+    --port-color: #9481E6;
+}
+
+PortView.type-System-Int32 {
+    --port-color: #9481E6;
+}
+
+PortView.type-System-Int64 {
+    --port-color: #9481E6;
+}
+
+PortView.type-System-Single {
+	--port-color: #84E4E7;
+}
+
+PortView.type-System-Enum {
+    --port-color: #9481E6;
+}
+
+PortView.type-UnityEngine-Vector2 {
+    --port-color: #9AEF92;
+}
+
+PortView.type-UnityEngine-Vector3 {
+    --port-color: #F6FF9A;
+}
+
+PortView.type-UnityEngine-Vector4 {
+    --port-color: #FBCBF4;
+}
+
+PortView.type-UnityEngine-Quaternion {
+    --port-color: #FBCBF4;
+}
+
+PortView.type-UnityEngine-Color {
+    --port-color: #FBCBF4;
+}
+
+PortView.type-UnityEngine-Matrix4x4 {
+    --port-color: #8FC1DF;
+}
+
+PortView.type-UnityEngine-GameObject {
+    --port-color:#8FC1DF;
+}
+
+PortView.type-UnityEngine-Texture2D {
+    --port-color:#FF8B8B;
+}

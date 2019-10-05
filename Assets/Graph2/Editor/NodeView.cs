@@ -4,8 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Graph2
 {
@@ -15,8 +18,11 @@ namespace Graph2
 
         EdgeConnectorListener m_ConnectorListener;
 
-        Dictionary<string, PortView> m_InputPortViews = new Dictionary<string, PortView>();
-        Dictionary<string, PortView> m_OutputPortViews = new Dictionary<string, PortView>();
+        SerializedObject m_SerializedNode;
+
+        // TODO: Don't really want this public but DestroyNode uses it.
+        public Dictionary<string, PortView> InputPorts = new Dictionary<string, PortView>();
+        public Dictionary<string, PortView> OutputPorts = new Dictionary<string, PortView>();
 
         public void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
@@ -25,6 +31,8 @@ namespace Graph2
             m_ConnectorListener = connectorListener;
             title = node.name;
 
+            m_SerializedNode = new SerializedObject(node);
+            
             UpdatePorts();
         }
 
@@ -36,100 +44,138 @@ namespace Graph2
             // Extract fields from the node.
             // TODO: Eventually, this'll cache somewhere per node type. 
             // Also attribute reads.
-            var fields = NodeData.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+            var fields = NodeData.GetType().GetFields(
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
+            );
             
-            NodePort port;
             foreach (var field in fields)
             {
                 var name = field.Name;
-                port = NodeData.GetInputPort(name);
-                
-                // Introspection pulled up a new port, track it.
-                if (port == null)
-                {
-                    port = new NodePort()
-                    {
-                        fieldName = name,
-                        node = NodeData,
-                        allowMany = true
-                    };
 
-                    NodeData.Inputs.Add(port);
+                foreach (var attr in field.GetCustomAttributes(true))
+                {
+                    Debug.Log(attr);
+
+                    if (attr is InputAttribute)
+                    {
+                        var port = NodeData.GetInputPort(name);
+                        if (port == null)
+                        {
+                            // Introspection pulled up a new port, track it.
+                            port = new NodePort()
+                            {
+                                fieldName = name,
+                                node = NodeData,
+                                allowMany = true
+                            };
+
+                            NodeData.Inputs.Add(port);
+                        }
+                
+                        Debug.Log("Add input: " + name);
+                        AddInputPort(
+                            port, 
+                            m_SerializedNode.FindProperty(field.Name), 
+                            field.FieldType
+                        );
+                    }
+                    else if (attr is OutputAttribute)
+                    {
+                        var port = NodeData.GetOutputPort(name);
+                        if (port == null)
+                        {
+                            port = new NodePort()
+                            {
+                                fieldName = name,
+                                node = NodeData,
+                                allowMany = true
+                            };
+
+                            NodeData.Outputs.Add(port);
+                        }
+                
+                        Debug.Log("Add output: " + name);
+                        AddOutputPort(port, null, field.FieldType);
+                    }
+                    else if (attr is EditableAttribute)
+                    {
+                        AddEditableField(m_SerializedNode.FindProperty(field.Name));
+                    }
                 }
                 
-                AddInputPort(port, field.FieldType);
             }
             
             // TODO: Deal with deleted/renamed ports.
 
-
-            // Make a fake output.
-
-            port = NodeData.GetOutputPort("Out");
-            if (port == null)
-            {
-                port = new NodePort()
-                {
-                    fieldName = "Out",
-                    node = NodeData
-                };
-
-                NodeData.Outputs.Add(port);
-            }
-
-            AddOutputPort(port, typeof(float));
+            
+            // Toggle visibility of the extension container
+            RefreshExpandedState();
         }
 
-        protected void AddInputPort(NodePort port, Type type)
+        protected void AddEditableField(SerializedProperty prop)
+        {
+            var field = new PropertyField(prop);
+            field.Bind(m_SerializedNode);
+            field.RegisterCallback<ChangeEvent<string>>((evt) =>
+            {
+                Debug.Log(evt);
+            });
+            
+            extensionContainer.Add(field);
+        }
+
+        protected void AddInputPort(NodePort port, SerializedProperty prop, Type type)
         {
             var view = PortView.Create(
                 port, 
                 Orientation.Horizontal,
                 Direction.Input, 
-                type, 
+                prop, 
+                type,
                 m_ConnectorListener
             );
-
-            m_InputPortViews.Add(port.fieldName, view);
+            
+            InputPorts.Add(port.fieldName, view);
             inputContainer.Add(view);
         }
         
-        protected void AddOutputPort(NodePort port, Type type)
+        protected void AddOutputPort(NodePort port, SerializedProperty prop, Type type)
         {
             var view = PortView.Create(
                 port, 
                 Orientation.Horizontal, 
                 Direction.Output, 
+                prop,
                 type, 
                 m_ConnectorListener
             );
 
-            m_OutputPortViews.Add(port.fieldName, view);
+            OutputPorts.Add(port.fieldName, view);
             outputContainer.Add(view);
         }
 
         public PortView GetInputPort(string name)
         {
-            m_InputPortViews.TryGetValue(name, out PortView port);
+            InputPorts.TryGetValue(name, out PortView port);
             return port;
         }
 
         public PortView GetOutputPort(string name)
         {
-            m_OutputPortViews.TryGetValue(name, out PortView port);
+            OutputPorts.TryGetValue(name, out PortView port);
             return port;
         }
         
         public PortView GetCompatibleInputPort(PortView output)
         { 
-            return m_InputPortViews.FirstOrDefault(
+            return InputPorts.FirstOrDefault(
                 (port) => port.Value.IsCompatibleWith(output)
             ).Value;
         }
     
         public PortView GetCompatibleOutputPort(PortView input)
         {
-            return m_OutputPortViews.FirstOrDefault(
+            return OutputPorts.FirstOrDefault(
                 (port) => port.Value.IsCompatibleWith(input)
             ).Value;
         }

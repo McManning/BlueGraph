@@ -32,6 +32,11 @@ namespace Graph2
             entry.userData = typeof(TestNode);
             tree.Add(entry);
         
+            
+            entry = new SearchTreeEntry(new GUIContent("Type Test"));
+            entry.level = 2;
+            entry.userData = typeof(TypeTestNode);
+            tree.Add(entry);
             // TODO: Context sensitive based on `connectedPort`
             // TODO: Blacklisting certain nodes by some other context (e.g. two independent graph systems)
         

@@ -25,7 +25,7 @@ namespace Graph2
         
             titleContent = new GUIContent(graph.name);
             Repaint();
-            }
+        }
         
         /// <summary>
         /// Restore an already open graph after a reload of assemblies
