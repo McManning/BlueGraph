@@ -50,6 +50,11 @@ namespace Graph2
     public class NodeAttribute : Attribute
     {
         public string Name;
+
+        public NodeAttribute(string name = null)
+        {
+            Name = name;
+        }
     }
     
     [AttributeUsage(AttributeTargets.Field)]
@@ -57,18 +62,34 @@ namespace Graph2
     {
         public string Name;
         public bool Multiple = true;
+        public bool Editable = true;
+        
+        public InputAttribute(string name = null)
+        {
+            Name = name;
+        }
     }
     
     [AttributeUsage(AttributeTargets.Field)]
     public class OutputAttribute : Attribute
     {
         public string Name;
+        
+        public OutputAttribute(string name = null)
+        {
+            Name = name;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Field)]
     public class EditableAttribute : Attribute
     {
         public string Name;
+        
+        public EditableAttribute(string name = null)
+        {
+            Name = name;
+        }
     }
 
     [Serializable]
@@ -102,7 +123,7 @@ namespace Graph2
             return null; 
         }
 
-        public T GetInputValue<T>(string name, T defaultValue = default(T))
+        public T GetInputValue<T>(string name, T defaultValue = default)
         {
             var port = GetInputPort(name);
 
@@ -113,6 +134,25 @@ namespace Graph2
             }
 
             return defaultValue;
+        }
+
+        public T[] GetInputValues<T>(string name, T defaultValue = default)
+        {
+            var values = new List<T>();
+            var port = GetInputPort(name);
+
+            if (port.Connections.Count < 1 && defaultValue != null)
+            {
+                values.Add(defaultValue);
+            }
+            else
+            {
+                port.Connections.ForEach(
+                    (conn) => values.Add((T)conn.Node.GetOutput(conn.FieldName))
+                );
+            }
+            
+            return values.ToArray();
         }
     }
 }
