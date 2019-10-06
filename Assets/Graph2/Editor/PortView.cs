@@ -11,6 +11,8 @@ namespace Graph2
 {
     public class PortView : Port
     {
+        public NodePort portData;
+
         protected PortView(
             Orientation portOrientation, 
             Direction portDirection, 
@@ -30,35 +32,29 @@ namespace Graph2
     
         public static PortView Create(
             NodePort port, 
-            Orientation portOrientation, 
-            Direction portDirection, 
+            PortReflectionData refPort,
             SerializedProperty prop, 
             Type type,
             IEdgeConnectorListener connectorListener
         ) {
             var view = new PortView(
-                portOrientation, 
-                portDirection, 
-                port.allowMany ? Capacity.Multi : Capacity.Single, 
+                Orientation.Horizontal, 
+                refPort.isInput ? Direction.Input : Direction.Output, 
+                port.isMulti ? Capacity.Multi : Capacity.Single, 
                 type
             ) {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
                 portName = port.fieldName,
-                userData = port
+                portData = port
             };
-        
+            
             view.AddManipulator(view.m_EdgeConnector);
 
             // Bind to the underlying field
-            if (prop != null)
+            if (prop != null && refPort.isEditable)
             {
                 var field = new PropertyField(prop, " ");
                 field.Bind(prop.serializedObject);
-                field.RegisterCallback<ChangeEvent<string>>((evt) =>
-                {
-                    Debug.Log(evt);
-                });
-
                 view.m_ConnectorBox.parent.Add(field);
             }
 

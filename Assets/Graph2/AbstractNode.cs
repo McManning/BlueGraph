@@ -17,7 +17,7 @@ namespace Graph2
     [Serializable]
     public class NodePort
     {
-        [SerializeField] public bool allowMany;
+        [SerializeField] public bool isMulti;
 
         [SerializeField] public string fieldName;
         [SerializeField] public AbstractNode node;
@@ -46,22 +46,29 @@ namespace Graph2
         }
     }
     
+    [AttributeUsage(AttributeTargets.Class)]
+    public class NodeAttribute : Attribute
+    {
+        public string Name;
+    }
+    
     [AttributeUsage(AttributeTargets.Field)]
     public class InputAttribute : Attribute
     {
-
+        public string Name;
+        public bool Multiple = true;
     }
     
     [AttributeUsage(AttributeTargets.Field)]
     public class OutputAttribute : Attribute
     {
-
+        public string Name;
     }
 
     [AttributeUsage(AttributeTargets.Field)]
     public class EditableAttribute : Attribute
     {
-
+        public string Name;
     }
 
     [Serializable]
@@ -73,7 +80,7 @@ namespace Graph2
         [SerializeField] public List<NodePort> Outputs = new List<NodePort>();
         
         // Graph metadata
-        [SerializeField] public Vector2 Position;
+        [SerializeField] public Vector2 position;
 
         // NodePortDictionary is a serializable Dictionary<string, NodePort>
         // that maps a port name to the port. Seems to only be storing dynamic

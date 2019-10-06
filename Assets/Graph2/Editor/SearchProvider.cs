@@ -25,18 +25,16 @@ namespace Graph2
             var group = new SearchTreeGroupEntry(new GUIContent("Everything lol"));
             group.level = 1;
             tree.Add(group);
-
             
-            var entry = new SearchTreeEntry(new GUIContent("Test Node"));
-            entry.level = 2;
-            entry.userData = typeof(TestNode);
-            tree.Add(entry);
+            var nodes = NodeReflection.GetNodeTypes();
+            foreach (var node in nodes.Values)
+            {
+                var entry = new SearchTreeEntry(new GUIContent(node.name));
+                entry.level = 2;
+                entry.userData = node.type;
+                tree.Add(entry);
+            }
         
-            
-            entry = new SearchTreeEntry(new GUIContent("Type Test"));
-            entry.level = 2;
-            entry.userData = typeof(TypeTestNode);
-            tree.Add(entry);
             // TODO: Context sensitive based on `connectedPort`
             // TODO: Blacklisting certain nodes by some other context (e.g. two independent graph systems)
         

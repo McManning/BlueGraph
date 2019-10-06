@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8605028299902836667
+--- !u!114 &-51884239444132698
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14,62 +14,118 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Graph: {fileID: 11400000}
   Inputs:
-  - allowMany: 1
+  - isMulti: 0
     fieldName: x
-    node: {fileID: -8605028299902836667}
+    node: {fileID: -51884239444132698}
     Connections:
     - FieldName: result
-      Node: {fileID: 5161313272837633317}
-  - allowMany: 1
+      Node: {fileID: 8824328029515458786}
+  - isMulti: 0
     fieldName: y
-    node: {fileID: -8605028299902836667}
-    Connections:
-    - FieldName: result
-      Node: {fileID: 5161313272837633317}
-  Outputs:
-  - allowMany: 0
-    fieldName: Out
-    node: {fileID: -8605028299902836667}
+    node: {fileID: -51884239444132698}
     Connections: []
-  - allowMany: 1
-    fieldName: result
-    node: {fileID: -8605028299902836667}
-    Connections: []
-  Position: {x: 367, y: -506}
-  x: 4.91
-  y: 1.78
-  result: 1.15
-  fooBarBuzz: -0.72
---- !u!114 &-4405958019291505302
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 437c8298294413745aed2e540d3e876b, type: 3}
-  m_Name: Graph2.TestNode
-  m_EditorClassIdentifier: 
-  Graph: {fileID: 11400000}
-  Inputs:
-  - allowMany: 1
+  - isMulti: 1
     fieldName: x
-    node: {fileID: -4405958019291505302}
-    Connections:
-    - FieldName: result
-      Node: {fileID: 5161313272837633317}
-  - allowMany: 1
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
     fieldName: y
-    node: {fileID: -4405958019291505302}
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: -51884239444132698}
     Connections: []
   Outputs:
-  - allowMany: 1
+  - isMulti: 0
     fieldName: result
-    node: {fileID: -4405958019291505302}
+    node: {fileID: -51884239444132698}
     Connections: []
-  Position: {x: 368, y: -288}
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: -51884239444132698}
+    Connections: []
+  position: {x: 225, y: -85}
   x: 0
   y: 0
   result: 0
@@ -87,27 +143,12 @@ MonoBehaviour:
   m_Name: New Graph
   m_EditorClassIdentifier: 
   Nodes:
-  - {fileID: -8605028299902836667}
-  - {fileID: 5161313272837633317}
-  - {fileID: -4405958019291505302}
-  - {fileID: 1940204603244770067}
---- !u!114 &1940204603244770067
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: Graph2.TypeTestNode
-  m_EditorClassIdentifier: Assembly-CSharp:Graph2:TypeTestNode
-  Graph: {fileID: 11400000}
-  Inputs: []
-  Outputs: []
-  Position: {x: 11, y: -304}
---- !u!114 &5161313272837633317
+  - {fileID: 1023718162956158858}
+  - {fileID: 6221747870270828486}
+  - {fileID: -51884239444132698}
+  - {fileID: 5969102885982540289}
+  - {fileID: 8824328029515458786}
+--- !u!114 &1023718162956158858
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -121,27 +162,367 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Graph: {fileID: 11400000}
   Inputs:
-  - allowMany: 1
+  - isMulti: 0
     fieldName: x
-    node: {fileID: 5161313272837633317}
+    node: {fileID: 1023718162956158858}
     Connections: []
-  - allowMany: 1
+  - isMulti: 0
     fieldName: y
-    node: {fileID: 5161313272837633317}
+    node: {fileID: 1023718162956158858}
+    Connections:
+    - FieldName: result
+      Node: {fileID: 8824328029515458786}
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 1023718162956158858}
     Connections: []
   Outputs:
-  - allowMany: 1
+  - isMulti: 0
     fieldName: result
-    node: {fileID: 5161313272837633317}
+    node: {fileID: 1023718162956158858}
     Connections:
+    - FieldName: x
+      Node: {fileID: 6221747870270828486}
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 1023718162956158858}
+    Connections: []
+  position: {x: -33, y: 56}
+  x: 0
+  y: 0
+  result: 0
+  fooBarBuzz: 0
+--- !u!114 &5969102885982540289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 437c8298294413745aed2e540d3e876b, type: 3}
+  m_Name: Graph2.TestNode
+  m_EditorClassIdentifier: 
+  Graph: {fileID: 11400000}
+  Inputs:
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  Outputs:
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 5969102885982540289}
+    Connections: []
+  position: {x: -241, y: 109}
+  x: 0
+  y: 0
+  result: 0
+  fooBarBuzz: 0
+--- !u!114 &6221747870270828486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 437c8298294413745aed2e540d3e876b, type: 3}
+  m_Name: Graph2.TestNode
+  m_EditorClassIdentifier: 
+  Graph: {fileID: 11400000}
+  Inputs:
+  - isMulti: 0
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections:
+    - FieldName: result
+      Node: {fileID: 1023718162956158858}
+  - isMulti: 0
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  Outputs:
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 6221747870270828486}
+    Connections: []
+  position: {x: 237, y: 128}
+  x: 0
+  y: 0
+  result: 0
+  fooBarBuzz: 0
+--- !u!114 &8824328029515458786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 437c8298294413745aed2e540d3e876b, type: 3}
+  m_Name: TestNode
+  m_EditorClassIdentifier: 
+  Graph: {fileID: 11400000}
+  Inputs:
+  - isMulti: 1
+    fieldName: x
+    node: {fileID: 8824328029515458786}
+    Connections: []
+  - isMulti: 1
+    fieldName: y
+    node: {fileID: 8824328029515458786}
+    Connections: []
+  Outputs:
+  - isMulti: 0
+    fieldName: result
+    node: {fileID: 8824328029515458786}
+    Connections:
+    - FieldName: x
+      Node: {fileID: -51884239444132698}
     - FieldName: y
-      Node: {fileID: -8605028299902836667}
-    - FieldName: x
-      Node: {fileID: -8605028299902836667}
-    - FieldName: x
-      Node: {fileID: -4405958019291505302}
-  Position: {x: -24, y: -510}
-  x: 8.73
-  y: 19.37
-  result: -2.8
-  fooBarBuzz: -3.63
+      Node: {fileID: 1023718162956158858}
+  position: {x: -217, y: -198}
+  x: 0
+  y: 0
+  result: 0
+  fooBarBuzz: 0

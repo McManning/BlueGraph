@@ -27,7 +27,7 @@ namespace Graph2
         public void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
             NodeData = node;
-            SetPosition(new Rect(node.Position.x, node.Position.y, 0, 0));
+            SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
             m_ConnectorListener = connectorListener;
             title = node.name;
 
@@ -41,72 +41,26 @@ namespace Graph2
         /// </summary>
         public void UpdatePorts()
         {
-            // Extract fields from the node.
-            // TODO: Eventually, this'll cache somewhere per node type. 
-            // Also attribute reads.
-            var fields = NodeData.GetType().GetFields(
-                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
-            );
-            
-            foreach (var field in fields)
+            var reflectionData = NodeReflection.GetNodeType(NodeData.GetType());
+
+            foreach (var portData in reflectionData.ports)
             {
-                var name = field.Name;
-
-                foreach (var attr in field.GetCustomAttributes(true))
+                if (portData.isInput)
                 {
-                    Debug.Log(attr);
-
-                    if (attr is InputAttribute)
-                    {
-                        var port = NodeData.GetInputPort(name);
-                        if (port == null)
-                        {
-                            // Introspection pulled up a new port, track it.
-                            port = new NodePort()
-                            {
-                                fieldName = name,
-                                node = NodeData,
-                                allowMany = true
-                            };
-
-                            NodeData.Inputs.Add(port);
-                        }
-                
-                        Debug.Log("Add input: " + name);
-                        AddInputPort(
-                            port, 
-                            m_SerializedNode.FindProperty(field.Name), 
-                            field.FieldType
-                        );
-                    }
-                    else if (attr is OutputAttribute)
-                    {
-                        var port = NodeData.GetOutputPort(name);
-                        if (port == null)
-                        {
-                            port = new NodePort()
-                            {
-                                fieldName = name,
-                                node = NodeData,
-                                allowMany = true
-                            };
-
-                            NodeData.Outputs.Add(port);
-                        }
-                
-                        Debug.Log("Add output: " + name);
-                        AddOutputPort(port, null, field.FieldType);
-                    }
-                    else if (attr is EditableAttribute)
-                    {
-                        AddEditableField(m_SerializedNode.FindProperty(field.Name));
-                    }
+                    AddInputPort(portData);
                 }
-                
+                else
+                {
+                    AddOutputPort(portData);
+                }
+            }
+
+            foreach (var editable in reflectionData.editables)
+            {
+                AddEditableField(m_SerializedNode.FindProperty(editable.fieldName));
             }
             
             // TODO: Deal with deleted/renamed ports.
-
             
             // Toggle visibility of the extension container
             RefreshExpandedState();
@@ -116,22 +70,30 @@ namespace Graph2
         {
             var field = new PropertyField(prop);
             field.Bind(m_SerializedNode);
-            field.RegisterCallback<ChangeEvent<string>>((evt) =>
-            {
-                Debug.Log(evt);
-            });
             
             extensionContainer.Add(field);
         }
 
-        protected void AddInputPort(NodePort port, SerializedProperty prop, Type type)
+        protected void AddInputPort(PortReflectionData portData)
         {
+            var port = NodeData.GetInputPort(portData.fieldName);
+            if (port == null)
+            {
+                port = new NodePort()
+                {
+                    node = NodeData,
+                    fieldName = portData.fieldName,
+                    isMulti = portData.isMulti
+                };
+
+                NodeData.Inputs.Add(port);
+            }
+
             var view = PortView.Create(
                 port, 
-                Orientation.Horizontal,
-                Direction.Input, 
-                prop, 
-                type,
+                portData,
+                m_SerializedNode.FindProperty(port.fieldName), 
+                portData.type,
                 m_ConnectorListener
             );
             
@@ -139,17 +101,30 @@ namespace Graph2
             inputContainer.Add(view);
         }
         
-        protected void AddOutputPort(NodePort port, SerializedProperty prop, Type type)
+        protected void AddOutputPort(PortReflectionData portData)
         {
+            var port = NodeData.GetOutputPort(name);
+            if (port == null)
+            {
+                // Introspection pulled up a new port, track it.
+                port = new NodePort()
+                {
+                    node = NodeData,
+                    fieldName = portData.fieldName,
+                    isMulti = portData.isMulti
+                };
+
+                NodeData.Outputs.Add(port);
+            }
+
             var view = PortView.Create(
                 port, 
-                Orientation.Horizontal, 
-                Direction.Output, 
-                prop,
-                type, 
+                portData,
+                m_SerializedNode.FindProperty(port.fieldName), 
+                portData.type,
                 m_ConnectorListener
             );
-
+            
             OutputPorts.Add(port.fieldName, view);
             outputContainer.Add(view);
         }

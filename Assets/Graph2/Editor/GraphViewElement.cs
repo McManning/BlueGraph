@@ -82,7 +82,7 @@ namespace Graph2
                     {
                         // TODO: something here?
                         var node = element as NodeView;
-                        node.NodeData.Position = element.GetPosition().position;
+                        node.NodeData.position = element.GetPosition().position;
                     }
                 }
             }
@@ -202,18 +202,20 @@ namespace Graph2
         
             var graphMousePosition = m_GraphView.contentViewContainer.WorldToLocal(windowMousePosition);
         
-            AbstractNode node = m_Graph.AddNode(type);
-            node.Position = graphMousePosition;
-            
-            AssetDatabase.AddObjectToAsset(node, m_Graph);
-            AssetDatabase.SaveAssets();
-
+            var typeData = NodeReflection.GetNodeType(type);
+            var node = m_Graph.AddNode(type);
+            node.name = typeData.name;
+            node.position = graphMousePosition;
+        
             // Add a node to the visual graph
             var element = new NodeView();
             element.Initialize(node, m_EdgeListener);
 
             m_GraphView.AddElement(element);
             
+            AssetDatabase.AddObjectToAsset(node, m_Graph);
+            AssetDatabase.SaveAssets();
+
             // If there was a provided existing port to connect to, find the best 
             // candidate port on the new node and connect. 
             if (connectedPort != null)
@@ -272,6 +274,11 @@ namespace Graph2
 
             var inputPort = input.NodeData.GetInputPort(edge.input.portName);
             var outputPort = output.NodeData.GetOutputPort(edge.output.portName);
+
+            Debug.Log(inputPort);
+            Debug.Log(outputPort);
+            Debug.Log(input.NodeData);
+            Debug.Log(output.NodeData);
 
             // Skip pre-existing connections
             if (inputPort.IsConnected(output.NodeData, edge.output.portName))
