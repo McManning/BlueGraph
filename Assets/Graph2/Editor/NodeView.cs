@@ -26,6 +26,13 @@ namespace Graph2
 
         public void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
+            // TODO: Less hardcoded of a path
+            StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+                "Assets/Graph/Editor/Styles/NodeView.uss"
+            );
+        
+            styleSheets.Add(styles);
+            
             NodeData = node;
             SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
             m_ConnectorListener = connectorListener;

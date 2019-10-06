@@ -94,20 +94,6 @@ NodeView .ExtensionRow .unity-base-field {
     align-self: flex-end;
 } */
 
-NodeView #contents > #top > #output {
-	flex: 0 0 auto;
-}
-
-NodeView #contents
-{
-	flex-direction: column;
-}
-
-NodePort.port > #type
-{
-	margin-right: 8px;
-}
-
 NodePort.port > .unity-base-field {
 	flex: 1 0 0; 
 }
@@ -118,23 +104,4 @@ PortView .unity-base-field__label {
 
 PortView .unity-base-field__input {
 	min-width: 60px;
-}
-
-NodeView #extension .unity-property-field__label {
-	min-width: 0;
-	flex: 1 0 0;
-	-unity-text-align: upper-right;
-	padding-right: 8px;
-}
-
-NodeView #extension .unity-property-field__input {
-	min-width: 60px;
-}
-
-NodeView #collapsible-area {
-	background-color: #3F3F3F;
-}
-
-NodeView #extension {
-	padding: 6px;
 }
