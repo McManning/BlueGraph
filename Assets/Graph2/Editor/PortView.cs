@@ -66,12 +66,12 @@ namespace Graph2
         /// </summary>
         public bool IsCompatibleWith(PortView other)
         {
-            // Note: direction should be account for here as well. And possibly
-            // any type of loop detection to ensure nobody is making a cycle 
+            // Note: Loop detection to ensure nobody is making a cycle 
             // (for certain use cases, that is)
-
-            // For now, just make it exact based on type classification
-            return visualClass == other.visualClass;
+            
+            return other.node != node
+                && other.direction != direction
+                && visualClass == other.visualClass;
         }
 
         public string GetTypeVisualClass(Type type)
