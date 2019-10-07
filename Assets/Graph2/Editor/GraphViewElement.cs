@@ -330,8 +330,8 @@ namespace Graph2
 
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)
         {
-            SearchWindow.Open(new SearchWindowContext(screenPosition), m_SearchProvider);
             m_SearchProvider.connectedPort = connectedPort;
+            SearchWindow.Open(new SearchWindowContext(screenPosition), m_SearchProvider);
         }
     }
 }

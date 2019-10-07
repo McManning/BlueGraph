@@ -25,13 +25,34 @@ namespace Graph2
     public class NodeReflectionData
     {
         public Type type;
+
+        /// <summary>
+        /// Full path name for grouping nodes excluding the last part (name)
+        /// </summary>
+        public string[] path;
+
+        /// <summary>
+        /// Human-readable display name of the node. Will come from the last
+        /// part of the path parsed out of node information - or be the class name.
+        /// </summary>
         public string name;
+
         public List<PortReflectionData> ports = new List<PortReflectionData>();
         public List<EditableReflectionData> editables = new List<EditableReflectionData>();
     
         public bool HasSingleOutput()
         {
             return ports.Count((port) => !port.isInput) < 2;
+        }
+
+        public bool HasInputOfType(Type type)
+        {
+            return ports.Count((port) => port.isInput && port.type == type) > 0;
+        }
+
+        public bool HasOutputOfType(Type type)
+        {
+            return ports.Count((port) => !port.isInput && port.type == type) > 0;
         }
     }
 
@@ -102,10 +123,20 @@ namespace Graph2
         /// <returns></returns>
         private static NodeReflectionData LoadReflection(Type type, NodeAttribute nodeAttr)
         {
+            string[] path = null;
+            string name = type.Name;
+            if (nodeAttr.Name != null) 
+            {
+                var stack = new Stack<string>(nodeAttr.Name.Split('/'));
+                name = stack.Pop();
+                path = stack.ToArray();
+            }
+
             var node = new NodeReflectionData()
             {
                 type = type,
-                name = nodeAttr.Name ?? type.Name
+                path = path,
+                name = name
             };
 
             var fields = new List<FieldInfo>(type.GetFields(
