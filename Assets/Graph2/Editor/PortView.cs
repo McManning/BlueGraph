@@ -85,5 +85,21 @@ namespace Graph2
 
             return "type-" + type.FullName.Replace(".", "-");
         }
+
+        /// <summary>
+        /// Executed on change of a port connection. Perform any prep before the following
+        /// OnUpdate() call during redraw. 
+        /// </summary>
+        public void OnDirty()
+        {
+            
+        }
+        
+        /// <summary>
+        /// Toggle visibility of the inline editable value based on whether we have connections
+        /// </summary>
+        public void OnUpdate()
+        {
+        }
     }
 }

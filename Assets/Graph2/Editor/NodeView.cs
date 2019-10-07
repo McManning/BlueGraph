@@ -161,5 +161,40 @@ namespace Graph2
                 (port) => port.Value.IsCompatibleWith(input)
             ).Value;
         }
+
+        /// <summary>
+        /// Dirty this node in response to a change in connectivity. Invalidate
+        /// any cache in prep for an OnUpdate() followup call. 
+        /// </summary>
+        public void OnDirty()
+        {
+            // Dirty all ports so they can refresh their state
+            foreach (var port in InputPorts.Values)
+            {
+                port.OnDirty();
+            }
+
+            foreach (var port in OutputPorts.Values)
+            {
+                port.OnDirty();
+            }
+        }
+
+        /// <summary>
+        /// Called when this node was dirtied and the UI is redrawing. 
+        /// </summary>
+        public void OnUpdate()
+        {
+            // Propagate to all ports
+            foreach (var port in InputPorts.Values)
+            {
+                port.OnUpdate();
+            }
+
+            foreach (var port in OutputPorts.Values)
+            {
+                port.OnUpdate();
+            }
+        }
     }
 }

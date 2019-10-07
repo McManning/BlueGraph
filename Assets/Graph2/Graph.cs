@@ -12,7 +12,7 @@ namespace Graph2
     {
         [SerializeField]
         [HideInInspector]
-        public List<AbstractNode> Nodes = new List<AbstractNode>();
+        public List<AbstractNode> nodes = new List<AbstractNode>();
 
         public T AddNode<T>() where T : AbstractNode
         {
@@ -25,7 +25,7 @@ namespace Graph2
             node.Graph = this;
             node.name = type.FullName;
 
-            Nodes.Add(node);
+            nodes.Add(node);
             return node;
         }
 
@@ -54,14 +54,14 @@ namespace Graph2
                 port.Connections.Clear();
             }
             
-            Nodes.Remove(node);
+            nodes.Remove(node);
         }
         
         public virtual Graph Copy()
         {
             Graph graph = Instantiate(this);
 
-            foreach (var node in Nodes)
+            foreach (var node in nodes)
             {
                 AbstractNode instance = Instantiate(node) as AbstractNode;
                 instance.Graph = graph;

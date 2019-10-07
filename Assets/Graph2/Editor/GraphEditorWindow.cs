@@ -26,7 +26,12 @@ namespace Graph2
             titleContent = new GUIContent(graph.name);
             Repaint();
         }
-        
+
+        private void Update()
+        {
+            m_GraphView.Update();
+        }
+
         /// <summary>
         /// Restore an already open graph after a reload of assemblies
         /// </summary>

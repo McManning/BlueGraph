@@ -41,6 +41,8 @@ namespace Graph2
 
         EdgeConnectorListener m_EdgeListener;
         
+        HashSet<NodeView> m_DirtyNodes = new HashSet<NodeView>();
+
         public GraphViewElement(EditorWindow window)
         {
             m_EditorWindow = window;
@@ -164,13 +166,14 @@ namespace Graph2
             
             // Add views of each node from the graph
             Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
-            foreach (var node in graph.Nodes)
+            foreach (var node in graph.nodes)
             {
                 var element = new NodeView();
                 element.Initialize(node, m_EdgeListener);
                 m_GraphView.AddElement(element);
 
                 nodeMap.Add(node, element);
+                Dirty(element);
             }
             
             // Sync edges on the graph with our graph's connections 
@@ -189,7 +192,6 @@ namespace Graph2
                     }
                 }
             }
-
         }
         
         public void CreateNode(Type type, Vector2 screenPosition, PortView connectedPort = null)
@@ -215,7 +217,7 @@ namespace Graph2
             
             AssetDatabase.AddObjectToAsset(node, m_Graph);
             AssetDatabase.SaveAssets();
-
+            
             // If there was a provided existing port to connect to, find the best 
             // candidate port on the new node and connect. 
             if (connectedPort != null)
@@ -235,11 +237,15 @@ namespace Graph2
                 
                 ConnectNodes(edge);
             }
+            
+            Dirty(element);
         }
 
         public void DestroyNode(NodeView node)
         {
             // Remove all edges on the graph 
+
+            // TODO: Propagate changes to adjacent nodes
             
             /*
             foreach (var port in node.OutputPorts.Values)
@@ -305,6 +311,39 @@ namespace Graph2
             // construct a new one and add that instead.
             var newEdge = edge.input.ConnectTo(edge.output);
             m_GraphView.AddElement(newEdge);
+            
+            // Dirty the associated nodes so they can refresh their state.
+            Dirty(input);
+            Dirty(output);
+        }
+
+        /// <summary>
+        /// Mark a node and all dependents as dirty for the next refresh. 
+        /// </summary>
+        /// <param name="node"></param>
+        public void Dirty(NodeView node)
+        {
+            m_DirtyNodes.Add(node);
+
+            foreach (var port in node.OutputPorts.Values)
+            {
+                foreach (var conn in port.connections)
+                {
+                    Dirty(conn.input.node as NodeView);
+                }
+            }
+        }
+
+        public void Update()
+        {
+            // Propagate change on dirty nodes
+            foreach (var node in m_DirtyNodes)
+            {
+                node.OnUpdate();
+                Debug.Log("Change: " + node.title);
+            }
+
+            m_DirtyNodes.Clear();
         }
 
         public void DestroyEdge(Edge edge)
@@ -326,6 +365,9 @@ namespace Graph2
             edge.output = null;
 
             m_GraphView.RemoveElement(edge);
+
+            Dirty(input);
+            Dirty(output);
         }
 
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)
