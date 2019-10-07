@@ -13,6 +13,8 @@ namespace Graph2
     {
         public NodePort portData;
 
+        VisualElement m_PropertyField;
+
         protected PortView(
             Orientation portOrientation, 
             Direction portDirection, 
@@ -53,9 +55,9 @@ namespace Graph2
             // Bind to the underlying field
             if (prop != null && refPort.isEditable)
             {
-                var field = new PropertyField(prop, " ");
-                field.Bind(prop.serializedObject);
-                view.m_ConnectorBox.parent.Add(field);
+                view.m_PropertyField = new PropertyField(prop, " ");
+                view.m_PropertyField.Bind(prop.serializedObject);
+                view.m_ConnectorBox.parent.Add(view.m_PropertyField);
             }
 
             return view;
@@ -100,6 +102,15 @@ namespace Graph2
         /// </summary>
         public void OnUpdate()
         {
+            if (connected && m_PropertyField != null)
+            {
+                m_PropertyField.visible = false;
+            }
+
+            if (!connected && m_PropertyField != null)
+            {
+                m_PropertyField.visible = true;
+            }
         }
     }
 }
