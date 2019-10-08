@@ -161,34 +161,7 @@ namespace Graph2
             Debug.Log("Load graph");
             m_Graph = graph;
             
-            // Add views of each node from the graph
-            Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
-            foreach (var node in graph.nodes)
-            {
-                var element = new NodeView();
-                element.Initialize(node, m_EdgeListener);
-                m_GraphView.AddElement(element);
-
-                nodeMap.Add(node, element);
-                Dirty(element);
-            }
-            
-            // Sync edges on the graph with our graph's connections 
-            // TODO: Deal with trash connections from bad imports
-            foreach (var node in nodeMap)
-            {
-                foreach (var port in node.Key.Inputs)
-                {
-                    foreach (var conn in port.Connections)
-                    {
-                        var inPort = node.Value.GetInputPort(port.fieldName);
-                        var outPort = nodeMap[conn.Node].GetOutputPort(conn.FieldName);
-                        
-                        var edge = inPort.ConnectTo(outPort);
-                        m_GraphView.AddElement(edge);
-                    }
-                }
-            }
+            AddNodes(graph.nodes);
         }
         
         public void CreateNode(Type type, Vector2 screenPosition, PortView connectedPort = null)
@@ -339,7 +312,7 @@ namespace Graph2
                 node.OnUpdate();
                 Debug.Log("Change: " + node.title);
             }
-
+            
             m_DirtyNodes.Clear();
         }
 
@@ -393,11 +366,18 @@ namespace Graph2
             
             AssetDatabase.SaveAssets();
 
-            // Below code is the same as Load()
+            AddNodes(graph.nodes);
+        }
 
+        /// <summary>de
+        /// Append nodes from a Graph onto the viewport
+        /// </summary>
+        /// <param name="graph"></param>
+        private void AddNodes(List<AbstractNode> nodes)
+        {
             // Add views of each node from the graph
             Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
-            foreach (var node in graph.nodes)
+            foreach (var node in nodes)
             {
                 var element = new NodeView();
                 element.Initialize(node, m_EdgeListener);
@@ -431,7 +411,6 @@ namespace Graph2
 
         private bool OnTryPasteSerializedData(string data)
         {
-            Debug.Log("On clipboard: " + data);
             return CopyPasteGraph.CanDeserialize(data);
         }
 
@@ -440,9 +419,7 @@ namespace Graph2
         /// </summary>
         private string OnSerializeGraphElements(IEnumerable<GraphElement> elements)
         {
-            var data = CopyPasteGraph.Serialize(elements);
-            Debug.Log("Copy: " + data);
-            return data;
+            return CopyPasteGraph.Serialize(elements);;
         }
     }
 }
