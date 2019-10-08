@@ -14,6 +14,9 @@ namespace Graph2
         [HideInInspector]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
+        [SerializeField]
+        public List<NodeGroup> groups = new List<NodeGroup>();
+
         /*public T AddNode<T>() where T : AbstractNode
         {
             return AddNode(typeof(T)) as T;
@@ -22,6 +25,7 @@ namespace Graph2
         public void AddNode(AbstractNode node)
         {
             node.Graph = this;
+            node.RegenerateGuid();
             nodes.Add(node);
         }
 
@@ -29,6 +33,7 @@ namespace Graph2
         {
             AbstractNode node = CreateInstance(type) as AbstractNode;
             node.Graph = this;
+            node.RegenerateGuid();
             nodes.Add(node);
             return node;
         }

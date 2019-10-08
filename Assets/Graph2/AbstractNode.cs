@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Graph2
 {
+    [Serializable]
+    public class NodeGroup
+    {
+        public string title;
+        public List<AbstractNode> nodes = new List<AbstractNode>();
+    }
+
     /// <summary>
     /// Connection information *out of* a port
     /// </summary>
@@ -95,6 +102,8 @@ namespace Graph2
     [Serializable]
     public class AbstractNode : ScriptableObject
     {
+        public string guid;
+
         [SerializeField] public Graph Graph;
 
         [SerializeField] public List<NodePort> Inputs = new List<NodePort>();
@@ -107,6 +116,11 @@ namespace Graph2
         // that maps a port name to the port. Seems to only be storing dynamic
         // ports.
 
+        public void RegenerateGuid()
+        {
+            guid = Guid.NewGuid().ToString();
+        }
+        
         public NodePort GetInputPort(string name)
         {
             return Inputs.Find((port) => port.fieldName == name);
