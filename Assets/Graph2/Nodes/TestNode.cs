@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Graph2
 {
+    [Node("Mesh Preview")]
+    public class MeshPreviewTestNode : AbstractNode
+    {
+        [Input] public Mesh mesh;
+        [Input] public Material material;
+    }
+
     [Node("Math/Float Math")]
     public class MathNode : AbstractNode
     {
