@@ -140,14 +140,11 @@ namespace Graph2
             
             m_GraphView.nodeCreationRequest = (ctx) => OpenSearch(ctx.screenMousePosition);
         
-            /*
             // Add handlers for (de)serialization
             m_GraphView.serializeGraphElements = OnSerializeGraphElements;
             m_GraphView.canPasteSerializedData = OnTryPasteSerializedData;
             m_GraphView.unserializeAndPaste = OnUnserializeAndPaste;
             
-            */
-
             VisualElement content = new VisualElement { name = "Content" };
             content.Add(m_GraphView);
         
@@ -374,6 +371,78 @@ namespace Graph2
         {
             m_SearchProvider.connectedPort = connectedPort;
             SearchWindow.Open(new SearchWindowContext(screenPosition), m_SearchProvider);
+        }
+        
+        /// <summary>
+        /// Handler for deserializing a node from a string payload
+        /// </summary>
+        /// <param name="operationName"></param>
+        /// <param name="data"></param>
+        private void OnUnserializeAndPaste(string operationName, string data)
+        {
+            Debug.Log("Operation name: " + operationName);
+
+            var graph = CopyPasteGraph.Deserialize(data);
+            
+            // Add each node to the working graph
+            foreach (var node in graph.nodes)
+            {
+                m_Graph.AddNode(node);
+                AssetDatabase.AddObjectToAsset(node, m_Graph);
+            }
+            
+            AssetDatabase.SaveAssets();
+
+            // Below code is the same as Load()
+
+            // Add views of each node from the graph
+            Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
+            foreach (var node in graph.nodes)
+            {
+                var element = new NodeView();
+                element.Initialize(node, m_EdgeListener);
+                m_GraphView.AddElement(element);
+
+                nodeMap.Add(node, element);
+                Dirty(element);
+            }
+            
+            // Sync edges on the graph with our graph's connections 
+            // TODO: Deal with trash connections from bad imports
+            foreach (var node in nodeMap)
+            {
+                foreach (var port in node.Key.Inputs)
+                {
+                    foreach (var conn in port.Connections)
+                    {
+                        // Only add if the linked node is in the collection
+                        if (nodeMap.ContainsKey(conn.Node))
+                        {
+                            var inPort = node.Value.GetInputPort(port.fieldName);
+                            var outPort = nodeMap[conn.Node].GetOutputPort(conn.FieldName);
+                        
+                            var edge = inPort.ConnectTo(outPort);
+                            m_GraphView.AddElement(edge);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool OnTryPasteSerializedData(string data)
+        {
+            Debug.Log("On clipboard: " + data);
+            return CopyPasteGraph.CanDeserialize(data);
+        }
+
+        /// <summary>
+        /// Serialize a selection to support cut/copy/duplicate
+        /// </summary>
+        private string OnSerializeGraphElements(IEnumerable<GraphElement> elements)
+        {
+            var data = CopyPasteGraph.Serialize(elements);
+            Debug.Log("Copy: " + data);
+            return data;
         }
     }
 }

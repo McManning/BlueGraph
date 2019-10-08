@@ -14,19 +14,28 @@ namespace Graph2
         [HideInInspector]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
-        public T AddNode<T>() where T : AbstractNode
+        /*public T AddNode<T>() where T : AbstractNode
         {
             return AddNode(typeof(T)) as T;
+        }*/
+
+        public void AddNode(AbstractNode node)
+        {
+            node.Graph = this;
+            nodes.Add(node);
         }
 
         public virtual AbstractNode AddNode(Type type)
         {
             AbstractNode node = CreateInstance(type) as AbstractNode;
             node.Graph = this;
-            node.name = type.FullName;
-
             nodes.Add(node);
             return node;
+        }
+
+        public virtual AbstractNode AddNode(string type)
+        {
+            return AddNode(Type.GetType(type));
         }
 
         public virtual void RemoveNode(AbstractNode node)
