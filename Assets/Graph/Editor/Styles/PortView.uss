@@ -1,4 +1,9 @@
 ﻿
+/* Fix expanding port heights for inlined structs */
+PortView.port {
+	height: auto;
+}
+
 /* Port themes by data type */
 
 PortView.type-System-String {
