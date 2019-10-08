@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Graph2
 {
+    [Serializable]
+    public class NodeGroup
+    {
+        public string title;
+        public List<AbstractNode> nodes = new List<AbstractNode>();
+    }
+
     /// <summary>
     /// Connection information *out of* a port
     /// </summary>

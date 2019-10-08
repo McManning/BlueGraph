@@ -14,6 +14,9 @@ namespace Graph2
         [HideInInspector]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
+        [SerializeField]
+        public List<NodeGroup> groups = new List<NodeGroup>();
+
         /*public T AddNode<T>() where T : AbstractNode
         {
             return AddNode(typeof(T)) as T;

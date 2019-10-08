@@ -153,7 +153,17 @@ namespace Graph2
        
         private void OnGraphKeydown(KeyDownEvent evt)
         {
+            // TODO: Mac support
+
+            // Group selected nodes
+            if (evt.modifiers.HasFlag(EventModifiers.Control) && evt.keyCode == KeyCode.G)
+            {
+                GroupSelection();
+            }
         
+            // Other ideas:
+            // - add comment node shortcut
+            // - 
         }
         
         public void Load(Graph graph)
@@ -162,6 +172,7 @@ namespace Graph2
             m_Graph = graph;
             
             AddNodes(graph.nodes);
+            AddGroups(graph.groups);
         }
         
         public void CreateNode(Type type, Vector2 screenPosition, PortView connectedPort = null)
@@ -421,6 +432,49 @@ namespace Graph2
         private NodeView GetNodeElement(AbstractNode node)
         {
             return m_GraphView.GetNodeByGuid(node.guid) as NodeView;
+        }
+
+        /// <summary>
+        /// Create views for a set of NodeGroups
+        /// </summary>
+        /// <param name="groups"></param>
+        private void AddGroups(List<NodeGroup> groups)
+        { 
+            foreach (var group in groups)
+            {
+                var groupView = new GroupView(group);
+                
+                foreach (var node in group.nodes)
+                {
+                    groupView.AddElement(GetNodeElement(node));
+                }
+                
+                m_GraphView.AddElement(groupView);
+            }
+        }
+
+        private void GroupSelection()
+        {
+            if (m_GraphView.selection.Count < 0)
+            {
+                return;
+            }
+
+            var group = new NodeGroup();
+            group.title = "New Group";
+            m_Graph.groups.Add(group);
+            
+            var groupView = new GroupView(group); 
+            foreach (var node in m_GraphView.selection)
+            {
+                if (node is NodeView)
+                {
+                    var nodeView = node as NodeView;
+                    groupView.AddElement(nodeView);
+                }
+            }
+            
+            m_GraphView.AddElement(groupView);
         }
 
         private bool OnTryPasteSerializedData(string data)
