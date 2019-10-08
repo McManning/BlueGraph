@@ -37,6 +37,8 @@ namespace Graph2
 
         public virtual void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
+            viewDataKey = node.guid;
+
             // TODO: Less hardcoded of a path
             StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
                 "Assets/Graph/Editor/Styles/NodeView.uss"

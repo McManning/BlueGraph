@@ -418,6 +418,11 @@ namespace Graph2
             }
         }
 
+        private NodeView GetNodeElement(AbstractNode node)
+        {
+            return m_GraphView.GetNodeByGuid(node.guid) as NodeView;
+        }
+
         private bool OnTryPasteSerializedData(string data)
         {
             return CopyPasteGraph.CanDeserialize(data);

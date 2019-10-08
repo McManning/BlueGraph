@@ -22,6 +22,7 @@ namespace Graph2
         public void AddNode(AbstractNode node)
         {
             node.Graph = this;
+            node.RegenerateGuid();
             nodes.Add(node);
         }
 
@@ -29,6 +30,7 @@ namespace Graph2
         {
             AbstractNode node = CreateInstance(type) as AbstractNode;
             node.Graph = this;
+            node.RegenerateGuid();
             nodes.Add(node);
             return node;
         }
