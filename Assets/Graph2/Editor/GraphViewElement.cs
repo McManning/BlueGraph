@@ -180,7 +180,8 @@ namespace Graph2
             node.position = graphMousePosition;
         
             // Add a node to the visual graph
-            var element = new NodeView();
+            var editorType = NodeReflection.GetNodeEditorType(type);
+            var element = Activator.CreateInstance(editorType) as NodeView;
             element.Initialize(node, m_EdgeListener);
 
             m_GraphView.AddElement(element);
@@ -375,13 +376,14 @@ namespace Graph2
         /// Append nodes from a Graph onto the viewport
         /// </summary>
         /// <param name="graph"></param>
-        private void AddNodes(List<AbstractNode> nodes)
+        private void AddNodes(List<AbstractNode> nodes, bool selectOnceAdded = false)
         {
             // Add views of each node from the graph
             Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
             foreach (var node in nodes)
             {
-                var element = new NodeView();
+                var editorType = NodeReflection.GetNodeEditorType(node.GetType());
+                var element = Activator.CreateInstance(editorType) as NodeView;
                 element.Initialize(node, m_EdgeListener);
                 m_GraphView.AddElement(element);
 

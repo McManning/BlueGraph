@@ -22,6 +22,10 @@ namespace Graph2
         public string fieldName;
     }
 
+    /// <summary>
+    /// Suite of reflection methods and caching for retrieving available
+    /// graph nodes and their associated custom editors
+    /// </summary>
     public class NodeReflectionData
     {
         public Type type;
@@ -59,17 +63,22 @@ namespace Graph2
     public static class NodeReflection
     {
         private static Dictionary<Type, NodeReflectionData> k_NodeTypes = null;
+
+        /// <summary>
+        /// Mapping between an AbstractNode type (key) and a custom editor type (value)
+        /// </summary>
+        private static Dictionary<Type, Type> k_NodeEditors = null;
         
         /// <summary>
         /// Extract node type info for one node
         /// </summary>
-        public static NodeReflectionData GetNodeType(Type t)
+        public static NodeReflectionData GetNodeType(Type type)
         {
             var types = GetNodeTypes();
 
-            if (types.ContainsKey(t))
+            if (types.ContainsKey(type))
             {
-                return types[t];
+                return types[type];
             }
 
             return null;
@@ -198,6 +207,57 @@ namespace Graph2
             }
 
             return node;
+        }
+        
+        public static Type GetNodeEditorType(Type type)
+        {
+            if (k_NodeEditors == null)
+            {
+                LoadNodeEditorTypes();
+            }
+            
+            k_NodeEditors.TryGetValue(type, out Type editorType);
+            if (editorType != null)
+            {
+                return editorType;
+            }
+
+            // Default to the base node editor
+            return typeof(NodeView);
+        }
+
+        /// <summary>
+        /// Load and cache a mapping between AbstractNode classes and their 
+        /// NodeView editor equivalent, if a custom editor has been defined.
+        /// </summary>
+        private static void LoadNodeEditorTypes()
+        {
+            var baseType = typeof(NodeView);
+            var types = new List<Type>();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    types.AddRange(assembly.GetTypes().Where(
+                        (t) => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray()
+                    );
+                } 
+                catch (ReflectionTypeLoadException) { }
+            }
+        
+            var nodeEditors = new Dictionary<Type, Type>();
+            foreach (var t in types) 
+            {
+                var attr = t.GetCustomAttribute<CustomNodeViewAttribute>();
+                if (attr != null)
+                {
+                    nodeEditors[attr.nodeType] = t;
+                }
+            }
+
+            k_NodeEditors = nodeEditors;
         }
     }
 }

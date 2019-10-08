@@ -12,6 +12,17 @@ using UnityEngine.UIElements;
 
 namespace Graph2
 {
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CustomNodeViewAttribute : Attribute
+    {
+        public Type nodeType;
+
+        public CustomNodeViewAttribute(Type nodeType)
+        {
+            this.nodeType = nodeType; 
+        }
+    }
+
     public class NodeView : Node
     {
         public AbstractNode NodeData { get; protected set; }
@@ -24,7 +35,7 @@ namespace Graph2
         public Dictionary<string, PortView> InputPorts = new Dictionary<string, PortView>();
         public Dictionary<string, PortView> OutputPorts = new Dictionary<string, PortView>();
 
-        public void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
+        public virtual void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
             // TODO: Less hardcoded of a path
             StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
@@ -32,6 +43,7 @@ namespace Graph2
             );
         
             styleSheets.Add(styles);
+            AddToClassList("node-view");
             
             NodeData = node;
             SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
@@ -166,7 +178,7 @@ namespace Graph2
         /// Dirty this node in response to a change in connectivity. Invalidate
         /// any cache in prep for an OnUpdate() followup call. 
         /// </summary>
-        public void OnDirty()
+        public virtual void OnDirty()
         {
             // Dirty all ports so they can refresh their state
             foreach (var port in InputPorts.Values)
@@ -183,7 +195,7 @@ namespace Graph2
         /// <summary>
         /// Called when this node was dirtied and the UI is redrawing. 
         /// </summary>
-        public void OnUpdate()
+        public virtual void OnUpdate()
         {
             // Propagate to all ports
             foreach (var port in InputPorts.Values)

@@ -1,28 +1,28 @@
 ﻿
-NodeView #contents > #top > #output {
+.node-view #contents > #top > #output {
 	flex: 0 0 auto;
 }
 
-NodeView #contents
+.node-view #contents
 {
 	flex-direction: column;
 }
 
-NodeView #extension .unity-property-field__label {
+.node-view #extension .unity-property-field__label {
 	min-width: 60px;
 	flex: 1 0 0;
 	-unity-text-align: upper-left;
 	padding-right: 8px;
 }
 
-NodeView #extension .unity-property-field__input {
+.node-view #extension .unity-property-field__input {
 	min-width: 60px;
 }
 
-NodeView #collapsible-area {
+.node-view #collapsible-area {
 	background-color: #3F3F3F;
 }
 
-NodeView #extension {
+.node-view #extension {
 	padding: 6px;
 }
