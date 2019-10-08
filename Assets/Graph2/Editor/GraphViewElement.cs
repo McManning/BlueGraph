@@ -366,7 +366,9 @@ namespace Graph2
             
             AssetDatabase.SaveAssets();
 
-            AddNodes(graph.nodes);
+            // Add the new nodes and select them
+            m_GraphView.ClearSelection();
+            AddNodes(graph.nodes, true);
         }
 
         /// <summary>de
@@ -385,6 +387,11 @@ namespace Graph2
 
                 nodeMap.Add(node, element);
                 Dirty(element);
+                
+                if (selectOnceAdded)
+                {
+                    m_GraphView.AddToSelection(element);
+                }
             }
             
             // Sync edges on the graph with our graph's connections 
