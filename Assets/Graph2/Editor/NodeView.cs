@@ -95,23 +95,23 @@ namespace Graph2
 
         protected void AddInputPort(PortReflectionData portData)
         {
-            var port = NodeData.GetInputPort(portData.fieldName);
+            var port = NodeData.GetInputPort(portData.name);
             if (port == null)
             {
                 port = new NodePort()
                 {
                     node = NodeData,
-                    fieldName = portData.fieldName,
+                    fieldName = portData.name,
                     isMulti = portData.isMulti
                 };
 
                 NodeData.Inputs.Add(port);
             }
-
+            
             var view = PortView.Create(
                 port, 
                 portData,
-                m_SerializedNode.FindProperty(port.fieldName), 
+                m_SerializedNode.FindProperty(portData.fieldName), 
                 portData.type,
                 m_ConnectorListener
             );
@@ -122,14 +122,14 @@ namespace Graph2
         
         protected void AddOutputPort(PortReflectionData portData)
         {
-            var port = NodeData.GetOutputPort(name);
+            var port = NodeData.GetOutputPort(portData.name);
             if (port == null)
             {
                 // Introspection pulled up a new port, track it.
                 port = new NodePort()
                 {
                     node = NodeData,
-                    fieldName = portData.fieldName,
+                    fieldName = portData.name,
                     isMulti = portData.isMulti
                 };
 
@@ -139,7 +139,7 @@ namespace Graph2
             var view = PortView.Create(
                 port, 
                 portData,
-                m_SerializedNode.FindProperty(port.fieldName), 
+                m_SerializedNode.FindProperty(portData.fieldName), 
                 portData.type,
                 m_ConnectorListener
             );
