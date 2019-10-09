@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEditor;
 
 namespace Graph2
 {
@@ -173,7 +174,7 @@ namespace Graph2
                         node.ports.Add(new PortReflectionData()
                         {
                             type = fields[i].FieldType,
-                            name = attr.Name ?? fields[i].Name,
+                            name = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = true,
                             isMulti = attr.Multiple,
@@ -187,7 +188,7 @@ namespace Graph2
                         node.ports.Add(new PortReflectionData()
                         {
                             type = fields[i].FieldType,
-                            name = attr.Name ?? fields[i].Name,
+                            name = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = false,
                             isEditable = false
