@@ -53,10 +53,21 @@ namespace Graph2
             title = node.name;
 
             m_SerializedNode = new SerializedObject(node);
+
+            // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
+            RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
             
             UpdatePorts();
         }
 
+        /// <summary>
+        /// Executed when we're about to detach this element from the graph. 
+        /// </summary>
+        protected virtual void OnDestroy()
+        {
+            
+        }
+        
         /// <summary>
         /// Make sure our list of PortViews sync up with our NodePorts
         /// </summary>
