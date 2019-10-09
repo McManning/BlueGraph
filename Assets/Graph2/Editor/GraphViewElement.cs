@@ -421,8 +421,19 @@ namespace Graph2
                             var inPort = node.Value.GetInputPort(port.fieldName);
                             var outPort = nodeMap[conn.Node].GetOutputPort(conn.FieldName);
                         
-                            var edge = inPort.ConnectTo(outPort);
-                            m_GraphView.AddElement(edge);
+                            if (inPort == null)
+                            {
+                                Debug.LogError($"Could not connect `{node.Value.title}:{port.fieldName}` -> `{conn.Node.name}:{conn.FieldName}`. Input port `{port.fieldName}` no longer exists.");
+                            }
+                            else if (outPort == null)
+                            {
+                                Debug.LogError($"Could not connect `{conn.Node.name}:{conn.FieldName}` to `{node.Value.name}:{port.fieldName}`. Output port `{conn.FieldName}` no longer exists.");
+                            }
+                            else
+                            {
+                                var edge = inPort.ConnectTo(outPort);
+                                m_GraphView.AddElement(edge);
+                            }
                         }
                     }
                 }
