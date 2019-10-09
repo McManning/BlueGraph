@@ -24,7 +24,7 @@ namespace Graph2
 
         public void AddNode(AbstractNode node)
         {
-            node.Graph = this;
+            node.graph = this;
             node.RegenerateGuid();
             nodes.Add(node);
         }
@@ -32,7 +32,7 @@ namespace Graph2
         public virtual AbstractNode AddNode(Type type)
         {
             AbstractNode node = CreateInstance(type) as AbstractNode;
-            node.Graph = this;
+            node.graph = this;
             node.RegenerateGuid();
             nodes.Add(node);
             return node;
@@ -46,26 +46,26 @@ namespace Graph2
         public virtual void RemoveNode(AbstractNode node)
         {
             // Remove all connections to and from this node
-            foreach (var port in node.Inputs)
+            foreach (var port in node.inputs)
             {
-                foreach (var conn in port.Connections) 
+                foreach (var conn in port.connections) 
                 {
-                    var output = conn.Node.GetOutputPort(conn.FieldName);
-                    output.Disconnect(node, port.fieldName);
+                    var output = conn.node.GetOutputPort(conn.portName);
+                    output.Disconnect(node, port.portName);
                 }
 
-                port.Connections.Clear();
+                port.connections.Clear();
             }
             
-            foreach (var port in node.Outputs)
+            foreach (var port in node.outputs)
             {
-                foreach (var conn in port.Connections) 
+                foreach (var conn in port.connections) 
                 {
-                    var output = conn.Node.GetInputPort(conn.FieldName);
-                    output.Disconnect(node, port.fieldName);
+                    var output = conn.node.GetInputPort(conn.portName);
+                    output.Disconnect(node, port.portName);
                 }
 
-                port.Connections.Clear();
+                port.connections.Clear();
             }
             
             nodes.Remove(node);
@@ -78,7 +78,7 @@ namespace Graph2
             foreach (var node in nodes)
             {
                 AbstractNode instance = Instantiate(node) as AbstractNode;
-                instance.Graph = graph;
+                instance.graph = graph;
                 // ports and such, private data?
             }
 

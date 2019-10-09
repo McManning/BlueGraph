@@ -51,6 +51,8 @@ namespace Graph2
             SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
             m_ConnectorListener = connectorListener;
             title = node.name;
+            
+            Debug.Log("Load " +  GetPosition().position + " and " + node.position);
 
             m_SerializedNode = new SerializedObject(node);
 
@@ -114,11 +116,11 @@ namespace Graph2
                 port = new NodePort()
                 {
                     node = NodeData,
-                    fieldName = portData.name,
+                    portName = portData.name,
                     isMulti = portData.isMulti
                 };
 
-                NodeData.Inputs.Add(port);
+                NodeData.inputs.Add(port);
             }
             
             var view = PortView.Create(
@@ -129,7 +131,7 @@ namespace Graph2
                 m_ConnectorListener
             );
             
-            InputPorts.Add(port.fieldName, view);
+            InputPorts.Add(port.portName, view);
             inputContainer.Add(view);
         }
         
@@ -142,11 +144,11 @@ namespace Graph2
                 port = new NodePort()
                 {
                     node = NodeData,
-                    fieldName = portData.name,
+                    portName = portData.name,
                     isMulti = portData.isMulti
                 };
 
-                NodeData.Outputs.Add(port);
+                NodeData.outputs.Add(port);
             }
 
             var view = PortView.Create(
@@ -157,7 +159,7 @@ namespace Graph2
                 m_ConnectorListener
             );
             
-            OutputPorts.Add(port.fieldName, view);
+            OutputPorts.Add(port.portName, view);
             outputContainer.Add(view);
         }
 
@@ -219,6 +221,18 @@ namespace Graph2
             foreach (var port in OutputPorts.Values)
             {
                 port.OnUpdate();
+            }
+
+            Debug.Log("Update " +  GetPosition().position);
+
+            if (GetPosition().position != Vector2.zero)
+            {
+                // TODO: It seems like first load this is zero. Just like GetPosition()
+                // after we call SetPosition above. Might have to do first draw to the 
+                // graph before a correctly reported position comes back. 
+                // In the meantime, this is guarded so it won't zero out the node's position
+                // when we open + close the graph without moving it. 
+                NodeData.position = GetPosition().position;
             }
         }
     }

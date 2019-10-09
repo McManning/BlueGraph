@@ -76,15 +76,14 @@ namespace Graph2
         {
             Debug.Log("Change: " + change.ToString());
 
+            // Dirty moved elements to update the target assets
             if (change.movedElements != null)
             {
                 foreach (var element in change.movedElements)
                 {
                     if (element is NodeView)
                     {
-                        // TODO: something here?
-                        var node = element as NodeView;
-                        node.NodeData.position = element.GetPosition().position;
+                        Dirty(element as NodeView);
                     }
                 }
             }
@@ -411,23 +410,23 @@ namespace Graph2
             // TODO: Deal with trash connections from bad imports
             foreach (var node in nodeMap)
             {
-                foreach (var port in node.Key.Inputs)
+                foreach (var port in node.Key.inputs)
                 {
-                    foreach (var conn in port.Connections)
+                    foreach (var conn in port.connections)
                     {
                         // Only add if the linked node is in the collection
-                        if (nodeMap.ContainsKey(conn.Node))
+                        if (nodeMap.ContainsKey(conn.node))
                         {
-                            var inPort = node.Value.GetInputPort(port.fieldName);
-                            var outPort = nodeMap[conn.Node].GetOutputPort(conn.FieldName);
+                            var inPort = node.Value.GetInputPort(port.portName);
+                            var outPort = nodeMap[conn.node].GetOutputPort(conn.portName);
                         
                             if (inPort == null)
                             {
-                                Debug.LogError($"Could not connect `{node.Value.title}:{port.fieldName}` -> `{conn.Node.name}:{conn.FieldName}`. Input port `{port.fieldName}` no longer exists.");
+                                Debug.LogError($"Could not connect `{node.Value.title}:{port.portName}` -> `{conn.node.name}:{conn.portName}`. Input port `{port.portName}` no longer exists.");
                             }
                             else if (outPort == null)
                             {
-                                Debug.LogError($"Could not connect `{conn.Node.name}:{conn.FieldName}` to `{node.Value.name}:{port.fieldName}`. Output port `{conn.FieldName}` no longer exists.");
+                                Debug.LogError($"Could not connect `{conn.node.name}:{conn.portName}` to `{node.Value.name}:{port.portName}`. Output port `{conn.portName}` no longer exists.");
                             }
                             else
                             {

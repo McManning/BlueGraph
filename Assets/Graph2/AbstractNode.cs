@@ -17,38 +17,38 @@ namespace Graph2
     [Serializable]
     public class PortConnection
     {
-        [SerializeField] public string FieldName;
-        [SerializeField] public AbstractNode Node;
+        public AbstractNode node;
+        public string portName;
     }
     
     [Serializable]
     public class NodePort
     {
-        [SerializeField] public bool isMulti;
+        public string portName;
+        public AbstractNode node;
+        public bool isMulti;
 
-        [SerializeField] public string fieldName;
-        [SerializeField] public AbstractNode node;
-        [SerializeField] public List<PortConnection> Connections = new List<PortConnection>();
+        public List<PortConnection> connections = new List<PortConnection>();
     
-        public void Connect(AbstractNode node, string port)
+        public void Connect(AbstractNode node, string portName)
         {
-            Connections.Add(new PortConnection() {
-                Node = node, 
-                FieldName = port
+            connections.Add(new PortConnection() {
+                node = node, 
+                portName = portName
             });
         }    
 
-        public void Disconnect(AbstractNode node, string port)
+        public void Disconnect(AbstractNode node, string portName)
         {
-            Connections.RemoveAll(
-                (conn) => conn.Node == node && conn.FieldName == port
+            connections.RemoveAll(
+                (conn) => conn.node == node && conn.portName == portName
             );
         }
 
-        public bool IsConnected(AbstractNode node, string port)
+        public bool IsConnected(AbstractNode node, string portName)
         {
-            return Connections.Find(
-                (conn) => conn.Node == node && conn.FieldName == port
+            return connections.Find(
+                (conn) => conn.node == node && conn.portName == portName
             ) != null;
         }
     }
@@ -103,14 +103,12 @@ namespace Graph2
     public class AbstractNode : ScriptableObject
     {
         public string guid;
-
-        [SerializeField] public Graph Graph;
-
-        [SerializeField] public List<NodePort> Inputs = new List<NodePort>();
-        [SerializeField] public List<NodePort> Outputs = new List<NodePort>();
+        public Graph graph;
+        public List<NodePort> inputs = new List<NodePort>();
+        public List<NodePort> outputs = new List<NodePort>();
         
         // Graph metadata
-        [SerializeField] public Vector2 position;
+        public Vector2 position;
 
         // NodePortDictionary is a serializable Dictionary<string, NodePort>
         // that maps a port name to the port. Seems to only be storing dynamic
@@ -123,12 +121,12 @@ namespace Graph2
         
         public NodePort GetInputPort(string name)
         {
-            return Inputs.Find((port) => port.fieldName == name);
+            return inputs.Find((port) => port.portName == name);
         }
         
         public NodePort GetOutputPort(string name)
         {
-            return Outputs.Find((port) => port.fieldName == name);
+            return outputs.Find((port) => port.portName == name);
         }
         
         public virtual object GetOutput(string name)
@@ -141,10 +139,10 @@ namespace Graph2
         {
             var port = GetInputPort(name);
 
-            if (port != null && port.Connections.Count > 0)
+            if (port != null && port.connections.Count > 0)
             {
-                var conn = port.Connections[0];
-                conn.Node.GetOutput(conn.FieldName);
+                var conn = port.connections[0];
+                conn.node.GetOutput(conn.portName);
             }
 
             return defaultValue;
@@ -155,14 +153,14 @@ namespace Graph2
             var values = new List<T>();
             var port = GetInputPort(name);
 
-            if (port.Connections.Count < 1 && defaultValue != null)
+            if (port.connections.Count < 1 && defaultValue != null)
             {
                 values.Add(defaultValue);
             }
             else
             {
-                port.Connections.ForEach(
-                    (conn) => values.Add((T)conn.Node.GetOutput(conn.FieldName))
+                port.connections.ForEach(
+                    (conn) => values.Add((T)conn.node.GetOutput(conn.portName))
                 );
             }
             

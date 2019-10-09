@@ -11,7 +11,7 @@ namespace Graph2
 {
     public class PortView : Port
     {
-        public NodePort portData;
+        public NodePort target;
 
         VisualElement m_PropertyField;
 
@@ -46,8 +46,8 @@ namespace Graph2
                 type
             ) {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
-                portName = port.fieldName,
-                portData = port
+                portName = port.portName,
+                target = port
             };
             
             view.AddManipulator(view.m_EdgeConnector);

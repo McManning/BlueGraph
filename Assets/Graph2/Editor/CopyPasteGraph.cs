@@ -16,10 +16,10 @@ namespace Graph2
         public class SerializedEdge
         {
             public int inputID;
-            public string inputFieldName;
+            public string inputPortName;
 
             public int outputID;
-            public string outputFieldName;
+            public string outputPortName;
         }
 
         [Serializable]
@@ -59,25 +59,30 @@ namespace Graph2
                     var node = (element as NodeView).NodeData;
                     
                     // Convert connections to something that can be serialized
-                    foreach (var port in node.Inputs)
+                    foreach (var port in node.inputs)
                     {
-                        foreach (var conn in port.Connections)
+                        foreach (var conn in port.connections)
                         {
                             graph.m_SerializedEdges.Add(new SerializedEdge()
                             {
                                 inputID = node.GetInstanceID(),
-                                inputFieldName = port.fieldName,
-                                outputID = conn.Node.GetInstanceID(),
-                                outputFieldName = conn.FieldName
+                                inputPortName = port.portName,
+                                outputID = conn.node.GetInstanceID(),
+                                outputPortName = conn.portName
                             });
                         }
 
-                        port.Connections.Clear();
+                        port.connections.Clear();
                     }
 
-                    foreach (var port in node.Outputs)
+                    // TODO: This copy/paste is deleting connections from the source element.
+                    // But I can't instantiate() because I need the original's InstanceID().
+                    // I can either copy connections to a temp storage, serialize, and then
+                    // copy back or ... something else?
+
+                    foreach (var port in node.outputs)
                     {
-                        port.Connections.Clear();
+                        port.connections.Clear();
                     }
 
                     graph.m_SerializedNodes.Add(new SerializedNode() {
@@ -130,8 +135,8 @@ namespace Graph2
                 if (nodeMap.ContainsKey(edge.inputID) && 
                     nodeMap.ContainsKey(edge.outputID)
                 ) {
-                    var inPort = nodeMap[edge.inputID].GetInputPort(edge.inputFieldName);
-                    inPort.Connect(nodeMap[edge.outputID], edge.outputFieldName);
+                    var inPort = nodeMap[edge.inputID].GetInputPort(edge.inputPortName);
+                    inPort.Connect(nodeMap[edge.outputID], edge.outputPortName);
                 }
             }
 
