@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Graph2
 {
-    [CustomNodeView(typeof(MathNode))]
+    [CustomNodeView(typeof(FloatOperationNode))]
     class ExampleCustomNodeView : NodeView
     {
         public override void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
