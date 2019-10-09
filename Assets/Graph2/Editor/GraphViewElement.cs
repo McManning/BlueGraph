@@ -114,6 +114,9 @@ namespace Graph2
                         DestroyEdge(element as Edge);
                     }
                 }
+                
+                // Save the batch of changes all at once
+                AssetDatabase.SaveAssets();
             }
 
             return change;
@@ -222,32 +225,14 @@ namespace Graph2
             Dirty(element);
         }
 
+        /// <summary>
+        /// Remove a node from both the graph and the linked asset
+        /// </summary>
+        /// <param name="node"></param>
         public void DestroyNode(NodeView node)
         {
-            // Remove all edges on the graph 
-
-            // TODO: Propagate changes to adjacent nodes
-            
-            /*
-            foreach (var port in node.OutputPorts.Values)
-            {
-                foreach (var conn in port.connections)
-                {
-                    m_GraphView.RemoveElement(conn);
-                }
-            }
-            
-            foreach (var port in node.InputPorts.Values)
-            {
-                foreach (var conn in port.connections)
-                {
-                    m_GraphView.RemoveElement(conn);
-                }
-            }*/
-            
             m_Graph.RemoveNode(node.NodeData);
             ScriptableObject.DestroyImmediate(node.NodeData, true);
-            AssetDatabase.SaveAssets();
         }
 
         public void ConnectNodes(Edge edge)
