@@ -9,7 +9,7 @@ namespace Graph2
     public class PortReflectionData
     {
         public Type type;
-        public string name;
+        public string portName;
         public string fieldName;
 
         public bool isMulti;
@@ -174,7 +174,7 @@ namespace Graph2
                         node.ports.Add(new PortReflectionData()
                         {
                             type = fields[i].FieldType,
-                            name = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            portName = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = true,
                             isMulti = attr.Multiple,
@@ -188,9 +188,10 @@ namespace Graph2
                         node.ports.Add(new PortReflectionData()
                         {
                             type = fields[i].FieldType,
-                            name = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            portName = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = false,
+                            isMulti = true,
                             isEditable = false
                         });
                     }

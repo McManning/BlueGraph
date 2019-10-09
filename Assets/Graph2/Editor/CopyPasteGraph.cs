@@ -82,10 +82,8 @@ namespace Graph2
                     });
                 }
             }
-
-            string data = JsonUtility.ToJson(graph);
-            Debug.Log(data);
-            return data;
+            
+            return JsonUtility.ToJson(graph);
         }
 
         public static bool CanDeserialize(string data)

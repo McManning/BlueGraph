@@ -11,7 +11,7 @@ namespace Graph2
         {
             base.Initialize(node, connectorListener);
 
-            Debug.Log("Initialize custom MathNode editor");
+            // Custom initialization logic goes here.
         }
     }
 }

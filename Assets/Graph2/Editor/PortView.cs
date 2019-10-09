@@ -49,7 +49,14 @@ namespace Graph2
                 portName = port.portName,
                 target = port
             };
-            
+
+            // Override default connector text with the human-readable port name
+            // TODO: Apparently the edge connector (Edge.output.portName) is based on whatever
+            // is in this label. So re-labeling it will inadvertedly change the port name. 
+            // (or it might be a two way binding). So natively, we won't be able to have multiple
+            // ports with the same name. 
+            // view.m_ConnectorText.text = refPort.displayName;
+
             view.AddManipulator(view.m_EdgeConnector);
 
             // Bind to the underlying field
@@ -76,6 +83,38 @@ namespace Graph2
                 && visualClass == other.visualClass;
         }
 
+        public override void Disconnect(Edge edge)
+        {
+            // Copy the disconnect onto the linked data
+            if (direction == Direction.Input)
+            {
+                target.Disconnect((edge.output.node as NodeView).NodeData, edge.output.portName);
+            }
+            else
+            {
+                target.Disconnect((edge.input.node as NodeView).NodeData, edge.input.portName);
+            }
+            
+            base.Disconnect(edge);
+        }
+
+        public override void Connect(Edge edge)
+        {
+            // Copy the connect onto the linked data
+            // TODO: This happens also when we load the graph for every node.
+            // How can this be optimized out?
+            if (direction == Direction.Input)
+            {
+                target.Connect((edge.output.node as NodeView).NodeData, edge.output.portName);
+            }
+            else
+            {
+                target.Connect((edge.input.node as NodeView).NodeData, edge.input.portName);
+            }
+
+            base.Connect(edge);
+        }
+        
         public string GetTypeVisualClass(Type type)
         {
             // TODO: Better variant that handles lists and such.

@@ -87,18 +87,7 @@ namespace Graph2
                     }
                 }
             }
-
-            if (change.edgesToCreate != null)
-            {
-                foreach (var edge in change.edgesToCreate)
-                {
-                    Debug.Log("Add edge : " + edge.output.name + " to " + edge.input.name);
-                }
-
-                // Intercept. We handled it already
-                // change.edgesToCreate = null;
-            }
-
+            
             if (change.elementsToRemove != null)
             {
                 foreach (var element in change.elementsToRemove)
@@ -238,49 +227,35 @@ namespace Graph2
         public void ConnectNodes(Edge edge)
         {
             if (edge.input == null || edge.output == null) return;
-
-            var input = edge.input.node as NodeView;
-            var output = edge.output.node as NodeView;
             
-            Debug.Log($"{edge.input.portName} of {edge.input.title} to {edge.output.portName}");
-
-            var inputPort = input.NodeData.GetInputPort(edge.input.portName);
-            var outputPort = output.NodeData.GetOutputPort(edge.output.portName);
-
-            Debug.Log(inputPort);
-            Debug.Log(outputPort);
-            Debug.Log(input.NodeData);
-            Debug.Log(output.NodeData);
-
-            // Skip pre-existing connections
-            if (inputPort.IsConnected(output.NodeData, edge.output.portName))
+            // Handle single connection ports on either end. 
+            var edgesToRemove = new List<GraphElement>();
+            if (edge.input.capacity == Port.Capacity.Single)
             {
-                Debug.Log("Input already connected");
-                return;
+                foreach (var conn in edge.input.connections)
+                {
+                    edgesToRemove.Add(conn);
+                }
             }
 
-            if (outputPort.IsConnected(input.NodeData, edge.input.portName))
+            if (edge.output.capacity == Port.Capacity.Single)
             {
-                Debug.Log("Output already connected");
-                return;
+                foreach (var conn in edge.input.connections)
+                {
+                    edgesToRemove.Add(conn);
+                }
             }
-            
-            Debug.Log("Add connection");
 
-            // Update the underlying asset
-            inputPort.Connect(output.NodeData, edge.output.portName);
-            outputPort.Connect(input.NodeData, edge.input.portName);
-            
-            // Add visual edge. Note this cannot be the input edge as it 
-            // could be dropped from being tracked by the graph 
-            // (thus not properly cleaned up later). Instead, we need to 
-            // construct a new one and add that instead.
+            if (edgesToRemove.Count > 0)
+            {
+                m_GraphView.DeleteElements(edgesToRemove);
+            }
+
             var newEdge = edge.input.ConnectTo(edge.output);
             m_GraphView.AddElement(newEdge);
             
-            // Dirty the associated nodes so they can refresh their state.
-            Dirty(input);
-            Dirty(output);
+            Dirty(edge.input.node as NodeView);
+            Dirty(edge.output.node as NodeView);
         }
 
         /// <summary>
@@ -306,7 +281,6 @@ namespace Graph2
             foreach (var node in m_DirtyNodes)
             {
                 node.OnUpdate();
-                Debug.Log("Change: " + node.title);
             }
             
             m_DirtyNodes.Clear();
@@ -314,15 +288,8 @@ namespace Graph2
 
         public void DestroyEdge(Edge edge)
         {
-            Debug.Log("rm Edge " + edge.input.portName + " to " + edge.output.portName);
             var input = edge.input.node as NodeView;
             var output = edge.output.node as NodeView;
-            
-            var inputPort = input.NodeData.GetInputPort(edge.input.portName);
-            var outputPort = output.NodeData.GetOutputPort(edge.output.portName);
-
-            inputPort.Disconnect(output.NodeData, edge.output.portName);
-            outputPort.Disconnect(input.NodeData, edge.input.portName);
 
             edge.input.Disconnect(edge);
             edge.output.Disconnect(edge);

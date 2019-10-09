@@ -28,11 +28,8 @@ public class EdgeConnectorListener : IEdgeConnectorListener
         if (left != null && right != null)
         {
             // TODO: Register undo
-            // TODO: Can we just reuse the input edge?
             var newEdge = left.ConnectTo(right);
             graphView.AddElement(newEdge);
-
-            // TODO: graphViewChange doesn't seem to fire here?
         }
     }
 

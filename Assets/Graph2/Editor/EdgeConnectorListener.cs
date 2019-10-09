@@ -38,7 +38,6 @@ namespace Graph2
                 Event.current.mousePosition
             );
             
-            Debug.Log("Open search");
             m_GraphView.OpenSearch(screenPosition, draggedPort as PortView);
         }
     }

@@ -52,8 +52,6 @@ namespace Graph2
             m_ConnectorListener = connectorListener;
             title = node.name;
             
-            Debug.Log("Load " +  GetPosition().position + " and " + node.position);
-
             m_SerializedNode = new SerializedObject(node);
 
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
@@ -110,13 +108,13 @@ namespace Graph2
 
         protected void AddInputPort(PortReflectionData portData)
         {
-            var port = NodeData.GetInputPort(portData.name);
+            var port = NodeData.GetInputPort(portData.portName);
             if (port == null)
             {
                 port = new NodePort()
                 {
                     node = NodeData,
-                    portName = portData.name,
+                    portName = portData.portName,
                     isMulti = portData.isMulti
                 };
 
@@ -137,14 +135,14 @@ namespace Graph2
         
         protected void AddOutputPort(PortReflectionData portData)
         {
-            var port = NodeData.GetOutputPort(portData.name);
+            var port = NodeData.GetOutputPort(portData.portName);
             if (port == null)
             {
                 // Introspection pulled up a new port, track it.
                 port = new NodePort()
                 {
                     node = NodeData,
-                    portName = portData.name,
+                    portName = portData.portName,
                     isMulti = portData.isMulti
                 };
 
@@ -222,9 +220,7 @@ namespace Graph2
             {
                 port.OnUpdate();
             }
-
-            Debug.Log("Update " +  GetPosition().position);
-
+            
             if (GetPosition().position != Vector2.zero)
             {
                 // TODO: It seems like first load this is zero. Just like GetPosition()
