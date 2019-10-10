@@ -10,33 +10,13 @@ using BlueGraph;
 namespace BlueGraphEditor
 {
     /// <summary>
-    /// Required concrete implementation of a GraphView
+    /// Graph view that contains the nodes, edges, etc. 
     /// </summary>
-    class NodeGraphView : GraphView
-    {
-        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
-        {
-            var compatiblePorts = new List<Port>();
-            var startPortView = startPort as PortView;
-
-            ports.ForEach((port) => {
-                var portView = port as PortView;
-                if (portView.IsCompatibleWith(startPortView))
-                {
-                    compatiblePorts.Add(portView);
-                }
-            });
-            
-            return compatiblePorts;
-        }
-    }
-
-    public class GraphViewElement : VisualElement
+    public class CanvasView : GraphView
     {
         GraphEditor m_GraphEditor;
         Graph m_Graph;
-
-        NodeGraphView m_GraphView;
+        
         SearchProvider m_SearchProvider;
         EditorWindow m_EditorWindow;
 
@@ -44,22 +24,34 @@ namespace BlueGraphEditor
         
         HashSet<ICanDirty> m_Dirty = new HashSet<ICanDirty>();
 
-        public GraphViewElement(EditorWindow window)
+        public CanvasView(EditorWindow window)
         {
             m_EditorWindow = window;
-
-            // TODO: Less hardcoded of a path
-            StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Assets/BlueGraph/Editor/Styles/GraphViewElement.uss"
-            );
-        
-            styleSheets.Add(styles);
+            
+            styleSheets.Add(Resources.Load<StyleSheet>("Styles/CanvasView"));
+            AddToClassList("canvasView");
             
             m_EdgeListener = new EdgeConnectorListener(this);
             m_SearchProvider = ScriptableObject.CreateInstance<SearchProvider>();
-            m_SearchProvider.graphView = this;
+            m_SearchProvider.target = this;
 
-            CreateGraph();
+            SetupZoom(0.05f, ContentZoomer.DefaultMaxScale);
+        
+            this.AddManipulator(new ContentDragger());
+            this.AddManipulator(new SelectionDragger());
+            this.AddManipulator(new RectangleSelector());
+            this.AddManipulator(new ClickSelector());
+        
+            // Add event handlers for shortcuts and changes
+            RegisterCallback<KeyDownEvent>(OnGraphKeydown);
+            graphViewChanged = OnGraphViewChanged;
+            
+            nodeCreationRequest = (ctx) => OpenSearch(ctx.screenMousePosition);
+        
+            // Add handlers for (de)serialization
+            serializeGraphElements = OnSerializeGraphElements;
+            canPasteSerializedData = OnTryPasteSerializedData;
+            unserializeAndPaste = OnUnserializeAndPaste;
         
             RegisterCallback<GeometryChangedEvent>(OnFirstResize);
         }
@@ -70,7 +62,7 @@ namespace BlueGraphEditor
         private void OnFirstResize(GeometryChangedEvent evt)
         {
             UnregisterCallback<GeometryChangedEvent>(OnFirstResize);
-            m_GraphView.FrameAll();
+            FrameAll();
         }
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
@@ -115,38 +107,7 @@ namespace BlueGraphEditor
 
             return change;
         }
-
-        /// <summary>
-        /// Create and configure a new graph window for node editing
-        /// </summary>
-        private void CreateGraph()
-        {
-            m_GraphView = new NodeGraphView();
-            m_GraphView.SetupZoom(0.05f, ContentZoomer.DefaultMaxScale);
         
-            // Manipulators for the graph view itself
-            m_GraphView.AddManipulator(new ContentDragger());
-            m_GraphView.AddManipulator(new SelectionDragger());
-            m_GraphView.AddManipulator(new RectangleSelector());
-            m_GraphView.AddManipulator(new ClickSelector());
-        
-            // Add event handlers for shortcuts and changes
-            m_GraphView.RegisterCallback<KeyDownEvent>(OnGraphKeydown);
-            m_GraphView.graphViewChanged = OnGraphViewChanged;
-            
-            m_GraphView.nodeCreationRequest = (ctx) => OpenSearch(ctx.screenMousePosition);
-        
-            // Add handlers for (de)serialization
-            m_GraphView.serializeGraphElements = OnSerializeGraphElements;
-            m_GraphView.canPasteSerializedData = OnTryPasteSerializedData;
-            m_GraphView.unserializeAndPaste = OnUnserializeAndPaste;
-            
-            VisualElement content = new VisualElement { name = "Content" };
-            content.Add(m_GraphView);
-        
-            Add(content);
-        }
-       
         private void OnGraphKeydown(KeyDownEvent evt)
         {
             // TODO: Mac support
@@ -179,7 +140,7 @@ namespace BlueGraphEditor
                 screenPosition - m_EditorWindow.position.position
             );
         
-            var graphMousePosition = m_GraphView.contentViewContainer.WorldToLocal(windowMousePosition);
+            var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
             var typeData = NodeReflection.GetNodeType(type);
             var node = m_Graph.AddNode(type);
@@ -191,7 +152,7 @@ namespace BlueGraphEditor
             var element = Activator.CreateInstance(editorType) as NodeView;
             element.Initialize(node, m_EdgeListener);
 
-            m_GraphView.AddElement(element);
+            AddElement(element);
             
             AssetDatabase.AddObjectToAsset(node, m_Graph);
             AssetDatabase.SaveAssets();
@@ -253,11 +214,11 @@ namespace BlueGraphEditor
 
             if (edgesToRemove.Count > 0)
             {
-                m_GraphView.DeleteElements(edgesToRemove);
+                DeleteElements(edgesToRemove);
             }
 
             var newEdge = edge.input.ConnectTo(edge.output);
-            m_GraphView.AddElement(newEdge);
+            AddElement(newEdge);
             
             Dirty(edge.input.node as NodeView);
             Dirty(edge.output.node as NodeView);
@@ -324,7 +285,7 @@ namespace BlueGraphEditor
             edge.input = null;
             edge.output = null;
 
-            m_GraphView.RemoveElement(edge);
+            RemoveElement(edge);
 
             Dirty(input);
             Dirty(output);
@@ -336,31 +297,6 @@ namespace BlueGraphEditor
             SearchWindow.Open(new SearchWindowContext(screenPosition), m_SearchProvider);
         }
         
-        /// <summary>
-        /// Handler for deserializing a node from a string payload
-        /// </summary>
-        /// <param name="operationName"></param>
-        /// <param name="data"></param>
-        private void OnUnserializeAndPaste(string operationName, string data)
-        {
-            Debug.Log("Operation name: " + operationName);
-
-            var graph = CopyPasteGraph.Deserialize(data);
-            
-            // Add each node to the working graph
-            foreach (var node in graph.nodes)
-            {
-                m_Graph.AddNode(node);
-                AssetDatabase.AddObjectToAsset(node, m_Graph);
-            }
-            
-            AssetDatabase.SaveAssets();
-
-            // Add the new nodes and select them
-            m_GraphView.ClearSelection();
-            AddNodes(graph.nodes, true);
-        }
-
         /// <summary>
         /// Append nodes from a Graph onto the viewport
         /// </summary>
@@ -374,14 +310,14 @@ namespace BlueGraphEditor
                 var editorType = NodeReflection.GetNodeEditorType(node.GetType());
                 var element = Activator.CreateInstance(editorType) as NodeView;
                 element.Initialize(node, m_EdgeListener);
-                m_GraphView.AddElement(element);
+                AddElement(element);
 
                 nodeMap.Add(node, element);
                 Dirty(element);
                 
                 if (selectOnceAdded)
                 {
-                    m_GraphView.AddToSelection(element);
+                    AddToSelection(element);
                 }
             }
             
@@ -410,7 +346,7 @@ namespace BlueGraphEditor
                             else
                             {
                                 var edge = inPort.ConnectTo(outPort);
-                                m_GraphView.AddElement(edge);
+                                AddElement(edge);
                             }
                         }
                     }
@@ -420,7 +356,7 @@ namespace BlueGraphEditor
 
         private NodeView GetNodeElement(AbstractNode node)
         {
-            return m_GraphView.GetNodeByGuid(node.guid) as NodeView;
+            return GetNodeByGuid(node.guid) as NodeView;
         }
 
         /// <summary>
@@ -438,14 +374,14 @@ namespace BlueGraphEditor
                     groupView.AddElement(GetNodeElement(node));
                 }
                 
-                m_GraphView.AddElement(groupView);
+                AddElement(groupView);
                 groupView.SetPosition(new Rect(group.position.x, group.position.y, 0, 0));
             }
         }
 
         private void GroupSelection()
         {
-            if (m_GraphView.selection.Count < 0)
+            if (selection.Count < 0)
             {
                 return;
             }
@@ -455,7 +391,7 @@ namespace BlueGraphEditor
             m_Graph.groups.Add(group);
             
             var groupView = new GroupView(group); 
-            foreach (var node in m_GraphView.selection)
+            foreach (var node in selection)
             {
                 if (node is NodeView)
                 {
@@ -464,7 +400,30 @@ namespace BlueGraphEditor
                 }
             }
             
-            m_GraphView.AddElement(groupView);
+            AddElement(groupView);
+        }
+        
+        /// <summary>
+        /// Handler for deserializing a node from a string payload
+        /// </summary>
+        /// <param name="operationName"></param>
+        /// <param name="data"></param>
+        private void OnUnserializeAndPaste(string operationName, string data)
+        {
+            var graph = CopyPasteGraph.Deserialize(data);
+            
+            // Add each node to the working graph
+            foreach (var node in graph.nodes)
+            {
+                m_Graph.AddNode(node);
+                AssetDatabase.AddObjectToAsset(node, m_Graph);
+            }
+            
+            AssetDatabase.SaveAssets();
+
+            // Add the new nodes and select them
+            ClearSelection();
+            AddNodes(graph.nodes, true);
         }
 
         private bool OnTryPasteSerializedData(string data)
@@ -479,5 +438,22 @@ namespace BlueGraphEditor
         {
             return CopyPasteGraph.Serialize(elements);;
         }
+        
+        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+        {
+            var compatiblePorts = new List<Port>();
+            var startPortView = startPort as PortView;
+
+            ports.ForEach((port) => {
+                var portView = port as PortView;
+                if (portView.IsCompatibleWith(startPortView))
+                {
+                    compatiblePorts.Add(portView);
+                }
+            });
+            
+            return compatiblePorts;
+        }
+
     }
 }

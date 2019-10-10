@@ -10,16 +10,16 @@ namespace BlueGraphEditor
     /// </summary>
     public class EdgeConnectorListener : IEdgeConnectorListener
     {
-        GraphViewElement m_GraphView;
+        CanvasView m_Canvas;
     
-        public EdgeConnectorListener(GraphViewElement graphView)
+        public EdgeConnectorListener(CanvasView canvas)
         {
-            m_GraphView = graphView;
+            m_Canvas = canvas;
         }
     
         public void OnDrop(GraphView graphView, Edge edge)
         {
-            m_GraphView.ConnectNodes(edge);
+            m_Canvas.ConnectNodes(edge);
         }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
@@ -38,7 +38,7 @@ namespace BlueGraphEditor
                 Event.current.mousePosition
             );
             
-            m_GraphView.OpenSearch(screenPosition, draggedPort as PortView);
+            m_Canvas.OpenSearch(screenPosition, draggedPort as PortView);
         }
     }
 }

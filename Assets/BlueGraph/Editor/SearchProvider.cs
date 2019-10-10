@@ -8,7 +8,7 @@ namespace BlueGraphEditor
 {
     public class SearchProvider : ScriptableObject, ISearchWindowProvider
     {
-        public GraphViewElement graphView;
+        public CanvasView target;
         public PortView connectedPort;
         
         class SearchGroup
@@ -101,7 +101,7 @@ namespace BlueGraphEditor
         
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
-            graphView.CreateNode(
+            target.CreateNode(
                 entry.userData as Type, 
                 context.screenMousePosition, 
                 connectedPort
