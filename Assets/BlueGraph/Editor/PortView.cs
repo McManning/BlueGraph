@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
 using UnityEditor;
+using UnityEngine;
 using BlueGraph;
 
 namespace BlueGraphEditor
@@ -21,12 +22,8 @@ namespace BlueGraphEditor
             Type type
         ) : base(portOrientation, portDirection, portCapacity, type)
         {
-            // TODO: Less hardcoded of a path
-            StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Assets/BlueGraph/Editor/Styles/PortView.uss"
-            );
-        
-            styleSheets.Add(styles);
+            styleSheets.Add(Resources.Load<StyleSheet>("Styles/PortView"));
+            AddToClassList("portView");
             
             visualClass = GetTypeVisualClass(type);
         }

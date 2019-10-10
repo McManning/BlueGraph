@@ -1,15 +1,15 @@
 ﻿
 
-PortView.port {
+.portView.port {
 	height: auto; /* Fix expanding port heights for inlined structs */
 	--port-color: #18abf2; /* Any type not detected is defaulted to plain object blue */
 }
 
-PortView .unity-base-field__label {
+.portView .unity-base-field__label {
 	min-width: 0px;
 }
 
-PortView .unity-base-field__input {
+.portView .unity-base-field__input {
 	min-width: 60px;
 }
 
@@ -20,67 +20,67 @@ PortView .unity-base-field__input {
 	These are modeled after UE4's Blueprints because I like the aesthetic.
 	May change if Unity adopts some standard
 */
-PortView.type-System-String {
+.portView.type-System-String {
     --port-color: #fb02d1;
 }
 
-PortView.type-System-Boolean {
+.portView.type-System-Boolean {
     --port-color: #940008;
 }
 
-PortView.type-System-Int {
+.portView.type-System-Int {
     --port-color: #29e0ad;
 }
 
-PortView.type-System-Int32 {
+.portView.type-System-Int32 {
     --port-color: #29e0ad;
 }
 
-PortView.type-System-Int64 {
+.portView.type-System-Int64 {
     --port-color: #29e0ad;
 }
 
-PortView.type-System-Single {
+.portView.type-System-Single {
 	--port-color: #9efb52;
 }
 
 /* TODO: Different vec colors? How often would we use them interchangeably? */
 
-PortView.type-UnityEngine-Vector2 {
+.portView.type-UnityEngine-Vector2 {
     --port-color: #fdc727;
 }
 
-PortView.type-UnityEngine-Vector3 {
+.portView.type-UnityEngine-Vector3 {
     --port-color: #fdc727;
 }
 
-PortView.type-UnityEngine-Vector4 {
+.portView.type-UnityEngine-Vector4 {
     --port-color: #fdc727;
 }
 
-PortView.type-UnityEngine-Quaternion {
+.portView.type-UnityEngine-Quaternion {
     --port-color: #8f9fdd;
 }
 
-PortView.type-UnityEngine-Color {
+.portView.type-UnityEngine-Color {
     --port-color: #0e3f7f;
 }
 
-PortView.type-UnityEngine-Transform {
+.portView.type-UnityEngine-Transform {
 	--port-color: #fa711d;
 }
 
 /* Anything inheriting a GO. Although ideally it should be prefabs or monobehaviors */
-PortView.type-UnityEngine-GameObject {
+.portView.type-UnityEngine-GameObject {
     --port-color: #5906b7;
 }
 
-PortView.type-System-Enum {
+.portView.type-System-Enum {
     --port-color: #076f64;
 }
 
 /* Any other object/class 
-PortView.type-UnityEngine-Object {
+.portView.type-UnityEngine-Object {
 	--port-color: #18abf2;
 }
 */

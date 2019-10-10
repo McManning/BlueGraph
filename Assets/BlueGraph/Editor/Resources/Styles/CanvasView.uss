@@ -1,0 +1,6 @@
+﻿
+.canvasView {
+	flex: 1;
+    background-color: #202020;
+}
+

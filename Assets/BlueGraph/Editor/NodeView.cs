@@ -35,13 +35,8 @@ namespace BlueGraphEditor
         {
             viewDataKey = node.guid;
             
-            // TODO: Less hardcoded of a path
-            StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Assets/BlueGraph/Editor/Styles/NodeView.uss"
-            );
-        
-            styleSheets.Add(styles);
-            AddToClassList("node-view");
+            styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
+            AddToClassList("nodeView");
             
             target = node;
             SetPosition(new Rect(node.position.x, node.position.y, 0, 0));

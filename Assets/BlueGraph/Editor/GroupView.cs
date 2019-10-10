@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
-using UnityEditor;
+using UnityEngine;
 using BlueGraph;
 
 namespace BlueGraphEditor
@@ -32,12 +32,8 @@ namespace BlueGraphEditor
             target = group;
             title = group.title;
             
-            // TODO: Less hardcoded of a path
-            StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-                "Assets/BlueGraph/Editor/Styles/GroupView.uss"
-            );
-        
-            styleSheets.Add(styles);
+            styleSheets.Add(Resources.Load<StyleSheet>("Styles/GroupView"));
+            AddToClassList("groupView");
             
             this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
 
