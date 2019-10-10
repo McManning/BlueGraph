@@ -51,7 +51,7 @@ namespace Graph2
                 foreach (var conn in port.connections) 
                 {
                     var output = conn.node.GetOutputPort(conn.portName);
-                    output.Disconnect(node, port.portName);
+                    output.Disconnect(port);
                 }
 
                 port.connections.Clear();
@@ -62,27 +62,13 @@ namespace Graph2
                 foreach (var conn in port.connections) 
                 {
                     var output = conn.node.GetInputPort(conn.portName);
-                    output.Disconnect(node, port.portName);
+                    output.Disconnect(port);
                 }
 
                 port.connections.Clear();
             }
             
             nodes.Remove(node);
-        }
-        
-        public virtual Graph Copy()
-        {
-            Graph graph = Instantiate(this);
-
-            foreach (var node in nodes)
-            {
-                AbstractNode instance = Instantiate(node) as AbstractNode;
-                instance.graph = graph;
-                // ports and such, private data?
-            }
-
-            return graph;
         }
     }
 }

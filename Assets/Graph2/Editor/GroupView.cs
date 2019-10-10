@@ -34,21 +34,13 @@ namespace Graph2
         {
             foreach (var element in elements)
             {
-                Debug.Log("on added: " + element.title);
                 if (element is NodeView)
                 {
-                    var nodeView = element as NodeView;
-
-                    // TODO: When a group is loaded from persistence,
-                    // each node in that graph will get re-iterate and 
-                    // added again here. 
-                    if (!target.nodes.Contains(nodeView.NodeData))
+                    var node = (element as NodeView).target;
+                    if (!target.nodes.Contains(node))
                     {
-                        target.nodes.Add(nodeView.NodeData);
+                        target.nodes.Add(node);
                     }
-
-                    // TODO: De-associate that node from other groups.
-                    // Happens automatically in the editor but is it safe?
                 }
             }
 
@@ -59,12 +51,10 @@ namespace Graph2
         {   
             foreach (var element in elements)
             {
-                Debug.Log("on removed: " + element.title);
                 if (element is NodeView)
                 {
-                    var nodeView = element as NodeView;
-                    
-                    target.nodes.Remove(nodeView.NodeData);
+                    var node = (element as NodeView).target;
+                    target.nodes.Remove(node);
                 }
             }
 

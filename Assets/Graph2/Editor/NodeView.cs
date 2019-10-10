@@ -25,15 +25,13 @@ namespace Graph2
 
     public class NodeView : Node, ICanDirty
     {
-        public AbstractNode NodeData { get; protected set; }
-
+        public AbstractNode target;
+        
+        public List<PortView> inputs = new List<PortView>();
+        public List<PortView> outputs = new List<PortView>();
+        
         EdgeConnectorListener m_ConnectorListener;
-
         SerializedObject m_SerializedNode;
-
-        // TODO: Don't really want this public but DestroyNode uses it.
-        public Dictionary<string, PortView> InputPorts = new Dictionary<string, PortView>();
-        public Dictionary<string, PortView> OutputPorts = new Dictionary<string, PortView>();
 
         public virtual void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
@@ -47,7 +45,7 @@ namespace Graph2
             styleSheets.Add(styles);
             AddToClassList("node-view");
             
-            NodeData = node;
+            target = node;
             SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
             m_ConnectorListener = connectorListener;
             title = node.name;
@@ -73,7 +71,7 @@ namespace Graph2
         /// </summary>
         public void UpdatePorts()
         {
-            var reflectionData = NodeReflection.GetNodeType(NodeData.GetType());
+            var reflectionData = NodeReflection.GetNodeType(target.GetType());
 
             foreach (var portData in reflectionData.ports)
             {
@@ -108,17 +106,17 @@ namespace Graph2
 
         protected void AddInputPort(PortReflectionData portData)
         {
-            var port = NodeData.GetInputPort(portData.portName);
+            var port = target.GetInputPort(portData.portName);
             if (port == null)
             {
                 port = new NodePort()
                 {
-                    node = NodeData,
+                    node = target,
                     portName = portData.portName,
                     isMulti = portData.isMulti
                 };
 
-                NodeData.inputs.Add(port);
+                target.inputs.Add(port);
             }
             
             var view = PortView.Create(
@@ -129,24 +127,24 @@ namespace Graph2
                 m_ConnectorListener
             );
             
-            InputPorts.Add(port.portName, view);
+            inputs.Add(view);
             inputContainer.Add(view);
         }
         
         protected void AddOutputPort(PortReflectionData portData)
         {
-            var port = NodeData.GetOutputPort(portData.portName);
+            var port = target.GetOutputPort(portData.portName);
             if (port == null)
             {
                 // Introspection pulled up a new port, track it.
                 port = new NodePort()
                 {
-                    node = NodeData,
+                    node = target,
                     portName = portData.portName,
                     isMulti = portData.isMulti
                 };
 
-                NodeData.outputs.Add(port);
+                target.outputs.Add(port);
             }
 
             var view = PortView.Create(
@@ -157,34 +155,28 @@ namespace Graph2
                 m_ConnectorListener
             );
             
-            OutputPorts.Add(port.portName, view);
+            outputs.Add(view);
             outputContainer.Add(view);
         }
 
         public PortView GetInputPort(string name)
         {
-            InputPorts.TryGetValue(name, out PortView port);
-            return port;
+            return inputs.Find((port) => port.portName == name);
         }
 
         public PortView GetOutputPort(string name)
         {
-            OutputPorts.TryGetValue(name, out PortView port);
-            return port;
+            return outputs.Find((port) => port.portName == name);
         }
         
         public PortView GetCompatibleInputPort(PortView output)
         { 
-            return InputPorts.FirstOrDefault(
-                (port) => port.Value.IsCompatibleWith(output)
-            ).Value;
+            return inputs.Find((port) => port.IsCompatibleWith(output));
         }
     
         public PortView GetCompatibleOutputPort(PortView input)
         {
-            return OutputPorts.FirstOrDefault(
-                (port) => port.Value.IsCompatibleWith(input)
-            ).Value;
+            return outputs.Find((port) => port.IsCompatibleWith(input));
         }
 
         /// <summary>
@@ -194,12 +186,12 @@ namespace Graph2
         public virtual void OnDirty()
         {
             // Dirty all ports so they can refresh their state
-            foreach (var port in InputPorts.Values)
+            foreach (var port in inputs)
             {
                 port.OnDirty();
             }
 
-            foreach (var port in OutputPorts.Values)
+            foreach (var port in outputs)
             {
                 port.OnDirty();
             }
@@ -210,26 +202,22 @@ namespace Graph2
         /// </summary>
         public virtual void OnUpdate()
         {
-            // Propagate to all ports
-            foreach (var port in InputPorts.Values)
+            // Propagate update to all ports
+            foreach (var port in inputs)
             {
                 port.OnUpdate();
             }
 
-            foreach (var port in OutputPorts.Values)
+            foreach (var port in outputs)
             {
                 port.OnUpdate();
             }
-            
-            if (GetPosition().position != Vector2.zero)
-            {
-                // TODO: It seems like first load this is zero. Just like GetPosition()
-                // after we call SetPosition above. Might have to do first draw to the 
-                // graph before a correctly reported position comes back. 
-                // In the meantime, this is guarded so it won't zero out the node's position
-                // when we open + close the graph without moving it. 
-                NodeData.position = GetPosition().position;
-            }
+        }
+
+        public override void SetPosition(Rect newPos)
+        {
+            base.SetPosition(newPos);
+            target.position = newPos.position;
         }
     }
 }

@@ -88,11 +88,11 @@ namespace Graph2
             // Copy the disconnect onto the linked data
             if (direction == Direction.Input)
             {
-                target.Disconnect((edge.output.node as NodeView).NodeData, edge.output.portName);
+                target.Disconnect((edge.output as PortView).target);
             }
             else
             {
-                target.Disconnect((edge.input.node as NodeView).NodeData, edge.input.portName);
+                target.Disconnect((edge.input as PortView).target);
             }
             
             base.Disconnect(edge);
@@ -105,11 +105,11 @@ namespace Graph2
             // How can this be optimized out?
             if (direction == Direction.Input)
             {
-                target.Connect((edge.output.node as NodeView).NodeData, edge.output.portName);
+                target.Connect((edge.output as PortView).target);
             }
             else
             {
-                target.Connect((edge.input.node as NodeView).NodeData, edge.input.portName);
+                target.Connect((edge.input as PortView).target);
             }
 
             base.Connect(edge);

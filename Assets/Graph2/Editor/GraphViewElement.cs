@@ -224,8 +224,8 @@ namespace Graph2
         /// <param name="node"></param>
         public void DestroyNode(NodeView node)
         {
-            m_Graph.RemoveNode(node.NodeData);
-            ScriptableObject.DestroyImmediate(node.NodeData, true);
+            m_Graph.RemoveNode(node.target);
+            ScriptableObject.DestroyImmediate(node.target, true);
         }
 
         public void ConnectNodes(Edge edge)
@@ -274,7 +274,7 @@ namespace Graph2
             if (element is NodeView)
             {
                 var node = element as NodeView;
-                foreach (var port in node.OutputPorts.Values)
+                foreach (var port in node.outputs)
                 {
                     foreach (var conn in port.connections)
                     {
@@ -360,7 +360,7 @@ namespace Graph2
             AddNodes(graph.nodes, true);
         }
 
-        /// <summary>de
+        /// <summary>
         /// Append nodes from a Graph onto the viewport
         /// </summary>
         /// <param name="graph"></param>

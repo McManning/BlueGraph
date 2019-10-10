@@ -48,7 +48,7 @@ namespace Graph2
             {
                 if (element is NodeView)
                 {
-                    var src = (element as NodeView).NodeData;
+                    var src = (element as NodeView).target;
                     var node = Instantiate(src);
                     node.name = src.name;
                     
@@ -107,13 +107,27 @@ namespace Graph2
             var graph = CreateInstance<Graph>();
 
             var nodeMap = new Dictionary<string, AbstractNode>();
+            var guidMap = new Dictionary<string, string>();
+
             foreach (var node in cpGraph.m_SerializedNodes)
             {
                 var instance = graph.AddNode(node.type);
                 JsonUtility.FromJsonOverwrite(node.JSON, instance);
                 instance.name = node.name;
                 
-                nodeMap.Add(node.guid, instance);
+                nodeMap[node.guid] = instance;
+                guidMap[node.guid] = instance.guid;
+                
+                // Remap port associations
+                foreach (var port in instance.inputs)
+                {
+                    port.node = instance;
+                }
+
+                foreach (var port in instance.outputs)
+                {
+                    port.node = instance;
+                }
             }
             
             // Re-associate edges to the new node instances
@@ -123,10 +137,13 @@ namespace Graph2
                     nodeMap.ContainsKey(edge.outputGuid)
                 ) {
                     var inPort = nodeMap[edge.inputGuid].GetInputPort(edge.inputPortName);
-                    inPort.Connect(nodeMap[edge.outputGuid], edge.outputPortName);
+                    var outPort = nodeMap[edge.outputGuid].GetOutputPort(edge.outputPortName);
+
+                    inPort.Connect(outPort);
+                    outPort.Connect(inPort);
                 }
             }
-
+            
             return graph;
         }
     }
