@@ -1,7 +1,5 @@
 ﻿
-
 /* Window layout styles */
-
 GraphViewElement {
     flex: 1;
 }
@@ -10,98 +8,9 @@ GraphViewElement > #Content {
     flex: 1;
 }
 
-
 /* Styles for the graph and sub components */
-
 NodeGraphView {
     flex: 1; 
     flex-direction: row;
     background-color: #202020;
-}
-
-/* Port themes by data type */
-
-NodePort.Boolean {
-    --port-color: #9481E6;
-}
-
-NodePort.Int {
-    --port-color: #9481E6;
-}
-
-NodePort.Int32 {
-    --port-color: #9481E6;
-}
-
-NodePort.Int64 {
-    --port-color: #9481E6;
-}
-
-NodePort.Single {
-	--port-color: #84E4E7;
-}
-
-NodePort.Vector2 {
-    --port-color: #9AEF92;
-}
-
-NodePort.Vector3 {
-    --port-color: #F6FF9A;
-}
-
-NodePort.Vector4 {
-    --port-color: #FBCBF4;
-}
-
-NodePort.Quaternion {
-    --port-color: #FBCBF4;
-}
-
-NodePort.Color {
-    --port-color: #FBCBF4;
-}
-
-NodePort.Matrix4x4 {
-    --port-color: #8FC1DF;
-}
-
-NodePort.String {
-    --port-color: #FCD76E;
-}
-
-NodePort.GameObject {
-    --port-color:#8FC1DF;
-}
-
-NodePort.Texture2D {
-    --port-color:#FF8B8B;
-}
-
-/* And so on... */
-
-/* Gradients are apparently broken
-NodeView .ExtensionRow {
-    flex: 1;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-NodeView .ExtensionRow > Label {
-   align-self: flex-end;
-} */
-/* 
-NodeView .ExtensionRow .unity-base-field {
-    align-self: flex-end;
-} */
-
-NodePort.port > .unity-base-field {
-	flex: 1 0 0; 
-}
-
-PortView .unity-base-field__label {
-	min-width: 0px;
-}
-
-PortView .unity-base-field__input {
-	min-width: 60px;
 }

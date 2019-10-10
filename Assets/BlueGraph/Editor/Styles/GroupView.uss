@@ -1,0 +1,19 @@
+﻿
+GroupView.theme-Dark {
+	background-color: #191919;
+	border-color: #343434;
+}
+
+GroupView.theme-Light {
+
+}
+
+GroupView.theme-Info {
+	/* TODO: Not even remotely colors */
+	background-color: #163A3F;
+	border-color: #277D89;
+}
+
+GroupView.theme-Danger {
+
+}

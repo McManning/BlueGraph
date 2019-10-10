@@ -5,6 +5,14 @@ PortView.port {
 	--port-color: #18abf2; /* Any type not detected is defaulted to plain object blue */
 }
 
+PortView .unity-base-field__label {
+	min-width: 0px;
+}
+
+PortView .unity-base-field__input {
+	min-width: 60px;
+}
+
 /* 
 	Port themes by data type. Each system type is prefixed with "type-" and periods become dashes.
 	Special handling is made for enums and objects that inherit from GameObject

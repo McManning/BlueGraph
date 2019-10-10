@@ -1,6 +1,9 @@
 ﻿
-using UnityEditor.Experimental.GraphView;
+using System;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
+using UnityEngine.UIElements;
+using UnityEditor;
 using BlueGraph;
 
 namespace BlueGraphEditor
@@ -11,23 +14,76 @@ namespace BlueGraphEditor
     /// </summary>
     public class GroupView : Group, ICanDirty
     {
+        // TODO: Less dumb theme names
+        public enum Theme
+        {
+            Dark,
+            Light,
+            Info,
+            Danger
+        }
+
         public NodeGroup target;
+        
+        Theme m_Theme;
 
         public GroupView(NodeGroup group)
         {
             target = group;
             title = group.title;
+            
+            // TODO: Less hardcoded of a path
+            StyleSheet styles = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+                "Assets/BlueGraph/Editor/Styles/GroupView.uss"
+            );
+        
+            styleSheets.Add(styles);
+            
+            this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
+
+            var text = new TextField();
+            text.multiline = true;
+            text.AddToClassList("group-comment");
+            Add(text);
+
+
+            SetTheme(Theme.Dark);
+        }
+        
+        public virtual void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            if (evt.target is GroupView)
+            {
+                // Add options to change theme
+                foreach (var theme in (Theme[])Enum.GetValues(typeof(Theme)))
+                {
+                    evt.menu.AppendAction(
+                        theme + " Theme", 
+                        (a) => { SetTheme(theme); }, 
+                        (m_Theme != theme) ? DropdownMenuAction.Status.Normal 
+                            : DropdownMenuAction.Status.Disabled
+                    );
+                }
+
+                evt.menu.AppendSeparator();
+            }
         }
 
-        public void OnDirty()
+        public void SetTheme(Theme theme)
+        {
+            RemoveFromClassList("theme-" + m_Theme);
+            AddToClassList("theme-" + theme);
+            m_Theme = theme;
+        }
+
+        public virtual void OnDirty()
         {
             
         }
 
-        public void OnUpdate()
+        public virtual void OnUpdate()
         {
-            // TODO: Update position. It doesn't really work because 
-            // the nodes still maintain their original position, even after moved. 
+
         }
 
         protected override void OnElementsAdded(IEnumerable<GraphElement> elements)
