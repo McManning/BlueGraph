@@ -8,6 +8,7 @@ namespace Graph2
     public class NodeGroup
     {
         public string title;
+        public Vector2 position;
         public List<AbstractNode> nodes = new List<AbstractNode>();
     }
 
@@ -32,17 +33,25 @@ namespace Graph2
     
         public void Connect(AbstractNode node, string portName)
         {
-            connections.Add(new PortConnection() {
-                node = node, 
-                portName = portName
-            });
-        }    
+            if (!IsConnected(node, portName))
+            {
+                connections.Add(new PortConnection() {
+                    node = node, 
+                    portName = portName
+                });
+            }
+        } 
 
         public void Disconnect(AbstractNode node, string portName)
         {
             connections.RemoveAll(
                 (conn) => conn.node == node && conn.portName == portName
             );
+        }
+
+        public void DisconnectAll()
+        {
+            connections.Clear();
         }
 
         public bool IsConnected(AbstractNode node, string portName)
@@ -68,7 +77,7 @@ namespace Graph2
     public class InputAttribute : Attribute
     {
         public string Name;
-        public bool Multiple = true;
+        public bool Multiple = false;
         public bool Editable = true;
         
         public InputAttribute(string name = null)
@@ -109,11 +118,7 @@ namespace Graph2
         
         // Graph metadata
         public Vector2 position;
-
-        // NodePortDictionary is a serializable Dictionary<string, NodePort>
-        // that maps a port name to the port. Seems to only be storing dynamic
-        // ports.
-
+        
         public void RegenerateGuid()
         {
             guid = Guid.NewGuid().ToString();

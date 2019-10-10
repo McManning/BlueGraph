@@ -41,7 +41,7 @@ namespace Graph2
 
         EdgeConnectorListener m_EdgeListener;
         
-        HashSet<NodeView> m_DirtyNodes = new HashSet<NodeView>();
+        HashSet<ICanDirty> m_Dirty = new HashSet<ICanDirty>();
 
         public GraphViewElement(EditorWindow window)
         {
@@ -84,6 +84,10 @@ namespace Graph2
                     if (element is NodeView)
                     {
                         Dirty(element as NodeView);
+                    }
+                    else if (element is GroupView)
+                    {
+                        DirtyGroup(element as GroupView);
                     }
                 }
             }
@@ -213,7 +217,7 @@ namespace Graph2
             
             Dirty(element);
         }
-
+        
         /// <summary>
         /// Remove a node from both the graph and the linked asset
         /// </summary>
@@ -262,28 +266,50 @@ namespace Graph2
         /// Mark a node and all dependents as dirty for the next refresh. 
         /// </summary>
         /// <param name="node"></param>
-        public void Dirty(NodeView node)
+        public void Dirty(ICanDirty element)
         {
-            m_DirtyNodes.Add(node);
+            m_Dirty.Add(element);
 
-            foreach (var port in node.OutputPorts.Values)
+            // Also dirty outputs if a nodeview
+            if (element is NodeView)
             {
-                foreach (var conn in port.connections)
+                var node = element as NodeView;
+                foreach (var port in node.OutputPorts.Values)
                 {
-                    Dirty(conn.input.node as NodeView);
+                    foreach (var conn in port.connections)
+                    {
+                        Dirty(conn.input.node as NodeView);
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Dirty the group and everything contained within it
+        /// </summary>
+        /// <param name="group"></param>
+        public void DirtyGroup(GroupView group)
+        {
+            foreach (var element in group.containedElements)
+            {
+                if (element is ICanDirty)
+                {
+                    Dirty(element as ICanDirty);
+                }
+            }
+
+            Dirty(group);
+        }
+        
         public void Update()
         {
-            // Propagate change on dirty nodes
-            foreach (var node in m_DirtyNodes)
+            // Propagate change on dirty elements
+            foreach (var element in m_Dirty)
             {
-                node.OnUpdate();
+                element.OnUpdate();
             }
             
-            m_DirtyNodes.Clear();
+            m_Dirty.Clear();
         }
 
         public void DestroyEdge(Edge edge)
@@ -412,6 +438,7 @@ namespace Graph2
                 }
                 
                 m_GraphView.AddElement(groupView);
+                groupView.SetPosition(new Rect(group.position.x, group.position.y, 0, 0));
             }
         }
 

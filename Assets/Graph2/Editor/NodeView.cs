@@ -23,7 +23,7 @@ namespace Graph2
         }
     }
 
-    public class NodeView : Node
+    public class NodeView : Node, ICanDirty
     {
         public AbstractNode NodeData { get; protected set; }
 

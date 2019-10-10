@@ -9,7 +9,7 @@ namespace Graph2
     /// Wrapper over GraphView.Group to pass changes onto 
     /// the serializable asset
     /// </summary>
-    public class GroupView : Group
+    public class GroupView : Group, ICanDirty
     {
         public NodeGroup target;
 
@@ -17,6 +17,17 @@ namespace Graph2
         {
             target = group;
             title = group.title;
+        }
+
+        public void OnDirty()
+        {
+            
+        }
+
+        public void OnUpdate()
+        {
+            // TODO: Update position. It doesn't really work because 
+            // the nodes still maintain their original position, even after moved. 
         }
 
         protected override void OnElementsAdded(IEnumerable<GraphElement> elements)
