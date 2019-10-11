@@ -14,6 +14,8 @@ namespace BlueGraphEditor
     /// </summary>
     public class CanvasView : GraphView
     {
+        public Label title;
+
         GraphEditor m_GraphEditor;
         Graph m_Graph;
         
@@ -54,6 +56,12 @@ namespace BlueGraphEditor
             unserializeAndPaste = OnUnserializeAndPaste;
         
             RegisterCallback<GeometryChangedEvent>(OnFirstResize);
+
+            title = new Label();
+            title.text = "BLUEGRAPH";
+            title.AddToClassList("canvasViewTitle");
+
+            Add(title);
         }
         
         /// <summary>
@@ -67,8 +75,6 @@ namespace BlueGraphEditor
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
-            Debug.Log("Change: " + change.ToString());
-
             // Dirty moved elements to update the target assets
             if (change.movedElements != null)
             {
@@ -91,12 +97,10 @@ namespace BlueGraphEditor
                 {
                     if (element is NodeView)
                     {
-                        Debug.Log("Destroy node");
                         DestroyNode(element as NodeView);
                     }
                     else if (element is Edge)
                     {
-                        Debug.Log("Destroy edge");
                         DestroyEdge(element as Edge);
                     }
                 }
@@ -125,7 +129,6 @@ namespace BlueGraphEditor
         
         public void Load(Graph graph)
         {
-            Debug.Log("Load graph");
             m_Graph = graph;
             
             AddNodes(graph.nodes);
@@ -436,7 +439,7 @@ namespace BlueGraphEditor
         /// </summary>
         private string OnSerializeGraphElements(IEnumerable<GraphElement> elements)
         {
-            return CopyPasteGraph.Serialize(elements);;
+            return CopyPasteGraph.Serialize(elements);
         }
         
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -454,6 +457,5 @@ namespace BlueGraphEditor
             
             return compatiblePorts;
         }
-
     }
 }
