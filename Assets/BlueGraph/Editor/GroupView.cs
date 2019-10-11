@@ -14,13 +14,13 @@ namespace BlueGraphEditor
     /// </summary>
     public class GroupView : Group, ICanDirty
     {
-        // TODO: Less dumb theme names
         public enum Theme
         {
-            Dark,
-            Light,
-            Info,
-            Danger
+            Grey,
+            Yellow,
+            Red,
+            Green,
+            Blue
         }
 
         public NodeGroup target;
@@ -37,13 +37,8 @@ namespace BlueGraphEditor
             
             this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
 
-            var text = new TextField();
-            text.multiline = true;
-            text.AddToClassList("group-comment");
-            Add(text);
-
-
-            SetTheme(Theme.Dark);
+            Enum.TryParse(target.theme, out m_Theme);
+            SetTheme(m_Theme);
         }
         
         public virtual void BuildContextualMenu(ContextualMenuPopulateEvent evt)
@@ -70,18 +65,19 @@ namespace BlueGraphEditor
             RemoveFromClassList("theme-" + m_Theme);
             AddToClassList("theme-" + theme);
             m_Theme = theme;
+            target.theme = Enum.GetName(typeof(Theme), theme);
         }
-
+        
         public virtual void OnDirty()
         {
-            
+
         }
 
         public virtual void OnUpdate()
         {
 
         }
-
+        
         protected override void OnElementsAdded(IEnumerable<GraphElement> elements)
         {
             foreach (var element in elements)

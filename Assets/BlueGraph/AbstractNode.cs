@@ -8,6 +8,7 @@ namespace BlueGraph
     public class NodeGroup
     {
         public string title;
+        public string theme;
         public Vector2 position;
         public List<AbstractNode> nodes = new List<AbstractNode>();
     }
