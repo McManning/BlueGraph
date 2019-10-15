@@ -1,7 +1,6 @@
 ﻿
 .canvasView {
 	flex: 1;
-    background-color: #202020;
 }
 
 .canvasViewTitle {
@@ -10,4 +9,12 @@
 	left: 15px;
 	font-size: 50px;
 	opacity: 0.15;
+}
+
+GridBackground {
+	--grid-background-color: rgba(20, 20, 20, 1);
+	--line-color: rgba(25, 25, 25, 1);
+	--thick-line-color: rgba(50, 50, 50, 1);
+	--spacing: 500;
+	--thick-lines: 0;
 }

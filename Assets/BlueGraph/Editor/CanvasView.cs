@@ -29,7 +29,7 @@ namespace BlueGraphEditor
         public CanvasView(EditorWindow window)
         {
             m_EditorWindow = window;
-            
+
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CanvasView"));
             AddToClassList("canvasView");
             
@@ -62,6 +62,9 @@ namespace BlueGraphEditor
             title.AddToClassList("canvasViewTitle");
 
             Add(title);
+            
+            // Add a grid renderer *behind* content containers
+            Insert(0, new GridBackground());
         }
         
         /// <summary>
