@@ -80,13 +80,19 @@ namespace BlueGraphEditor
             {
                 foreach (var element in change.movedElements)
                 {
-                    if (element is NodeView)
-                    {
-                        Dirty(element as NodeView);
-                    }
-                    else if (element is GroupView)
+                    if (element is GroupView)
                     {
                         DirtyGroup(element as GroupView);
+                    }
+                    else if (element is ICanDirty)
+                    {
+                        Dirty(element as ICanDirty);
+                    }
+
+                    // TODO: Move/optimize
+                    if (element is NodeView)
+                    {
+                        UpdateCommentLink(element as NodeView);
                     }
                 }
             }
@@ -103,12 +109,16 @@ namespace BlueGraphEditor
                     {
                         DestroyEdge(element as Edge);
                     }
+                    else if (element is CommentView)
+                    {
+                        DestroyComment(element as CommentView);
+                    }
                 }
                 
                 // Save the batch of changes all at once
                 AssetDatabase.SaveAssets();
             }
-
+            
             return change;
         }
         
@@ -121,6 +131,7 @@ namespace BlueGraphEditor
             {
                 GroupSelection();
             }
+            
         
             // Other ideas:
             // - add comment node shortcut
@@ -189,8 +200,18 @@ namespace BlueGraphEditor
         /// <param name="node"></param>
         public void DestroyNode(NodeView node)
         {
+            if (node.comment != null)
+            {
+                node.comment.RemoveElement(node);
+            }
+
             m_Graph.RemoveNode(node.target);
             ScriptableObject.DestroyImmediate(node.target, true);
+        }
+
+        public void DestroyComment(CommentView comment)
+        {
+            comments.Remove(comment);
         }
 
         public void ConnectNodes(Edge edge)
@@ -249,6 +270,8 @@ namespace BlueGraphEditor
             }
         }
 
+        public List<CommentView> comments = new List<CommentView>();
+        
         /// <summary>
         /// Dirty the group and everything contained within it
         /// </summary>
@@ -275,6 +298,34 @@ namespace BlueGraphEditor
             }
             
             m_Dirty.Clear();
+        }
+
+        public void UpdateCommentLink(NodeView node)
+        {
+            if (node.comment != null)
+            {
+                // Keep existing connection
+                if (node.comment.OverlapsElement(node))
+                {
+                    Debug.Log("keep conn");
+                    return;
+                }
+
+                Debug.Log("Remove old");
+                node.comment.RemoveElement(node);
+            }
+
+            // Find new comment associations
+            foreach (var comment in comments)
+            {
+                Debug.Log("Try overlap");
+                if (comment.OverlapsElement(node))
+                {
+                    Debug.Log("Found");
+                    comment.AddElement(node);
+                    return;
+                }
+            }
         }
 
         public void DestroyEdge(Edge edge)
@@ -388,12 +439,12 @@ namespace BlueGraphEditor
             {
                 return;
             }
-
+            
             var group = new NodeGroup();
             group.title = "New Group";
-            m_Graph.groups.Add(group);
+           //  m_Graph.groups.Add(group);
             
-            var groupView = new GroupView(group); 
+           /* var groupView = new GroupView(group); 
             foreach (var node in selection)
             {
                 if (node is NodeView)
@@ -403,7 +454,13 @@ namespace BlueGraphEditor
                 }
             }
             
-            AddElement(groupView);
+            AddElement(groupView);*/
+
+            var comment = new CommentView(group);
+            comment.onResize += Dirty;
+
+            comments.Add(comment);
+            AddElement(comment);
         }
         
         /// <summary>

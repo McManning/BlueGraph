@@ -28,6 +28,8 @@ namespace BlueGraphEditor
         public List<PortView> inputs = new List<PortView>();
         public List<PortView> outputs = new List<PortView>();
         
+        public CommentView comment;
+
         EdgeConnectorListener m_ConnectorListener;
         SerializedObject m_SerializedNode;
 
