@@ -36,7 +36,7 @@ namespace BlueGraphEditor
         public virtual void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.guid;
-            
+
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
@@ -47,12 +47,15 @@ namespace BlueGraphEditor
             
             m_SerializedNode = new SerializedObject(node);
 
+            // titleContainer.Q("title-label").tooltip = node.usageTooltip;
+
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
             RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
-            
+            RegisterCallback<TooltipEvent>(OnTooltip);
+
             UpdatePorts();
         }
-
+        
         /// <summary>
         /// Executed when we're about to detach this element from the graph. 
         /// </summary>
@@ -213,6 +216,24 @@ namespace BlueGraphEditor
         {
             base.SetPosition(newPos);
             target.position = newPos.position;
+        }
+        
+        private void OnTooltip(TooltipEvent evt)
+        {
+            // TODO: Better implementation that can be styled
+            if (evt.target == titleContainer.Q("title-label"))
+            {
+                var typeData = NodeReflection.GetNodeType(target.GetType());
+                evt.tooltip = typeData.tooltip;
+                
+                // Float the tooltip above the node title bar
+                var bound = titleContainer.worldBound;
+                bound.x = 0;
+                bound.y = 0;
+                bound.height *= -1;
+                
+                evt.rect = titleContainer.LocalToWorld(bound);
+            }
         }
     }
 }

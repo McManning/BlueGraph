@@ -43,6 +43,11 @@ namespace BlueGraphEditor
         /// </summary>
         public string name;
 
+        /// <summary>
+        /// Tooltip content for node usage instructions
+        /// </summary>
+        public string tooltip;
+
         public List<PortReflectionData> ports = new List<PortReflectionData>();
         public List<EditableReflectionData> editables = new List<EditableReflectionData>();
     
@@ -147,7 +152,8 @@ namespace BlueGraphEditor
             {
                 type = type,
                 path = path,
-                name = name
+                name = name,
+                tooltip = nodeAttr.Tooltip
             };
 
             var fields = new List<FieldInfo>(type.GetFields(
