@@ -457,5 +457,24 @@ namespace BlueGraphEditor
             
             return compatiblePorts;
         }
+
+        /// <summary>
+        /// Replacement of the base AddElement() to undo the hardcoded
+        /// border style that's overriding USS files. 
+        /// Should probably report this as dumb. 
+        /// 
+        /// See: https://github.com/Unity-Technologies/UnityCsReference/blob/02d565cf3dd0f6b15069ba976064c75dc2705b08/Modules/GraphViewEditor/Views/GraphView.cs#L1222
+        /// </summary>
+        /// <param name="graphElement"></param>
+        public new void AddElement(GraphElement graphElement)
+        {
+            var borderBottomWidth = graphElement.style.borderBottomWidth;
+            base.AddElement(graphElement);
+
+            if (graphElement.IsResizable())
+            {
+                graphElement.style.borderBottomWidth = borderBottomWidth;
+            }
+        }
     }
 }
