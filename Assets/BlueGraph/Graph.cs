@@ -5,15 +5,11 @@ using UnityEngine;
 
 namespace BlueGraph
 {
-    [CreateAssetMenu(menuName = "Empty BlueGraph")]
-    [Serializable]
     public class Graph : ScriptableObject
     {
-        [SerializeField]
         [HideInInspector]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
-        [SerializeField]
         public List<NodeGroup> groups = new List<NodeGroup>();
 
         /*public T AddNode<T>() where T : AbstractNode
