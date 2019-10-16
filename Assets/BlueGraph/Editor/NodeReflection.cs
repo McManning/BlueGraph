@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using BlueGraph;
+using UnityEngine;
 
 namespace BlueGraphEditor
 {
@@ -231,6 +232,18 @@ namespace BlueGraphEditor
                 return editorType;
             }
 
+            // If it's not found, go down the inheritance tree until we find one
+            while (type != typeof(AbstractNode))
+            {
+                type = type.BaseType;
+                
+                k_NodeEditors.TryGetValue(type, out editorType);
+                if (editorType != null)
+                {
+                    return editorType;
+                }
+            }
+
             // Default to the base node editor
             return typeof(NodeView);
         }
@@ -255,17 +268,18 @@ namespace BlueGraphEditor
                 } 
                 catch (ReflectionTypeLoadException) { }
             }
-        
+            
             var nodeEditors = new Dictionary<Type, Type>();
             foreach (var t in types) 
             {
+                Debug.Log(t);
                 var attr = t.GetCustomAttribute<CustomNodeViewAttribute>();
                 if (attr != null)
                 {
                     nodeEditors[attr.nodeType] = t;
                 }
             }
-
+            
             k_NodeEditors = nodeEditors;
         }
     }
