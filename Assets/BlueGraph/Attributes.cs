@@ -6,7 +6,7 @@ namespace BlueGraph
     public class NodeAttribute : Attribute
     {
         public string Name;
-        public string Tooltip;
+        public string Help;
 
         public NodeAttribute(string name = null)
         {

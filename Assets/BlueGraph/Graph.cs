@@ -19,12 +19,7 @@ namespace BlueGraph
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
         public List<GraphComment> comments = new List<GraphComment>();
-
-        /*public T AddNode<T>() where T : AbstractNode
-        {
-            return AddNode(typeof(T)) as T;
-        }*/
-
+        
         public void AddNode(AbstractNode node)
         {
             node.graph = this;

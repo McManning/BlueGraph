@@ -46,9 +46,7 @@ namespace BlueGraphEditor
             title = node.name;
             
             m_SerializedNode = new SerializedObject(node);
-
-            // titleContainer.Q("title-label").tooltip = node.usageTooltip;
-
+            
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
             RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
             RegisterCallback<TooltipEvent>(OnTooltip);

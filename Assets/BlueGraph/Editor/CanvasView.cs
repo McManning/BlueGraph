@@ -438,6 +438,9 @@ namespace BlueGraphEditor
         /// </summary>
         private void AddComment(Vector2 worldPosition)
         {
+            // Pad out the bounding box a bit more on the selection
+            float padding = 30; // TODO: Remove hardcoding
+
             Rect bounds = GetBounds(selection);
             
             if (bounds.width < 1 || bounds.height < 1)
@@ -445,10 +448,12 @@ namespace BlueGraphEditor
                 worldPosition = contentViewContainer.WorldToLocal(worldPosition);
                 bounds.x = worldPosition.x;
                 bounds.y = worldPosition.y;
-            }
 
-            // Pad out the bounding box a bit more on the selection
-            float padding = 30; // TODO: Remove hardcoding
+                // TODO: For some reason CSS minWidth/minHeight isn't being respected. 
+                // Maybe I need to wait for CSS to load before setting bounds?
+                bounds.width = 150 - padding * 2;
+                bounds.height = 100 - padding * 3;
+            }
 
             bounds.x -= padding;
             bounds.y -= padding * 2;
@@ -462,6 +467,7 @@ namespace BlueGraphEditor
             var commentView = new CommentView(comment);
             commentView.onResize += Dirty;
             
+
             m_Graph.comments.Add(comment);
             comments.Add(commentView);
             AddElement(commentView);

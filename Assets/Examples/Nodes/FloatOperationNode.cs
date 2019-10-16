@@ -4,7 +4,7 @@ using BlueGraph;
 
 namespace BlueGraphExamples
 {
-    [Node("Math/Operation (float)", Tooltip = "Perform some operation on float values")]
+    [Node("Math/Operation (float)", Help = "Perform some operation on float values")]
     public class FloatOperationNode : AbstractNode
     {
         public enum Operation

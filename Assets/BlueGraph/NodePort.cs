@@ -7,21 +7,40 @@ namespace BlueGraph
     public class NodePort
     {
         /// <summary>
-        /// Connection information *out of* a port
-        /// TODO: May be able to remove this if we link nodeports together directly.
-        /// The only benefit I see of this is additional edge data (reroute notes)
+        /// Distinct connection made to a NodePort
         /// </summary>
         [Serializable]
         public class Connection
         {
+            /// <summary>
+            /// Node this NodePort is connected to
+            /// </summary>
             public AbstractNode node;
+            
+            /// <summary>
+            /// Port on Connection.node this port is connected to
+            /// </summary>
             public string portName;
         }
     
+        /// <summary>
+        /// Parent node of this port
+        /// </summary>
         public AbstractNode node;
+
+        /// <summary>
+        /// Port name for connections
+        /// </summary>
         public string portName;
+
+        /// <summary>
+        /// Does this port allow multiple connections
+        /// </summary>
         public bool isMulti;
 
+        /// <summary>
+        /// List of current connections out of this port
+        /// </summary>
         public List<Connection> connections = new List<Connection>();
     
         public void Connect(NodePort other)

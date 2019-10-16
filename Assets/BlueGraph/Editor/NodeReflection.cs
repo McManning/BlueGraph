@@ -153,7 +153,7 @@ namespace BlueGraphEditor
                 type = type,
                 path = path,
                 name = name,
-                tooltip = nodeAttr.Tooltip
+                tooltip = nodeAttr.Help
             };
 
             var fields = new List<FieldInfo>(type.GetFields(
