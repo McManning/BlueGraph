@@ -94,3 +94,8 @@
 .commentView.theme-Blue .unity-label {
 	color: #ffffff;
 }
+
+
+.commentView:checked {
+	border-color: #44C0FF;
+}

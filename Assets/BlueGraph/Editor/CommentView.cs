@@ -19,7 +19,7 @@ namespace BlueGraphEditor
             Blue
         }
         
-        public NodeGroup target;
+        public GraphComment target;
         public List<NodeView> containedNodes = new List<NodeView>();
         
         public Action<CommentView> onResize;
@@ -29,12 +29,12 @@ namespace BlueGraphEditor
         VisualElement m_TitleContainer;
         TextField m_TitleEditor;
         Label m_TitleLabel;
-        Vector2 m_Position;
         bool m_EditingCancelled;
 
-        public CommentView(NodeGroup group)
+        public CommentView(GraphComment comment)
         {
-            target = group;
+            target = comment;
+            SetPosition(comment.position);
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CommentView"));
             
@@ -50,7 +50,7 @@ namespace BlueGraphEditor
             m_TitleContainer.Add(m_TitleEditor);
             
             m_TitleLabel = new Label();
-            m_TitleLabel.text = group.title;
+            m_TitleLabel.text = comment.title;
             
             m_TitleContainer.Add(m_TitleLabel);
 
@@ -195,8 +195,9 @@ namespace BlueGraphEditor
         public override void SetPosition(Rect newPos)
         {
             Vector2 delta = newPos.position - GetPosition().position;
-            // m_Position = newPos.position;
             MoveElements(delta);
+
+            target.position = newPos;
 
             base.SetPosition(newPos);
         }

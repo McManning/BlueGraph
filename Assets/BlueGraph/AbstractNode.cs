@@ -5,15 +5,6 @@ using UnityEngine;
 namespace BlueGraph
 {
     [Serializable]
-    public class NodeGroup
-    {
-        public string title;
-        public string theme;
-        public Vector2 position;
-        public List<AbstractNode> nodes = new List<AbstractNode>();
-    }
-
-    [Serializable]
     public class AbstractNode : ScriptableObject
     {
         public string guid;

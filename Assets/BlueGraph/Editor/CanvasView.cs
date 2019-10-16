@@ -1,11 +1,11 @@
 ﻿
+using BlueGraph;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
-using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
-using BlueGraph;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace BlueGraphEditor
 {
@@ -15,7 +15,9 @@ namespace BlueGraphEditor
     public class CanvasView : GraphView
     {
         public Label title;
-
+        
+        public List<CommentView> comments = new List<CommentView>();
+        
         GraphEditor m_GraphEditor;
         Graph m_Graph;
         
@@ -83,11 +85,7 @@ namespace BlueGraphEditor
             {
                 foreach (var element in change.movedElements)
                 {
-                    if (element is GroupView)
-                    {
-                        DirtyGroup(element as GroupView);
-                    }
-                    else if (element is ICanDirty)
+                    if (element is ICanDirty)
                     {
                         Dirty(element as ICanDirty);
                     }
@@ -129,16 +127,12 @@ namespace BlueGraphEditor
         {
             // TODO: Mac support
 
-            // Group selected nodes
-            if (evt.modifiers.HasFlag(EventModifiers.Control) && evt.keyCode == KeyCode.G)
+            // Add a new comment selected nodes
+            // TODO: C shortcut?
+            if (evt.keyCode == KeyCode.C)
             {
-                GroupSelection();
+                AddComment(evt.originalMousePosition);
             }
-            
-        
-            // Other ideas:
-            // - add comment node shortcut
-            // - 
         }
         
         public void Load(Graph graph)
@@ -146,7 +140,7 @@ namespace BlueGraphEditor
             m_Graph = graph;
             
             AddNodes(graph.nodes);
-            AddGroups(graph.groups);
+            AddComments(graph.comments);
         }
         
         public void CreateNode(Type type, Vector2 screenPosition, PortView connectedPort = null)
@@ -215,6 +209,7 @@ namespace BlueGraphEditor
         public void DestroyComment(CommentView comment)
         {
             comments.Remove(comment);
+            m_Graph.comments.Remove(comment.target);
         }
 
         public void ConnectNodes(Edge edge)
@@ -273,25 +268,6 @@ namespace BlueGraphEditor
             }
         }
 
-        public List<CommentView> comments = new List<CommentView>();
-        
-        /// <summary>
-        /// Dirty the group and everything contained within it
-        /// </summary>
-        /// <param name="group"></param>
-        public void DirtyGroup(GroupView group)
-        {
-            foreach (var element in group.containedElements)
-            {
-                if (element is ICanDirty)
-                {
-                    Dirty(element as ICanDirty);
-                }
-            }
-
-            Dirty(group);
-        }
-        
         public void Update()
         {
             // Propagate change on dirty elements
@@ -355,7 +331,7 @@ namespace BlueGraphEditor
         }
         
         /// <summary>
-        /// Append nodes from a Graph onto the viewport
+        /// Append views for nodes from a Graph
         /// </summary>
         /// <param name="graph"></param>
         private void AddNodes(List<AbstractNode> nodes, bool selectOnceAdded = false)
@@ -417,53 +393,80 @@ namespace BlueGraphEditor
         }
 
         /// <summary>
-        /// Create views for a set of NodeGroups
+        /// Append views for comments from a Graph
         /// </summary>
-        /// <param name="groups"></param>
-        private void AddGroups(List<NodeGroup> groups)
+        private void AddComments(List<GraphComment> comments)
         { 
-            foreach (var group in groups)
+            foreach (var comment in comments)
             {
-                var groupView = new GroupView(group);
-                
-                foreach (var node in group.nodes)
-                {
-                    groupView.AddElement(GetNodeElement(node));
-                }
-                
-                AddElement(groupView);
-                groupView.SetPosition(new Rect(group.position.x, group.position.y, 0, 0));
+                var commentView = new CommentView(comment);
+                AddElement(commentView);
+                Dirty(commentView);
             }
         }
 
-        private void GroupSelection()
+        Rect GetBounds(IEnumerable<ISelectable> items)
         {
-            if (selection.Count < 0)
+            Rect contentRect = Rect.zero;
+               
+            foreach (var item in items)
             {
-                return;
-            }
-            
-            var group = new NodeGroup();
-            group.title = "New Group";
-           //  m_Graph.groups.Add(group);
-            
-           /* var groupView = new GroupView(group); 
-            foreach (var node in selection)
-            {
-                if (node is NodeView)
+                if (item is GraphElement ele)
                 {
-                    var nodeView = node as NodeView;
-                    groupView.AddElement(nodeView);
+                    var boundingRect = ele.GetPosition();
+                    boundingRect = ele.parent.ChangeCoordinatesTo(contentViewContainer, boundingRect);
+
+                    if (contentRect.width < 1 || contentRect.height < 1)
+                    {
+                        contentRect = boundingRect;
+                    }
+                    else
+                    {
+                        contentRect = RectUtils.Encompass(contentRect, boundingRect);
+                    }
                 }
             }
+
+            return contentRect;
+        }
+
+        /// <summary>
+        /// Add a new comment to the canvas and the associated Graph
+        /// 
+        /// If there are selected nodes, this'll encapsulate the selection with
+        /// the comment box. Otherwise, it'll add at defaultPosition.
+        /// </summary>
+        private void AddComment(Vector2 worldPosition)
+        {
+            Rect bounds = GetBounds(selection);
             
-            AddElement(groupView);*/
+            if (bounds.width < 1 || bounds.height < 1)
+            {
+                worldPosition = contentViewContainer.WorldToLocal(worldPosition);
+                bounds.x = worldPosition.x;
+                bounds.y = worldPosition.y;
+            }
 
-            var comment = new CommentView(group);
-            comment.onResize += Dirty;
+            // Pad out the bounding box a bit more on the selection
+            float padding = 30; // TODO: Remove hardcoding
 
-            comments.Add(comment);
-            AddElement(comment);
+            bounds.x -= padding;
+            bounds.y -= padding * 2;
+            bounds.width += padding * 2;
+            bounds.height += padding * 3; 
+
+            var comment = new GraphComment();
+            comment.title = "New Comment";
+            comment.position = bounds;
+
+            var commentView = new CommentView(comment);
+            commentView.onResize += Dirty;
+            
+            m_Graph.comments.Add(comment);
+            comments.Add(commentView);
+            AddElement(commentView);
+
+            Dirty(commentView);
         }
         
         /// <summary>

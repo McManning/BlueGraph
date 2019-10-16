@@ -5,12 +5,20 @@ using UnityEngine;
 
 namespace BlueGraph
 {
+    [Serializable]
+    public class GraphComment
+    {
+        public string title;
+        public string theme;
+        public Rect position;
+    }
+
     public class Graph : ScriptableObject
     {
         [HideInInspector]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
-        public List<NodeGroup> groups = new List<NodeGroup>();
+        public List<GraphComment> comments = new List<GraphComment>();
 
         /*public T AddNode<T>() where T : AbstractNode
         {
