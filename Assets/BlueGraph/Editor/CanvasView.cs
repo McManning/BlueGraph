@@ -125,11 +125,8 @@ namespace BlueGraphEditor
         
         private void OnGraphKeydown(KeyDownEvent evt)
         {
-            // TODO: Mac support
-
-            // Add a new comment selected nodes
-            // TODO: C shortcut?
-            if (evt.keyCode == KeyCode.C)
+            // C: Add a new comment around the selected nodes (or just at mouse position)
+            if (evt.keyCode == KeyCode.C && !evt.ctrlKey && !evt.commandKey)
             {
                 AddComment(evt.originalMousePosition);
             }
