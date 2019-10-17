@@ -53,24 +53,23 @@ namespace BlueGraphEditor
                     node.name = src.name;
                     
                     // Convert connections to something that can be serialized
-                    foreach (var port in node.inputs)
+                    foreach (var port in node.ports)
                     {
-                        foreach (var conn in port.connections)
+                        // Just serialize input connections to reduce a bit of redundancy
+                        if (port.isInput)
                         {
-                            graph.m_SerializedEdges.Add(new SerializedEdge()
+                            foreach (var conn in port.connections)
                             {
-                                inputGuid = node.guid,
-                                inputPortName = port.portName,
-                                outputGuid = conn.node.guid,
-                                outputPortName = conn.portName
-                            });
+                                graph.m_SerializedEdges.Add(new SerializedEdge()
+                                {
+                                    inputGuid = node.guid,
+                                    inputPortName = port.portName,
+                                    outputGuid = conn.node.guid,
+                                    outputPortName = conn.portName
+                                });
+                            }
                         }
-
-                        port.connections.Clear();
-                    }
-                    
-                    foreach (var port in node.outputs)
-                    {
+                       
                         port.connections.Clear();
                     }
                     
@@ -119,12 +118,7 @@ namespace BlueGraphEditor
                 guidMap[node.guid] = instance.guid;
                 
                 // Remap port associations
-                foreach (var port in instance.inputs)
-                {
-                    port.node = instance;
-                }
-
-                foreach (var port in instance.outputs)
+                foreach (var port in instance.ports)
                 {
                     port.node = instance;
                 }

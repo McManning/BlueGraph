@@ -44,28 +44,23 @@ namespace BlueGraph
         public virtual void RemoveNode(AbstractNode node)
         {
             // Remove all connections to and from this node
-            foreach (var port in node.inputs)
+            foreach (var port in node.ports)
             {
-                foreach (var conn in port.connections) 
+                foreach (var conn in port.connections)
                 {
-                    var output = conn.node.GetOutputPort(conn.portName);
-                    output.Disconnect(port);
+                    if (port.isInput)
+                    {
+                        conn.node.GetOutputPort(conn.portName).Disconnect(port);
+                    }
+                    else
+                    {
+                        conn.node.GetInputPort(conn.portName).Disconnect(port);
+                    }
                 }
 
                 port.connections.Clear();
             }
-            
-            foreach (var port in node.outputs)
-            {
-                foreach (var conn in port.connections) 
-                {
-                    var output = conn.node.GetInputPort(conn.portName);
-                    output.Disconnect(port);
-                }
 
-                port.connections.Clear();
-            }
-            
             nodes.Remove(node);
         }
     }

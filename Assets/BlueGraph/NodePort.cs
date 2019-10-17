@@ -38,6 +38,8 @@ namespace BlueGraph
         /// </summary>
         public bool isMulti;
 
+        public bool isInput;
+
         /// <summary>
         /// List of current connections out of this port
         /// </summary>

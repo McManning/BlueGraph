@@ -109,10 +109,11 @@ namespace BlueGraphEditor
                 {
                     node = target,
                     portName = portData.portName,
-                    isMulti = portData.isMulti
+                    isMulti = portData.isMulti,
+                    isInput = true
                 };
 
-                target.inputs.Add(port);
+                target.ports.Add(port);
             }
             
             var view = PortView.Create(
@@ -137,10 +138,11 @@ namespace BlueGraphEditor
                 {
                     node = target,
                     portName = portData.portName,
-                    isMulti = portData.isMulti
+                    isMulti = portData.isMulti,
+                    isInput = false
                 };
 
-                target.outputs.Add(port);
+                target.ports.Add(port);
             }
 
             var view = PortView.Create(

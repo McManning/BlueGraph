@@ -9,8 +9,8 @@ namespace BlueGraph
     {
         public string guid;
         public Graph graph;
-        public List<NodePort> inputs = new List<NodePort>();
-        public List<NodePort> outputs = new List<NodePort>();
+        
+        public List<NodePort> ports = new List<NodePort>();
         
         // Graph metadata
         public Vector2 position;
@@ -22,12 +22,12 @@ namespace BlueGraph
         
         public NodePort GetInputPort(string name)
         {
-            return inputs.Find((port) => port.portName == name);
+            return ports.Find((port) => port.isInput && port.portName == name);
         }
         
         public NodePort GetOutputPort(string name)
         {
-            return outputs.Find((port) => port.portName == name);
+            return ports.Find((port) => !port.isInput && port.portName == name);
         }
         
         public virtual object GetOutput(string name)

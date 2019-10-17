@@ -358,8 +358,13 @@ namespace BlueGraphEditor
             // TODO: Deal with trash connections from bad imports
             foreach (var node in nodeMap)
             {
-                foreach (var port in node.Key.inputs)
+                foreach (var port in node.Key.ports)
                 {
+                    if (!port.isInput)
+                    {
+                        continue;
+                    }
+
                     foreach (var conn in port.connections)
                     {
                         // Only add if the linked node is in the collection
