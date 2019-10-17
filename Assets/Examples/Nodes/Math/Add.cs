@@ -2,9 +2,9 @@
 using UnityEngine;
 using BlueGraph;
 
-namespace BlueGraphExamples
+namespace BlueGraphExamples.Math
 {
-    [Node("Math/Add")]
+    [Node(category = "Math")]
     [NodeIcon("Icons/Add")]
     public class Add : IconNode
     {

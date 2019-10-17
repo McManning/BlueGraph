@@ -2,9 +2,9 @@
 using UnityEngine;
 using BlueGraph;
 
-namespace BlueGraphExamples
+namespace BlueGraphExamples.Math
 {
-    [Node("Math/Multiply")]
+    [Node(category = "Math")]
     [NodeIcon("Icons/Multiply")]
     public class Multiply : IconNode
     {

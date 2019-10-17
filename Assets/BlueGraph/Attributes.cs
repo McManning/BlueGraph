@@ -5,47 +5,48 @@ namespace BlueGraph
     [AttributeUsage(AttributeTargets.Class)]
     public class NodeAttribute : Attribute
     {
-        public string Name;
-        public string Help;
+        public string name;
+        public string help;
+        public string category;
 
         public NodeAttribute(string name = null)
         {
-            Name = name;
+            this.name = name;
         }
     }
     
     [AttributeUsage(AttributeTargets.Field)]
     public class InputAttribute : Attribute
     {
-        public string Name;
-        public bool Multiple = false;
-        public bool Editable = true;
+        public string name;
+        public bool multiple = false;
+        public bool editable = true;
         
         public InputAttribute(string name = null)
         {
-            Name = name;
+            this.name = name;
         }
     }
     
     [AttributeUsage(AttributeTargets.Field)]
     public class OutputAttribute : Attribute
     {
-        public string Name;
+        public string name;
         
         public OutputAttribute(string name = null)
         {
-            Name = name;
+            this.name = name;
         }
     }
 
     [AttributeUsage(AttributeTargets.Field)]
     public class EditableAttribute : Attribute
     {
-        public string Name;
+        public string name;
         
         public EditableAttribute(string name = null)
         {
-            Name = name;
+            this.name = name;
         }
     }
 }

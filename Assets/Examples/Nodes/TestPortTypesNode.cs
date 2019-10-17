@@ -7,7 +7,7 @@ namespace BlueGraphExamples
     /// <summary>
     /// Node that just dumps every type available for CSS checking
     /// </summary>
-    [Node(Name = "Test Port Types")]
+    [Node("Test Port Types")]
     public class TestPortTypesNode : AbstractNode
     {
         // TODO: Inputs don't present an editable field inline
@@ -16,9 +16,9 @@ namespace BlueGraphExamples
         [Input] public long int64Input;
 
         [Input] public float floatInput;
-        [Input(Name="V2 Input")] public Vector2 vector2Input;
-        [Input(Name="V3 Input")] public Vector3 vector3Input;
-        [Input(Name="V4 Input")] public Vector4 vector4Input;
+        [Input("V2 Input")] public Vector2 vector2Input;
+        [Input("V3 Input")] public Vector3 vector3Input;
+        [Input("V4 Input")] public Vector4 vector4Input;
     
         [Input] public Transform transformInput;
         [Input] public Matrix4x4 mat4x4Input;

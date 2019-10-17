@@ -2,9 +2,9 @@
 using UnityEngine;
 using BlueGraph;
 
-namespace BlueGraphExamples
+namespace BlueGraphExamples.Math
 {
-    [Node("Math/Less Than")]
+    [Node(category = "Math")]
     [NodeIcon("Icons/LessThan")]
     public class LessThan : IconNode
     {

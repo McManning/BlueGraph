@@ -5,7 +5,7 @@ using BlueGraph;
 
 namespace BlueGraphExamples
 {
-    [Node(Name = "Test Field Types")]
+    [Node("Test Field Types")]
     public class TestFieldTypesNode : AbstractNode
     {
         [Editable] public int int32Input;

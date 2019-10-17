@@ -25,16 +25,20 @@ namespace BlueGraphEditor
         public string fieldName;
     }
 
-    /// <summary>
-    /// Suite of reflection methods and caching for retrieving available
-    /// graph nodes and their associated custom editors
-    /// </summary>
     public class NodeReflectionData
     {
+        /// <summary>
+        /// Class type to instantiate for the node 
+        /// </summary>
         public Type type;
 
         /// <summary>
-        /// Full path name for grouping nodes excluding the last part (name)
+        /// The bind method for FuncNodes
+        /// </summary>
+        public MethodInfo method;
+
+        /// <summary>
+        /// Category list for grouping nodes under modules/features/etc
         /// </summary>
         public string[] path;
 
@@ -67,7 +71,11 @@ namespace BlueGraphEditor
             return ports.Count((port) => !port.isInput && port.type == type) > 0;
         }
     }
-
+    
+    /// <summary>
+    /// Suite of reflection methods and caching for retrieving available
+    /// graph nodes and their associated custom editors
+    /// </summary>
     public static class NodeReflection
     {
         private static Dictionary<Type, NodeReflectionData> k_NodeTypes = null;
@@ -182,11 +190,11 @@ namespace BlueGraphEditor
                         node.ports.Add(new PortReflectionData()
                         {
                             type = fields[i].FieldType,
-                            portName = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = true,
-                            isMulti = attr.Multiple,
-                            isEditable = attr.Editable
+                            isMulti = attr.multiple,
+                            isEditable = attr.editable
                         });
                     }
                     else if (attribs[j] is OutputAttribute)
@@ -196,7 +204,7 @@ namespace BlueGraphEditor
                         node.ports.Add(new PortReflectionData()
                         {
                             type = fields[i].FieldType,
-                            portName = attr.Name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = false,
                             isMulti = true,

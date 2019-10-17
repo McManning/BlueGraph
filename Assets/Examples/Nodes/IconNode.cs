@@ -5,16 +5,16 @@ using BlueGraph;
 namespace BlueGraphExamples
 {
     /// <summary>
-    /// Custom attribute to let the user define an icon per-node
+    /// Custom icon resource to display within a node
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class NodeIconAttribute : Attribute
     {
-        public string Name;
+        public string name;
 
         public NodeIconAttribute(string name)
         {
-            Name = name;
+            this.name = name;
         }
     }
     

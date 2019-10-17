@@ -33,7 +33,7 @@ namespace BlueGraphExamples
             {
                 if (attr is NodeIconAttribute iconAttr)
                 {
-                    iconName = iconAttr.Name;
+                    iconName = iconAttr.name;
                     break;
                 }
             }
