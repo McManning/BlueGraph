@@ -67,5 +67,11 @@ namespace BlueGraph
             
             return values.ToArray();
         }
+
+        public virtual void AddPort(NodePort port)
+        {
+            // TODO: Redundancy check
+            ports.Add(port);
+        }
     }
 }

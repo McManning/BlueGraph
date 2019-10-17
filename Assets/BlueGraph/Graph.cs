@@ -26,21 +26,7 @@ namespace BlueGraph
             node.RegenerateGuid();
             nodes.Add(node);
         }
-
-        public virtual AbstractNode AddNode(Type type)
-        {
-            AbstractNode node = CreateInstance(type) as AbstractNode;
-            node.graph = this;
-            node.RegenerateGuid();
-            nodes.Add(node);
-            return node;
-        }
-
-        public virtual AbstractNode AddNode(string type)
-        {
-            return AddNode(Type.GetType(type));
-        }
-
+        
         public virtual void RemoveNode(AbstractNode node)
         {
             // Remove all connections to and from this node

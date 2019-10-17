@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BlueGraph
 {
     [Serializable]
-    public class NodePort
+    public class NodePort : ISerializationCallbackReceiver
     {
         /// <summary>
         /// Distinct connection made to a NodePort
@@ -33,11 +34,18 @@ namespace BlueGraph
         /// </summary>
         public string portName;
 
+        public string fieldName;
+        
+        public Type type;
+
+        [SerializeField]
+        string m_TypeFullName;
+
         /// <summary>
         /// Does this port allow multiple connections
         /// </summary>
         public bool isMulti;
-
+        
         public bool isInput;
 
         /// <summary>
@@ -83,6 +91,16 @@ namespace BlueGraph
             return connections.Find(
                 (conn) => conn.node == node && conn.portName == portName
             ) != null;
+        }
+
+        public void OnBeforeSerialize()
+        {
+            m_TypeFullName = type?.AssemblyQualifiedName;
+        }
+
+        public void OnAfterDeserialize()
+        {
+            type = Type.GetType(m_TypeFullName);
         }
     }
 }

@@ -140,23 +140,23 @@ namespace BlueGraphEditor
             AddComments(graph.comments);
         }
         
-        public void CreateNode(Type type, Vector2 screenPosition, PortView connectedPort = null)
+        public void CreateNode(NodeReflectionData data, Vector2 screenPosition, PortView connectedPort = null)
         {
             var windowRoot = m_EditorWindow.rootVisualElement;
             var windowMousePosition = m_EditorWindow.rootVisualElement.ChangeCoordinatesTo(
                 windowRoot.parent, 
                 screenPosition - m_EditorWindow.position.position
             );
-        
+
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
-            var typeData = NodeReflection.GetNodeType(type);
-            var node = m_Graph.AddNode(type);
-            node.name = typeData.name;
+            var node = data.CreateInstance();
             node.position = graphMousePosition;
-        
+
+            m_Graph.AddNode(node);
+            
             // Add a node to the visual graph
-            var editorType = NodeReflection.GetNodeEditorType(type);
+            var editorType = NodeReflection.GetNodeEditorType(data.type);
             var element = Activator.CreateInstance(editorType) as NodeView;
             element.Initialize(node, m_EdgeListener);
 

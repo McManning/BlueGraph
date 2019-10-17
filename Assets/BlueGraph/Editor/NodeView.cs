@@ -36,11 +36,11 @@ namespace BlueGraphEditor
         public virtual void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.guid;
+            target = node;
 
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
-            target = node;
             SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
             m_ConnectorListener = connectorListener;
             title = node.name;
@@ -52,6 +52,12 @@ namespace BlueGraphEditor
             RegisterCallback<TooltipEvent>(OnTooltip);
 
             UpdatePorts();
+
+            // TODO: Don't do it this way.
+            if (node is FuncNode func)
+            {
+                func.Awake();
+            }
         }
         
         /// <summary>
@@ -63,30 +69,32 @@ namespace BlueGraphEditor
         }
         
         /// <summary>
-        /// Make sure our list of PortViews sync up with our NodePorts
+        /// Make sure our list of PortViews and editables sync up with our NodePorts
         /// </summary>
         public void UpdatePorts()
         {
-            var reflectionData = NodeReflection.GetNodeType(target.GetType());
-
-            foreach (var portData in reflectionData.ports)
+            foreach (var port in target.ports)
             {
-                if (portData.isInput)
+                if (port.isInput)
                 {
-                    AddInputPort(portData);
+                    AddInputPort(port);
                 }
                 else
                 {
-                    AddOutputPort(portData);
+                    AddOutputPort(port);
                 }
             }
-
-            foreach (var editable in reflectionData.editables)
-            {
-                AddEditableField(m_SerializedNode.FindProperty(editable.fieldName));
-            }
             
-            // TODO: Deal with deleted/renamed ports.
+            // TODO: Support FuncNode since GetNodeType won't work for those
+            // as they're registered under a different type. 
+            var reflectionData = NodeReflection.GetNodeType(target.GetType());
+            if (reflectionData != null) 
+            {
+                foreach (var editable in reflectionData.editables)
+                {
+                    AddEditableField(m_SerializedNode.FindProperty(editable.fieldName));
+                }
+            }
             
             // Toggle visibility of the extension container
             RefreshExpandedState();
@@ -100,27 +108,12 @@ namespace BlueGraphEditor
             extensionContainer.Add(field);
         }
 
-        protected void AddInputPort(PortReflectionData portData)
+        protected void AddInputPort(NodePort port)
         {
-            var port = target.GetInputPort(portData.portName);
-            if (port == null)
-            {
-                port = new NodePort()
-                {
-                    node = target,
-                    portName = portData.portName,
-                    isMulti = portData.isMulti,
-                    isInput = true
-                };
-
-                target.ports.Add(port);
-            }
-            
             var view = PortView.Create(
                 port, 
-                portData,
-                m_SerializedNode.FindProperty(portData.fieldName), 
-                portData.type,
+                m_SerializedNode.FindProperty(port.fieldName), 
+                port.type,
                 m_ConnectorListener
             );
             
@@ -128,28 +121,12 @@ namespace BlueGraphEditor
             inputContainer.Add(view);
         }
         
-        protected void AddOutputPort(PortReflectionData portData)
+        protected void AddOutputPort(NodePort port)
         {
-            var port = target.GetOutputPort(portData.portName);
-            if (port == null)
-            {
-                // Introspection pulled up a new port, track it.
-                port = new NodePort()
-                {
-                    node = target,
-                    portName = portData.portName,
-                    isMulti = portData.isMulti,
-                    isInput = false
-                };
-
-                target.ports.Add(port);
-            }
-
             var view = PortView.Create(
-                port, 
-                portData,
-                m_SerializedNode.FindProperty(portData.fieldName), 
-                portData.type,
+                port,
+                m_SerializedNode.FindProperty(port.fieldName), 
+                port.type,
                 m_ConnectorListener
             );
             
@@ -184,15 +161,8 @@ namespace BlueGraphEditor
         public virtual void OnDirty()
         {
             // Dirty all ports so they can refresh their state
-            foreach (var port in inputs)
-            {
-                port.OnDirty();
-            }
-
-            foreach (var port in outputs)
-            {
-                port.OnDirty();
-            }
+            inputs.ForEach(port => port.OnDirty());
+            outputs.ForEach(port => port.OnDirty());
         }
 
         /// <summary>
@@ -201,15 +171,8 @@ namespace BlueGraphEditor
         public virtual void OnUpdate()
         {
             // Propagate update to all ports
-            foreach (var port in inputs)
-            {
-                port.OnUpdate();
-            }
-
-            foreach (var port in outputs)
-            {
-                port.OnUpdate();
-            }
+            inputs.ForEach(port => port.OnUpdate());
+            outputs.ForEach(port => port.OnUpdate());
         }
 
         public override void SetPosition(Rect newPos)
@@ -224,7 +187,7 @@ namespace BlueGraphEditor
             if (evt.target == titleContainer.Q("title-label"))
             {
                 var typeData = NodeReflection.GetNodeType(target.GetType());
-                evt.tooltip = typeData.tooltip;
+                evt.tooltip = typeData?.tooltip;
                 
                 // Float the tooltip above the node title bar
                 var bound = titleContainer.worldBound;

@@ -30,14 +30,13 @@ namespace BlueGraphEditor
     
         public static PortView Create(
             NodePort port, 
-            PortReflectionData refPort,
             SerializedProperty prop, 
             Type type,
             IEdgeConnectorListener connectorListener
         ) {
             var view = new PortView(
                 Orientation.Horizontal, 
-                refPort.isInput ? Direction.Input : Direction.Output, 
+                port.isInput ? Direction.Input : Direction.Output, 
                 port.isMulti ? Capacity.Multi : Capacity.Single, 
                 type
             ) {
@@ -56,7 +55,7 @@ namespace BlueGraphEditor
             view.AddManipulator(view.m_EdgeConnector);
 
             // Bind to the underlying field
-            if (prop != null && refPort.isEditable)
+            if (prop != null && port.isInput) // TODO refPort.isEditable)
             {
                 view.m_PropertyField = new PropertyField(prop, " ");
                 view.m_PropertyField.Bind(prop.serializedObject);

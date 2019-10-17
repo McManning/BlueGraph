@@ -110,7 +110,7 @@ namespace BlueGraphEditor
 
             foreach (var node in cpGraph.m_SerializedNodes)
             {
-                var instance = graph.AddNode(node.type);
+                var instance = CreateInstance(node.type) as AbstractNode;
                 JsonUtility.FromJsonOverwrite(node.JSON, instance);
                 instance.name = node.name;
                 

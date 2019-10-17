@@ -40,7 +40,7 @@ namespace BlueGraphEditor
                 { 
                     entry = new SearchTreeEntry(new GUIContent(node.name));
                     entry.level = depth;
-                    entry.userData = node.type;
+                    entry.userData = node;
                     tree.Add(entry);
                 }
             }
@@ -102,7 +102,7 @@ namespace BlueGraphEditor
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
             target.CreateNode(
-                entry.userData as Type, 
+                entry.userData as NodeReflectionData, 
                 context.screenMousePosition, 
                 connectedPort
             );

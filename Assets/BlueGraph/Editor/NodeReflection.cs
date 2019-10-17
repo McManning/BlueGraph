@@ -70,6 +70,41 @@ namespace BlueGraphEditor
         {
             return ports.Count((port) => !port.isInput && port.type == type) > 0;
         }
+
+        /// <summary>
+        /// Create a node instance from the reflected type data
+        /// </summary>
+        public AbstractNode CreateInstance()
+        {
+            AbstractNode node = ScriptableObject.CreateInstance(type) as AbstractNode;
+            node.RegenerateGuid();
+            node.name = name;
+            
+            // TODO: Cleanup. No cast here.
+            if (method != null && node is FuncNode)
+            {
+                var func = node as FuncNode;
+                func.methodName = method.Name;
+                func.methodClass = method.DeclaringType.FullName;
+            }
+
+            // Setup ports
+            foreach (var port in ports)
+            {
+                // Now it's basically everything from reflection.
+                // TODO Get rid of reflection?
+                node.AddPort(new NodePort() {
+                    node = node,
+                    portName = port.portName,
+                    isMulti = port.isMulti,
+                    isInput = port.isInput,
+                    type = port.type,
+                    fieldName = port.fieldName
+                });
+            }
+            
+            return node;
+        }
     }
     
     /// <summary>
@@ -78,23 +113,32 @@ namespace BlueGraphEditor
     /// </summary>
     public static class NodeReflection
     {
-        private static Dictionary<Type, NodeReflectionData> k_NodeTypes = null;
-
+        private static Dictionary<string, NodeReflectionData> k_NodeTypes = null;
+        
         /// <summary>
         /// Mapping between an AbstractNode type (key) and a custom editor type (value)
         /// </summary>
         private static Dictionary<Type, Type> k_NodeEditors = null;
         
         /// <summary>
-        /// Extract node type info for one node
+        /// Retrieve reflection data for a given node class type
         /// </summary>
         public static NodeReflectionData GetNodeType(Type type)
         {
-            var types = GetNodeTypes();
+            return GetReflectionData(type.FullName);
+        }
 
-            if (types.ContainsKey(type))
+        public static NodeReflectionData GetReflectionData(string classFullName, string method)
+        {
+            return GetReflectionData($"{classFullName}|{method}");
+        }
+
+        public static NodeReflectionData GetReflectionData(string key)
+        {
+            var types = GetNodeTypes();
+            if (types.ContainsKey(key))
             {
-                return types[type];
+                return types[key];
             }
 
             return null;
@@ -104,7 +148,7 @@ namespace BlueGraphEditor
         /// Get all types derived from the base node
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<Type, NodeReflectionData> GetNodeTypes()
+        public static Dictionary<string, NodeReflectionData> GetNodeTypes()
         {
             // Load cache if we got it
             if (k_NodeTypes != null)
@@ -113,27 +157,42 @@ namespace BlueGraphEditor
             }
 
             var baseType = typeof(AbstractNode);
-            var types = new List<Type>();
+            var moduleTypes = new List<Type>();
+
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            
+            var nodes = new Dictionary<string, NodeReflectionData>();
 
             foreach (var assembly in assemblies)
             {
-                try
+                foreach (var t in assembly.GetTypes())
                 {
-                    types.AddRange(assembly.GetTypes().Where(
-                        (t) => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray()
-                    );
-                } 
-                catch (ReflectionTypeLoadException) { }
+                    if (!t.IsAbstract && baseType.IsAssignableFrom(t))
+                    {
+                        // Aggregate [Node] inherited from baseType
+                        var attr = t.GetCustomAttribute<NodeAttribute>();
+                        if (attr != null)
+                        {
+                            nodes[t.FullName] = LoadClassReflection(t, attr);
+                        }
+                    }
+                    else if (t.GetCustomAttribute<FuncNodeModuleAttribute>() != null)
+                    {
+                        // Aggregate classes that are [FuncNodeModule]
+                        moduleTypes.Add(t);
+                    }
+                }
             }
         
-            var nodes = new Dictionary<Type, NodeReflectionData>();
-            foreach (var type in types) 
+            // Run through modules and add tagged methods as FuncNodes
+            foreach (var type in moduleTypes) 
             {
-                var attr = type.GetCustomAttribute<NodeAttribute>();
-                if (attr != null)
+                var attr = type.GetCustomAttribute<FuncNodeModuleAttribute>();
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+
+                foreach (var method in methods)
                 {
-                    nodes[type] = LoadReflection(type, attr);
+                    nodes[$"{type.FullName}|{method.Name}"] = LoadMethodReflection(method, attr);
                 }
             }
         
@@ -141,28 +200,67 @@ namespace BlueGraphEditor
             return k_NodeTypes;
         }
 
+        private static NodeReflectionData LoadMethodReflection(MethodInfo method, FuncNodeModuleAttribute moduleAttr)
+        {    
+            var attr = method.GetCustomAttribute<FuncNodeAttribute>();
+            string name = attr?.name ?? method.Name;
+
+            // FuncNode.category can override FuncNodeModule.category. 
+            string category = attr?.category ?? moduleAttr.category;
+        
+            var node = new NodeReflectionData()
+            {
+                type = typeof(FuncNode),
+                path = category?.Split('/'),
+                name = name,
+                tooltip = "TODO!",
+                method = method
+            };
+            
+            // Add an output port for the return value
+            // TODO: IFF there actually is one. 
+            node.ports.Add(new PortReflectionData() {
+                type = method.ReturnType,
+                portName = "Result",
+                fieldName = null,
+                isMulti = true,
+                isInput = false
+            });
+            
+            ParameterInfo[] parameters = method.GetParameters();
+            
+            foreach (var parameter in parameters)
+            {
+                node.ports.Add(new PortReflectionData() {
+                    type = parameter.IsOut ? 
+                        parameter.ParameterType.GetElementType() :
+                        parameter.ParameterType,
+                    portName = parameter.Name,
+                    fieldName = parameter.Name,
+                    isMulti = parameter.IsOut,
+                    isInput = !parameter.IsOut
+                });
+            }
+            
+            return node;
+        }
+
         /// <summary>
         /// Extract NodeField information from class reflection + attributes
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        private static NodeReflectionData LoadReflection(Type type, NodeAttribute nodeAttr)
+        private static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
         {
-            string[] path = null;
-            string name = type.Name;
-            if (nodeAttr.Name != null) 
-            {
-                var stack = new Stack<string>(nodeAttr.Name.Split('/'));
-                name = stack.Pop();
-                path = stack.ToArray();
-            }
-
+            string name = nodeAttr.name ?? type.Name;
+            string category = nodeAttr.category;
+            
             var node = new NodeReflectionData()
             {
                 type = type,
-                path = path,
+                path = category?.Split('/'),
                 name = name,
-                tooltip = nodeAttr.Help
+                tooltip = nodeAttr.help
             };
 
             var fields = new List<FieldInfo>(type.GetFields(
@@ -266,6 +364,9 @@ namespace BlueGraphEditor
             var types = new List<Type>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             
+            // TODO: Move or collapse.
+            // If node reflection data is needed outside the editor, maybe hold onto this. 
+
             foreach (var assembly in assemblies)
             {
                 try
