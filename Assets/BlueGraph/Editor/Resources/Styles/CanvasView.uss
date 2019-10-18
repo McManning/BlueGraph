@@ -12,9 +12,12 @@
 }
 
 GridBackground {
-	--grid-background-color: rgba(20, 20, 20, 1);
-	--line-color: rgba(25, 25, 25, 1);
-	--thick-line-color: rgba(50, 50, 50, 1);
-	--spacing: 500;
-	--thick-lines: 0;
+	--grid-background-color: #202b3c;
+	--line-color: #283042;
+	--thick-line-color: #3a455e;
+	--spacing: 100;
+}
+
+.canvasView .edge {
+	--selected-edge-color: #FFD244; 
 }

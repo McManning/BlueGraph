@@ -1,6 +1,15 @@
 ﻿
+.nodeView #title {
+	background-color: #3B4C64;
+}
+
+.nodeView #contents > #top > #input {
+	background-color: #393A40;
+}
+
 .nodeView #contents > #top > #output {
 	flex: 0 0 auto;
+	background-color: #232932;
 }
 
 .nodeView #contents
@@ -25,4 +34,9 @@
 
 .nodeView #extension {
 	padding: 6px;
+}
+
+
+.nodeView:selected > #selection-border {
+	border-color: #FFD244; /* Orange/yellow */
 }
