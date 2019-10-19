@@ -3,12 +3,18 @@
 	display: none;
 }
 
-.iconNodeView #contents {
-	background-color: rgba(63, 63, 63, 0.8);
-}
-
 .iconNodeView #divider {
 	display: none;
+}
+
+.iconNodeView #type {
+	/* Can't use display: none here as it breaks event handling */
+	visibility: hidden;
+	max-width: 0;
+}
+
+.iconNodeView #contents {
+	background-color: #3B4C64;
 }
 
 .iconNodeView #contents > #top > #input {
@@ -21,14 +27,19 @@
 	background-color: rgba(0, 0, 0, 0);
 }
 
-.iconNodeView #type {
-	display: none;
-}
-
 .iconNodeView #icon {
-	width: 50px;
-	height: 50px;
+	min-height: 50px;
+	min-width: 50px;
+	justify-content: center;
+	align-items: center;
 
-	-unity-background-image-tint-color: #18abf2;
+	-unity-background-scale-mode: scale-to-fit;
+	
+	-unity-background-image-tint-color: rgba(255, 255, 255, 0.5);
 }
 
+.iconNodeView #icon > .iconNodeTitle {
+	font-size: 20px;
+	color: #a7a7a7;
+	font-style: bold;
+}

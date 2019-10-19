@@ -10,11 +10,12 @@ namespace BlueGraphExamples
     [AttributeUsage(AttributeTargets.Class)]
     public class NodeIconAttribute : Attribute
     {
-        public string name;
+        public string iconName;
+        public bool showTitle;
 
-        public NodeIconAttribute(string name)
+        public NodeIconAttribute(string iconName = null)
         {
-            this.name = name;
+            this.iconName = iconName;
         }
     }
     

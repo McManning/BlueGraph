@@ -8,8 +8,8 @@ using UnityEngine.UIElements;
 namespace BlueGraphExamples
 {
     /// <summary>
-    /// Variant of node rendering where we just render 
-    /// an icon in the center of the node
+    /// Different style of a node where the title is (optionally)
+    /// rendered in the center with a backing icon. Very UE4, basically.
     /// </summary>
     [CustomNodeView(typeof(IconNode))]
     class IconNodeView : NodeView
@@ -28,24 +28,35 @@ namespace BlueGraphExamples
                 name = "icon"
             };
 
-            string iconName = "Icons/Add";
+            string iconName = null;
+            bool showTitle = true;
             foreach (var attr in node.GetType().GetCustomAttributes(false))
             {
                 if (attr is NodeIconAttribute iconAttr)
                 {
-                    iconName = iconAttr.name;
+                    iconName = iconAttr.iconName;
+                    showTitle = iconAttr.showTitle;
                     break;
                 }
             }
             
-            var icon = Resources.Load<Texture2D>(iconName);
+            if (showTitle)
+            {
+                var titleLabel = new Label();
+                titleLabel.text = title;
+                titleLabel.AddToClassList("iconNodeTitle");
 
-            iconContainer.style.backgroundImage = icon;
-
+                iconContainer.Add(titleLabel);
+            }
+            
+            if (iconName != null)
+            {
+                var icon = Resources.Load<Texture2D>(iconName);
+                iconContainer.style.backgroundImage = icon;
+            }
+            
             inputContainer.parent.Add(iconContainer);
             iconContainer.PlaceInFront(inputContainer);
-
-            // TODO: Tooltip support on the node body
         }
     }
 }
