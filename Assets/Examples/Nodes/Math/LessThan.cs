@@ -4,7 +4,7 @@ using BlueGraph;
 
 namespace BlueGraphExamples.Math
 {
-    [Node(category = "Math")]
+    [Node(module = "Math")]
     [NodeIcon("Icons/LessThan")]
     public class LessThan : IconNode
     {
@@ -12,7 +12,7 @@ namespace BlueGraphExamples.Math
         [Input] public float b;
         [Output] public bool result;
 
-        public override object GetOutput(string name)
+        public override object GetOutputValue(string name)
         {
             return a < b;
         }

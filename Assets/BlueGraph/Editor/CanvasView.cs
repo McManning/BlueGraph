@@ -145,7 +145,7 @@ namespace BlueGraphEditor
             var attrs = graph.GetType().GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
-                if (attr is NodeModulesAttribute modulesAttr)
+                if (attr is IncludeModulesAttribute modulesAttr)
                 {
                     foreach (var module in modulesAttr.modules)
                     {

@@ -38,7 +38,7 @@ namespace BlueGraphEditor
         public MethodInfo method;
 
         /// <summary>
-        /// Category list for grouping nodes under modules/features/etc
+        /// Module path for grouping nodes together
         /// </summary>
         public string[] path;
 
@@ -64,6 +64,36 @@ namespace BlueGraphEditor
         public bool HasInputOfType(Type type)
         {
             return ports.Count((port) => port.isInput && port.type == type) > 0;
+            
+            /*
+            object instance = type.IsValueType ? Activator.CreateInstance(type) : null;
+
+            foreach (var port in ports)
+            {
+                if (!port.isInput) continue;
+                
+                // this would be awful unless I cache results...
+                var method = type.GetMethod("CastTo");
+                method.Invoke(null, null);
+
+                if (type is ITypeCastable && )
+                {
+
+                }
+
+                // Direct comparison for exact type without casting.
+                if (instance == null && type == port.type)
+                {
+                    return true;
+                }
+                
+                // Try to determine if we can cast value types
+                try {
+                    Convert.ChangeType(instance, port.type);
+                } catch { }
+            }
+
+            return false;*/
         }
 
         public bool HasOutputOfType(Type type)
@@ -205,8 +235,8 @@ namespace BlueGraphEditor
             var attr = method.GetCustomAttribute<FuncNodeAttribute>();
             string name = attr?.name ?? method.Name;
 
-            // FuncNode.category can override FuncNodeModule.category. 
-            string path = attr?.category ?? moduleAttr.category;
+            // FuncNode.module can override FuncNodeModule.path. 
+            string path = attr?.module ?? moduleAttr.path;
         
             var node = new NodeReflectionData()
             {
@@ -253,12 +283,12 @@ namespace BlueGraphEditor
         private static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
         {
             string name = nodeAttr.name ?? type.Name;
-            string category = nodeAttr.category;
+            string path = nodeAttr.module;
             
             var node = new NodeReflectionData()
             {
                 type = type,
-                path = category?.Split('/'),
+                path = path?.Split('/'),
                 name = name,
                 tooltip = nodeAttr.help
             };

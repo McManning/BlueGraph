@@ -4,7 +4,7 @@ using BlueGraph;
 
 namespace BlueGraphExamples
 {
-    [Node("Operation (float)", category = "Math", help = "Perform some operation on float values")]
+    [Node("Operation (float)", module = "Math", help = "Perform some operation on float values")]
     public class FloatOperationNode : AbstractNode
     {
         public enum Operation
@@ -26,7 +26,7 @@ namespace BlueGraphExamples
 
         [Editable, TextArea(5, 3)] public string comments;
 
-        public override object GetOutput(string name)
+        public override object GetOutputValue(string name)
         {
             float x = GetInputValue("x", this.x);
             float y = GetInputValue("y", this.y);

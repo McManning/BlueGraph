@@ -14,6 +14,7 @@ namespace BlueGraphExamples
         // unless they're public. Again, Unity serialization stuff.
         [Input] public int int32Input;
         [Input] public long int64Input;
+        
 
         [Input] public float floatInput;
         [Input("V2 Input")] public Vector2 vector2Input;
@@ -32,8 +33,10 @@ namespace BlueGraphExamples
 
         [Input] public AnimationCurve animCurveInput = new AnimationCurve();
         [Input] public GameObject gameObjectInput;
-
+        
+        [Input("")] public float noNameInput;
     
+
         [Output] int int32Output;
         [Output] long int64Output;
 
@@ -54,5 +57,7 @@ namespace BlueGraphExamples
 
         [Output] AnimationCurve animCurveOutput;
         [Output] GameObject gameObjectOutput;
+        
+        [Input("")] public float noNameOutput;
     }
 }

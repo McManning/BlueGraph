@@ -30,10 +30,9 @@ namespace BlueGraph
             return ports.Find((port) => !port.isInput && port.portName == name);
         }
         
-        public virtual object GetOutput(string name)
+        public virtual object GetOutputValue(string name)
         {
-            // Override.
-            return null; 
+            return null;
         }
 
         public T GetInputValue<T>(string name, T defaultValue = default)
@@ -43,7 +42,7 @@ namespace BlueGraph
             if (port != null && port.connections.Count > 0)
             {
                 var conn = port.connections[0];
-                conn.node.GetOutput(conn.portName);
+                return (T)conn.node.GetOutputValue(conn.portName);
             }
 
             return defaultValue;
@@ -61,7 +60,7 @@ namespace BlueGraph
             else
             {
                 port.connections.ForEach(
-                    (conn) => values.Add((T)conn.node.GetOutput(conn.portName))
+                    (conn) => values.Add((T)conn.node.GetOutputValue(conn.portName))
                 );
             }
             
