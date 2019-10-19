@@ -206,12 +206,12 @@ namespace BlueGraphEditor
             string name = attr?.name ?? method.Name;
 
             // FuncNode.category can override FuncNodeModule.category. 
-            string category = attr?.category ?? moduleAttr.category;
+            string path = attr?.category ?? moduleAttr.category;
         
             var node = new NodeReflectionData()
             {
                 type = typeof(FuncNode),
-                path = category?.Split('/'),
+                path = path?.Split('/'),
                 name = name,
                 tooltip = "TODO!",
                 method = method

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
+using System.Linq;
 
 namespace BlueGraphEditor
 {
@@ -10,6 +11,12 @@ namespace BlueGraphEditor
     {
         public CanvasView target;
         public PortView connectedPort;
+
+        /// <summary>
+        /// Whitelist of node modules to include in search results.
+        /// All submodules will be included (e.g. "Foo" will include "Foo/Bar", "Foo/Fizz/Buzz", etc).
+        /// </summary>
+        public List<string[]> modules = new List<string[]>();
         
         class SearchGroup
         {
@@ -62,18 +69,24 @@ namespace BlueGraphEditor
         
             // First item is the title of the window
             tree.Add(new SearchTreeGroupEntry(new GUIContent("Add Node"), 0));
+
+            // TODO: Custom top level pieces (Comments, new variables, etc)
      
-            // Construct a tree of available nodes by path
+            // Construct a tree of available nodes by module path
             var nodes = NodeReflection.GetNodeTypes();
 
             var groups = new SearchGroup(1);
             foreach (var node in nodes.Values)
             {
+                var path = node.path;
+
+                // Skip the node if it the module isn't whitelisted
+                if (!IsInSupportedModule(path)) continue;
+
                 // If we're coming from a port, make sure to only add nodes that accept
                 // an input (or output) that's compatible. 
                 if (connectedPort == null || IsCompatibleWithConnectedPort(node))
                 {
-                    var path = node.path;
                     var group = groups;
                     if (path != null)
                     {
@@ -93,12 +106,31 @@ namespace BlueGraphEditor
             }
             
             groups.AddToTree(tree);
-            
-            // TODO: Blacklisting certain nodes by some other context (e.g. two independent graph systems)
-        
+
             return tree;
         }
-        
+
+        /// <summary>
+        /// Returns true if the input path is prefixed by one or more registered module paths.
+        /// </summary>
+        private bool IsInSupportedModule(string[] path)
+        {
+            foreach (var module in modules)
+            {
+                if (path == null || path.Length < module.Length) continue;
+                
+                string[] compare = new string[module.Length];
+                Array.Copy(path, compare, compare.Length);
+
+                if (path.SequenceEqual(module))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
             target.CreateNode(

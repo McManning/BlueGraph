@@ -138,6 +138,21 @@ namespace BlueGraphEditor
             
             AddNodes(graph.nodes);
             AddComments(graph.comments);
+
+            // Reset the lookup to a new set of whitelisted modules
+            m_SearchProvider.modules.Clear();
+
+            var attrs = graph.GetType().GetCustomAttributes(true);
+            foreach (var attr in attrs)
+            {
+                if (attr is NodeModulesAttribute modulesAttr)
+                {
+                    foreach (var module in modulesAttr.modules)
+                    {
+                        m_SearchProvider.modules.Add(module.Split('/'));
+                    }
+                }
+            }
         }
         
         public void CreateNode(NodeReflectionData data, Vector2 screenPosition, PortView connectedPort = null)
