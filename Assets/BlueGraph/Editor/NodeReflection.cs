@@ -110,14 +110,6 @@ namespace BlueGraphEditor
             node.RegenerateGuid();
             node.name = name;
             
-            // TODO: Cleanup. No cast here.
-            if (method != null && node is FuncNode)
-            {
-                var func = node as FuncNode;
-                func.methodName = method.Name;
-                func.methodClass = method.DeclaringType.FullName;
-            }
-
             // Setup ports
             foreach (var port in ports)
             {
@@ -133,6 +125,12 @@ namespace BlueGraphEditor
                 });
             }
             
+            // If we spawned a FuncNode, bind it to the method. 
+            if (method != null && node is FuncNode func)
+            {
+                func.CreateDelegate(method);
+            }
+
             return node;
         }
     }

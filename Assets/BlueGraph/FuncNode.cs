@@ -7,167 +7,87 @@ using UnityEngine;
 namespace BlueGraph
 {
     /// <summary>
-    /// Indicate that a class contains a suite of FuncNode methods.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    public class FuncNodeModuleAttribute : Attribute
-    {
-        /// <summary>
-        /// Default category for all contained FuncNode methods.
-        /// Can be slash-delimited to denote subcategories. 
-        /// </summary>
-        public string category;
-    }
-
-    [AttributeUsage(AttributeTargets.Method)]
-    public class FuncNodeAttribute : Attribute
-    {
-        /// <summary>
-        /// Custom display name of the FuncNode
-        /// </summary>
-        public string name;
-
-        /// <summary>
-        /// Optional category name to override FuncNodeModule's category.
-        /// Can be slash-delimited to denote subcategories.
-        /// </summary>
-        public string category;
-
-        public FuncNodeAttribute(string name = null)
-        {
-            this.name = name;    
-        }
-    }
-
-    /// <summary>
     /// Node that exposes a pure static method to the graph
     /// </summary>
     public class FuncNode : AbstractNode
     {
-        [Serializable]
-        public class Parameter : ISerializationCallbackReceiver
-        {
-            public string name;
-            public Type type;
-            public bool isOut;
+        delegate object FuncWrapperDelegate(object[] args);
+        static Dictionary<string, FuncWrapperDelegate> k_DelegateCache = new Dictionary<string, FuncWrapperDelegate>();
 
-            [NonSerialized]
-            public object value;
-
-            [SerializeField]
-            string m_TypeName;
-
-            public void OnAfterDeserialize()
-            {
-                type = Type.GetType(m_TypeName);
-            }
-
-            public void OnBeforeSerialize()
-            {
-                m_TypeName = type.FullName;
-            }
-        }
+        object[] m_ArgsCache;
         
-        [NonSerialized]
-        Dictionary<string, object> m_OutputCache = new Dictionary<string, object>();
-        
-        // TODO: Not public 
-        public string methodClass;
+        // TODO: Not public (but still serialized). Needed by NodeReflection but 
+        // I can probably just call CreateLambda directly.
+        public string className;
         public string methodName;
         
-        Func<object[], object> m_Func;
+        FuncWrapperDelegate m_Func;
 
         object m_ReturnValue;
 
         public void Awake()
         {
-            CheckLambda();
+            CheckForDelegate();
         }
 
         /// <summary>
         /// Execute the wrapped method and get the named output value
         /// </summary>
-        public override object GetOutput(string name)
+        public override object GetOutputValue(string name)
         {
             // TODO: Don't re-execute unless we dirty inputs
             ExecuteMethod();
             
-            if (!m_OutputCache.ContainsKey(name))
+            if (name == "Result")
             {
-                // TODO: Better error handling
-                Debug.LogError($"[{this.name}] Missing output slot {name}");
-                return null;
+                return m_ReturnValue;
             }
 
-            return m_OutputCache[name];
+            // Other out argument, find matching index
+            for (int i = 0; i < ports.Count - 1; i++) 
+            {
+                if (!ports[i + 1].isInput && ports[i + 1].portName == name)
+                {
+                    return m_ArgsCache[i];
+                }
+            }
+            
+            // TODO: Better error handling
+            throw new Exception($"[{this.name}] Missing requested output slot {name}");
         }
-
-        /// <summary>
-        /// Create ports and a wrapper lambda for the given method
-        /// </summary>
-        /// <param name="method"></param>
-       /* protected void BindMethod(MethodInfo method)
-        {
-            m_MethodClass = method.DeclaringType.FullName;
-            m_MethodName = method.Name;
-
-            FuncNodeAttribute attr = method.GetCustomAttribute<FuncNodeAttribute>();
-            name = attr.name ?? method.Name;
-
-            ParameterInfo[] parameters = method.GetParameters();
-
-            // TODO: Don't clear. Diff and merge intelligently.
-            ports.Clear();
-            m_TypeCache.Clear();
-            
-            // Add an output port for the return value
-            // TODO: IFF there actually is one. 
-            ports.Add(new NodePort() {
-                node = this,
-                portName = "result",
-                isMulti = true,
-                isInput = false
-            });
-
-            m_TypeCache.Add(method.ReturnType);
-
-            foreach (var parameter in parameters)
-            {
-                ports.Add(new NodePort() {
-                    node = this,
-                    portName = parameter.Name,
-                    isMulti = parameter.IsOut,
-                    isInput = !parameter.IsOut
-                });
-
-                m_TypeCache.Add(parameter.IsOut ? 
-                    parameter.ParameterType.GetElementType() :
-                    parameter.ParameterType
-                );
-            }
-            
-            CreateLambda(method);
-        } */
         
-        protected void CheckLambda()
+        /// <summary>
+        /// Make sure a delegate is created to wrap the bound method for in-graph execution
+        /// </summary>
+        protected void CheckForDelegate()
         {
             // Re-bind to the method if necessary
-            if (methodName != null && methodClass != null)
+            if (m_Func == null && methodName != null && className != null)
             {
                 // TODO: This is going to probably be slow due to each node
                 // wanting to load it. Probably not cached well.
-                MethodInfo method = Type.GetType(methodClass).GetMethod(methodName);
-                CreateLambda(method);
+                MethodInfo method = Type.GetType(className).GetMethod(methodName);
+                CreateDelegate(method);
             }
         }
         
         /// <summary>
-        /// Construct a lambda expression to call the wrapped method
+        /// Construct a lambda expression to call the wrapped method.
+        /// 
+        /// At runtime, this ends up being substantially faster than MethodInfo.Invoke()
+        /// but we end up with limited support (i.e. no AOT platform support)
         /// </summary>
-        protected void CreateLambda(MethodInfo method)
+        public void CreateDelegate(MethodInfo method)
         {
-            // TODO: Caching so that we don't have duplicate lambdas for 
-            // multiple instances of the same func
+            methodName = method.Name;
+            className = method.DeclaringType.FullName;
+
+            // If a copy of the lambda delegate is already in cache, use that.
+            string key = $"{className}|{methodName}";
+            if (k_DelegateCache.ContainsKey(key))
+            {
+                return;
+            }
 
             /* In short, this method will compile into the following lambda:
              
@@ -181,7 +101,7 @@ namespace BlueGraph
                 return (object)ret;
             }
             
-            This will accept an object[] containing inputs and output placeholders
+            This will accept an object[] containing input and output placeholders
             for the wrapped method, execute, replace output placeholders with the 
             resolved out parameter values and return the method's return value. 
             */
@@ -255,9 +175,11 @@ namespace BlueGraph
             
             // Finally compile the expression into a callable delegate
             LambdaExpression lambdaExp = Expression.Lambda(block, argsExp);
-            m_Func = (Func<object[], object>)lambdaExp.Compile();
+            m_Func = lambdaExp.Compile() as FuncWrapperDelegate;
             
             Debug.Log(lambdaExp);
+            
+            k_DelegateCache.Add(key, m_Func);
         }
     
         /// <summary>
@@ -268,38 +190,29 @@ namespace BlueGraph
             if (m_Func == null)
             {
                 // TODO: Better error handling
-                Debug.LogError($"[{name}] Delegate does not exist");
-                return;
+                throw new Exception($"[{name}] Delegate does not exist");
             }
 
-            object[] args = new object[ports.Count - 1];
-            for (int i = 0; i < args.Length; i++)
+            if (m_ArgsCache == null)
+            {
+                m_ArgsCache = new object[ports.Count - 1];
+            }
+            
+            for (int i = 0; i < m_ArgsCache.Length; i++)
             {
                 var port = ports[i + 1];
 
                 if (port.isInput)
                 {
-                    args[i] = GetInputValue<object>(port.portName);
+                    m_ArgsCache[i] = GetInputValue<object>(port.portName);
                 }
                 else
                 {
-                    args[i] = null;
+                    m_ArgsCache[i] = null;
                 }
             }
 
-            m_ReturnValue = m_Func(args);
-
-            // Copy outputs back into our cache
-            // TODO: This step seems redundant. Why not keep args @ the class level
-            m_OutputCache.Clear();
-            for (int i = 0; i < args.Length; i++)
-            {
-                var port = ports[i + 1];
-                if (!port.isInput)
-                {
-                    m_OutputCache[port.portName] = args[i];
-                }
-            }
+            m_ReturnValue = m_Func(m_ArgsCache);
         }
     }
 }
