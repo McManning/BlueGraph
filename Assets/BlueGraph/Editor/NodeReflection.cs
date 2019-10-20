@@ -63,42 +63,36 @@ namespace BlueGraphEditor
 
         public bool HasInputOfType(Type type)
         {
-            return ports.Count((port) => port.isInput && port.type == type) > 0;
-            
-            /*
-            object instance = type.IsValueType ? Activator.CreateInstance(type) : null;
-
             foreach (var port in ports)
             {
                 if (!port.isInput) continue;
-                
-                // this would be awful unless I cache results...
-                var method = type.GetMethod("CastTo");
-                method.Invoke(null, null);
-
-                if (type is ITypeCastable && )
-                {
-
-                }
-
-                // Direct comparison for exact type without casting.
-                if (instance == null && type == port.type)
+       
+                // Cast direction type -> port input
+                if (type.IsCastableTo(port.type, true))
                 {
                     return true;
                 }
-                
-                // Try to determine if we can cast value types
-                try {
-                    Convert.ChangeType(instance, port.type);
-                } catch { }
             }
 
-            return false;*/
+            return false;
         }
 
         public bool HasOutputOfType(Type type)
         {
-            return ports.Count((port) => !port.isInput && port.type == type) > 0;
+            // return ports.Count((port) => !port.isInput && port.type == type) > 0;
+            
+            foreach (var port in ports)
+            {
+                if (port.isInput) continue;
+       
+                // Cast direction port output -> type
+                if (port.type.IsCastableTo(type, true))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -231,7 +225,7 @@ namespace BlueGraphEditor
         private static NodeReflectionData LoadMethodReflection(MethodInfo method, FuncNodeModuleAttribute moduleAttr)
         {    
             var attr = method.GetCustomAttribute<FuncNodeAttribute>();
-            string name = attr?.name ?? method.Name;
+            string name = attr?.name ?? ObjectNames.NicifyVariableName(method.Name);
 
             // FuncNode.module can override FuncNodeModule.path. 
             string path = attr?.module ?? moduleAttr.path;
@@ -245,16 +239,6 @@ namespace BlueGraphEditor
                 method = method
             };
             
-            // Add an output port for the return value
-            // TODO: IFF there actually is one. 
-            node.ports.Add(new PortReflectionData() {
-                type = method.ReturnType,
-                portName = "Result",
-                fieldName = null,
-                isMulti = true,
-                isInput = false
-            });
-            
             ParameterInfo[] parameters = method.GetParameters();
             
             foreach (var parameter in parameters)
@@ -263,10 +247,22 @@ namespace BlueGraphEditor
                     type = parameter.IsOut ? 
                         parameter.ParameterType.GetElementType() :
                         parameter.ParameterType,
-                    portName = parameter.Name,
+                    portName = ObjectNames.NicifyVariableName(parameter.Name),
                     fieldName = parameter.Name,
                     isMulti = parameter.IsOut,
                     isInput = !parameter.IsOut
+                });
+            }
+            
+            // Add an output port for the return value if non-void
+            if (method.ReturnType != typeof(void))
+            {
+                node.ports.Add(new PortReflectionData() {
+                    type = method.ReturnType,
+                    portName = "Result",
+                    fieldName = null,
+                    isMulti = true,
+                    isInput = false
                 });
             }
             

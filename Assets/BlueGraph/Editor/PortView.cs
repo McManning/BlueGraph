@@ -70,12 +70,17 @@ namespace BlueGraphEditor
         /// </summary>
         public bool IsCompatibleWith(PortView other)
         {
-            // Note: Loop detection to ensure nobody is making a cycle 
+            if (other.node == node || other.direction == direction)
+            {
+                return false;
+            }
+            
+            // TODO: Loop detection to ensure nobody is making a cycle 
             // (for certain use cases, that is)
             
-            return other.node != node
-                && other.direction != direction
-                && visualClass == other.visualClass;
+            // Check for type cast support in the direction of output port -> input port
+            return (other.direction == Direction.Input && portType.IsCastableTo(other.portType, true)) ||
+                    (other.direction == Direction.Output && other.portType.IsCastableTo(portType, true));
         }
 
         public override void Disconnect(Edge edge)
