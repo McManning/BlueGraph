@@ -30,7 +30,7 @@ namespace BlueGraphEditor
             public string type;
             public string JSON;
         }
-
+        
         [NonSerialized]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
@@ -51,7 +51,7 @@ namespace BlueGraphEditor
                     var src = (element as NodeView).target;
                     var node = Instantiate(src);
                     node.name = src.name;
-                    
+
                     // Convert connections to something that can be serialized
                     foreach (var port in node.ports)
                     {
@@ -116,6 +116,7 @@ namespace BlueGraphEditor
                 
                 nodeMap[node.guid] = instance;
                 guidMap[node.guid] = instance.guid;
+                graph.AddNode(instance);
                 
                 // Remap port associations
                 foreach (var port in instance.ports)
@@ -137,7 +138,7 @@ namespace BlueGraphEditor
                     outPort.Connect(inPort);
                 }
             }
-            
+
             return graph;
         }
     }
