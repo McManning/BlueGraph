@@ -115,14 +115,20 @@ namespace BlueGraphEditor
         /// </summary>
         private bool IsInSupportedModule(string[] path)
         {
+            // Everything in global namespace is allowed.
+            if (path == null) return true;
+            
             foreach (var module in modules)
             {
-                if (path == null || path.Length < module.Length) continue;
+                if (path.Length < module.Length) continue;
                 
-                string[] compare = new string[module.Length];
-                Array.Copy(path, compare, compare.Length);
+                bool match = true;
+                for (int i = 0; i < module.Length && match; i++)
+                {
+                    match = path[i] == module[i];
+                }
 
-                if (path.SequenceEqual(module))
+                if (match)
                 {
                     return true;
                 }
