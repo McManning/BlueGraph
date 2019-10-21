@@ -41,9 +41,11 @@ namespace BlueGraphEditor
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
-            SetPosition(new Rect(node.position.x, node.position.y, 0, 0));
+            SetPosition(new Rect(node.position, Vector2.one));
             m_ConnectorListener = connectorListener;
             title = node.name;
+
+            Debug.Log("NODE POS: " + GetPosition());
             
             m_SerializedNode = new SerializedObject(node);
             
@@ -173,6 +175,19 @@ namespace BlueGraphEditor
             // Propagate update to all ports
             inputs.ForEach(port => port.OnUpdate());
             outputs.ForEach(port => port.OnUpdate());
+        }
+
+        public override Rect GetPosition()
+        {
+            // The default implementation doesn't give us back a valid position until layout is resolved.
+            // See: https://github.com/Unity-Technologies/UnityCsReference/blob/master/Modules/GraphViewEditor/Elements/Node.cs#L131
+            Rect position = base.GetPosition();
+            if (position.width > 0 && position.height > 0)
+            {
+                return position;
+            }
+            
+            return new Rect(target.position, Vector2.one);
         }
 
         public override void SetPosition(Rect newPos)
