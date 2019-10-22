@@ -28,6 +28,8 @@ namespace BlueGraphEditor
         
         HashSet<ICanDirty> m_Dirty = new HashSet<ICanDirty>();
 
+        Vector2 m_LastMousePosition;
+
         public CanvasView(EditorWindow window)
         {
             m_EditorWindow = window;
@@ -48,6 +50,7 @@ namespace BlueGraphEditor
         
             // Add event handlers for shortcuts and changes
             RegisterCallback<KeyDownEvent>(OnGraphKeydown);
+            RegisterCallback<MouseMoveEvent>(OnGraphMouseMove);
             graphViewChanged = OnGraphViewChanged;
             
             nodeCreationRequest = (ctx) => OpenSearch(ctx.screenMousePosition);
@@ -68,7 +71,12 @@ namespace BlueGraphEditor
             // Add a grid renderer *behind* content containers
             Insert(0, new GridBackground());
         }
-        
+
+        private void OnGraphMouseMove(MouseMoveEvent evt)
+        {
+            m_LastMousePosition = evt.mousePosition;
+        }
+
         /// <summary>
         /// Event handler to frame the graph view on initial layout
         /// </summary>
@@ -128,7 +136,7 @@ namespace BlueGraphEditor
             // C: Add a new comment around the selected nodes (or just at mouse position)
             if (evt.keyCode == KeyCode.C && !evt.ctrlKey && !evt.commandKey)
             {
-                AddComment(evt.originalMousePosition);
+                AddComment();
             }
         }
         
@@ -345,8 +353,7 @@ namespace BlueGraphEditor
         /// <summary>
         /// Append views for nodes from a Graph
         /// </summary>
-        /// <param name="graph"></param>
-        private void AddNodes(List<AbstractNode> nodes, bool selectOnceAdded = false)
+        private void AddNodes(List<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
             // Add views of each node from the graph
             Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
@@ -356,7 +363,7 @@ namespace BlueGraphEditor
                 var element = Activator.CreateInstance(editorType) as NodeView;
                 element.Initialize(node, m_EdgeListener);
                 AddElement(element);
-
+                
                 nodeMap.Add(node, element);
                 Dirty(element);
                 
@@ -366,6 +373,18 @@ namespace BlueGraphEditor
                 }
             }
             
+            if (centerOnMouse)
+            {
+                Rect bounds = GetBounds(nodeMap.Values);
+                Vector2 worldPosition = contentViewContainer.WorldToLocal(m_LastMousePosition);
+                Vector2 delta = worldPosition - bounds.center;
+                
+                foreach (var node in nodeMap)
+                {
+                    node.Value.SetPosition(new Rect(node.Key.position + delta, Vector2.one));
+                }
+            }
+
             // Sync edges on the graph with our graph's connections 
             // TODO: Deal with trash connections from bad imports
             foreach (var node in nodeMap)
@@ -431,6 +450,9 @@ namespace BlueGraphEditor
                 if (item is GraphElement ele)
                 {
                     var boundingRect = ele.GetPosition();
+                    boundingRect.width = Mathf.Max(boundingRect.width, 1);
+                    boundingRect.height = Mathf.Max(boundingRect.height, 1);
+                    
                     boundingRect = ele.parent.ChangeCoordinatesTo(contentViewContainer, boundingRect);
 
                     if (contentRect.width < 1 || contentRect.height < 1)
@@ -453,7 +475,7 @@ namespace BlueGraphEditor
         /// If there are selected nodes, this'll encapsulate the selection with
         /// the comment box. Otherwise, it'll add at defaultPosition.
         /// </summary>
-        private void AddComment(Vector2 worldPosition)
+        private void AddComment()
         {
             // Pad out the bounding box a bit more on the selection
             float padding = 30; // TODO: Remove hardcoding
@@ -462,7 +484,7 @@ namespace BlueGraphEditor
             
             if (bounds.width < 1 || bounds.height < 1)
             {
-                worldPosition = contentViewContainer.WorldToLocal(worldPosition);
+                Vector2 worldPosition = contentViewContainer.WorldToLocal(m_LastMousePosition);
                 bounds.x = worldPosition.x;
                 bounds.y = worldPosition.y;
 
@@ -512,14 +534,14 @@ namespace BlueGraphEditor
 
             // Add the new nodes and select them
             ClearSelection();
-            AddNodes(graph.nodes, true);
+            AddNodes(graph.nodes, true, true);
         }
 
         private bool OnTryPasteSerializedData(string data)
         {
             return CopyPasteGraph.CanDeserialize(data);
         }
-
+        
         /// <summary>
         /// Serialize a selection to support cut/copy/duplicate
         /// </summary>
