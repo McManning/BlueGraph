@@ -12,7 +12,7 @@ namespace BlueGraph
         
         public List<NodePort> ports = new List<NodePort>();
         
-        // Graph metadata
+        /// Graph metadata
         public Vector2 position;
 
         public void RegenerateGuid()
@@ -35,14 +35,76 @@ namespace BlueGraph
             return null;
         }
 
+        /// <summary>
+        /// Retrieve an input value without attempting a typecast. 
+        /// </summary>
+        public object GetInputValue(string name, object defaultValue = null)
+        {
+            var port = GetInputPort(name);
+            if (port == null)
+            {
+                Debug.LogWarning(
+                    $"<b>[{this.name}]</b> Cannot read unknown port {name}. Returning default."
+                );
+                return defaultValue;
+            }
+
+            if (port.connections.Count < 1)
+            {
+                return defaultValue;
+            }
+            
+            NodePort.Connection conn = port.connections[0];
+            return conn.node.GetOutputValue(conn.portName);
+        }
+        
         public T GetInputValue<T>(string name, T defaultValue = default)
         {
             var port = GetInputPort(name);
-
-            if (port != null && port.connections.Count > 0)
+            if (port == null)
             {
-                var conn = port.connections[0];
-                return (T)conn.node.GetOutputValue(conn.portName);
+                Debug.LogWarning(
+                    $"<b>[{this.name}]</b> Cannot read unknown port {name}. Returning default."
+                );
+                return defaultValue;
+            }
+
+            if (port.connections.Count < 1)
+            {
+                return defaultValue;
+            }
+            
+            NodePort.Connection conn = port.connections[0];
+            object output = conn.node.GetOutputValue(conn.portName);
+
+            if (output.GetType() == typeof(T))
+            {
+                Debug.Log("Type match for " + typeof(T));
+                return (T)output;
+            }
+            
+            if (output == null && typeof(T).IsValueType)
+            {
+                // Can't ChangeType a null when expecting a value type. Bail.
+                Debug.LogWarning(
+                    $"<b>[{this.name}]</b> Received null on input {name}. " +
+                    $"Expected value type {typeof(T).FullName}. " +
+                    $"Returning default."
+                );
+                return defaultValue;
+            }
+            
+            try
+            {
+                return (T)Convert.ChangeType(output, typeof(T));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(
+                    $"<b>[{this.name}]</b> Could not cast output `{conn.portName}` with type `{output.GetType()}` " +
+                    $"to input `{this.name}` type `{typeof(T)}`. " +
+                    $"Returning default."
+                );
             }
 
             return defaultValue;
@@ -50,8 +112,8 @@ namespace BlueGraph
 
         public T[] GetInputValues<T>(string name, T defaultValue = default)
         {
-            var values = new List<T>();
-            var port = GetInputPort(name);
+            List<T> values = new List<T>();
+            NodePort port = GetInputPort(name);
 
             if (port.connections.Count < 1 && defaultValue != null)
             {

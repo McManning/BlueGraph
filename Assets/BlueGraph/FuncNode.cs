@@ -11,8 +11,7 @@ namespace BlueGraph
     /// </summary>
     public class FuncNode : AbstractNode
     {
-        delegate object FuncWrapperDelegate(object[] args);
-        static Dictionary<string, FuncWrapperDelegate> k_DelegateCache = new Dictionary<string, FuncWrapperDelegate>();
+        static Dictionary<string, Func<object[], object>> k_DelegateCache = new Dictionary<string, Func<object[], object>>();
 
         object[] m_ArgsCache;
         
@@ -21,8 +20,9 @@ namespace BlueGraph
         public string className;
         public string methodName;
         
-        FuncWrapperDelegate m_Func;
+        Func<object[], object> m_Func;
 
+        bool m_HasReturnValue;
         object m_ReturnValue;
 
         public void Awake()
@@ -37,7 +37,8 @@ namespace BlueGraph
         {
             // TODO: Don't re-execute unless we dirty inputs
             ExecuteMethod();
-            
+
+            // TODO: Technically a slot in args? 
             if (name == "Result")
             {
                 return m_ReturnValue;
@@ -46,14 +47,14 @@ namespace BlueGraph
             // Other out argument, find matching index
             for (int i = 0; i < ports.Count - 1; i++) 
             {
-                if (!ports[i + 1].isInput && ports[i + 1].portName == name)
+                if (!ports[i].isInput && ports[i].portName == name)
                 {
                     return m_ArgsCache[i];
                 }
             }
             
             // TODO: Better error handling
-            throw new Exception($"[{this.name}] Missing requested output slot {name}");
+            throw new Exception($"<b>[{this.name}]</b> Missing requested output slot {name}");
         }
         
         /// <summary>
@@ -81,6 +82,7 @@ namespace BlueGraph
         {
             methodName = method.Name;
             className = method.DeclaringType.FullName;
+            m_HasReturnValue = method.ReturnType != typeof(void);
 
             // If a copy of the lambda delegate is already in cache, use that.
             string key = $"{className}|{methodName}";
@@ -114,16 +116,17 @@ namespace BlueGraph
             List<ParameterExpression> outputs = new List<ParameterExpression>();
             
             // First port is the return value. Skip as a param.
-            Expression[] paramsExps = new Expression[ports.Count - 1];
+            int paramsLen = m_HasReturnValue ? ports.Count - 1 : ports.Count;
+
+            Expression[] paramsExps = new Expression[paramsLen];
             List<Expression> blockExps = new List<Expression>();
             
             // Iterate through parameters of the method and construct either a 
             // mapping between args[] and the correct param position of the function
             // or a temp variable + assignment for `out` parameters. 
-            for (int i = 0; i < ports.Count - 1; i++)
+            for (int i = 0; i < paramsLen; i++)
             {
-                // Skip first port while reading (return value)
-                NodePort port = ports[i + 1];
+                NodePort port = ports[i];
 
                 if (port.isInput)
                 {
@@ -136,9 +139,11 @@ namespace BlueGraph
                 {
                     // Output case: Foo(out object o) -> object o; Foo(o); args[i] = o;
 
+                    Debug.Log($"Out: {port.portName} of type {port.type}");
+
                     // Create a temp variable to store the out parameter
                     // (float f)
-                    ParameterExpression outVariable = Expression.Variable(port.type);
+                    ParameterExpression outVariable = Expression.Variable(port.type, port.fieldName);
 
                     // Add an assignment line that'll copy the temp variable back into args[i]
                     // (args[i] = f)
@@ -153,20 +158,26 @@ namespace BlueGraph
                 }
             }
             
-            // Add another output variable for return value of the method
-            ParameterExpression ret = Expression.Variable(method.ReturnType, "ret");
-            outputs.Add(ret);
+            if (m_HasReturnValue)
+            {
+                // Add another output variable for return value of the method
+                ParameterExpression ret = Expression.Variable(method.ReturnType, "ret");
+                outputs.Add(ret);
             
-            // Add the actual method call as the *first* expression in the block
-            // after all the temp variable declarations have been made. 
-            blockExps.Insert(0, Expression.Assign(ret, Expression.Call(method, paramsExps)));
+                // Add the actual method call as the *first* expression in the block
+                // after all the temp variable declarations have been made. 
+                blockExps.Insert(0, Expression.Assign(ret, Expression.Call(method, paramsExps)));
             
-            // Last expression in the block becomes the lambda output.
-            // Make sure it's the result of the method.
-            // TODO: This assumes all methods return a non-void. Which should
-            // be a safe assumption for nodes, but some warning would be nice here.
-            blockExps.Add(Expression.Convert(ret, typeof(object)));
-
+                // Last expression in the block becomes the lambda output.
+                // Make sure it's the result of the method.
+                blockExps.Add(Expression.Convert(ret, typeof(object)));
+            }
+            else
+            {
+                // Return void, just insert the method call at the beginning with no assignment
+                blockExps.Insert(0, Expression.Call(method, paramsExps));
+            }
+            
             BlockExpression block = Expression.Block(outputs, blockExps);
             foreach (var exp in block.Expressions)
             {
@@ -175,9 +186,10 @@ namespace BlueGraph
             
             // Finally compile the expression into a callable delegate
             LambdaExpression lambdaExp = Expression.Lambda(block, argsExp);
-            m_Func = lambdaExp.Compile() as FuncWrapperDelegate;
+            m_Func = (Func<object[], object>)lambdaExp.Compile();
             
             Debug.Log(lambdaExp);
+            Debug.Log(m_Func);
             
             k_DelegateCache.Add(key, m_Func);
         }
@@ -193,26 +205,50 @@ namespace BlueGraph
                 throw new Exception($"[{name}] Delegate does not exist");
             }
 
+            int argsLen = m_HasReturnValue ? ports.Count - 1 : ports.Count;
+
             if (m_ArgsCache == null)
             {
-                m_ArgsCache = new object[ports.Count - 1];
+                m_ArgsCache = new object[argsLen];
             }
             
-            for (int i = 0; i < m_ArgsCache.Length; i++)
+            for (int i = 0; i < argsLen; i++)
             {
-                var port = ports[i + 1];
+                var port = ports[i];
 
                 if (port.isInput)
                 {
-                    m_ArgsCache[i] = GetInputValue<object>(port.portName);
+                    object value = GetInputValue(port.portName);
+                    if (value != null)
+                    {
+                        try
+                        {
+                            m_ArgsCache[i] = Convert.ChangeType(value, port.type);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError($"<b>[{name}]</b>: Cannot convert input port `{port.portName}` value to type `{port.type}`");
+                        }
+                    }
+                    // TODO: if value is null and port.type is a value type, ChangeType will
+                    // throw an exception. How do we handle this case? Error out the node?
                 }
                 else
                 {
                     m_ArgsCache[i] = null;
                 }
             }
-
-            m_ReturnValue = m_Func(m_ArgsCache);
+            
+            try
+            {
+                m_ReturnValue = m_Func(m_ArgsCache);
+            } 
+            catch (Exception e)
+            {
+                Debug.LogError($"<b>[{name}]</b>: Delegate exception: {e}");
+                // TODO: Don't LogError, just throw an error status onto the node UI
+                // (done in the view during execution - not the nodes themselves?)
+            }
         }
     }
 }
