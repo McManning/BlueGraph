@@ -34,8 +34,14 @@ namespace BlueGraph
         /// </summary>
         public string portName;
 
+        /// <summary>
+        /// Underlying field name for the port. Used by the editor
+        /// </summary>
         public string fieldName;
-        
+       
+        /// <summary>
+        /// Suggested type of this port. Used for compatibility testing
+        /// </summary>
         public Type type;
 
         [SerializeField]

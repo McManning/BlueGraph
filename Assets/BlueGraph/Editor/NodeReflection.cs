@@ -329,7 +329,7 @@ namespace BlueGraphEditor
                             portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = false,
-                            isMulti = true,
+                            isMulti = attr.multiple,
                             isEditable = false
                         });
                     }

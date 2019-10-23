@@ -67,6 +67,11 @@ namespace BlueGraph
         /// </summary>
         public string name;
         
+        /// <summary>
+        /// Can this output go to multiple connections at once
+        /// </summary>
+        public bool multiple = true;
+
         public OutputAttribute(string name = null)
         {
             this.name = name;

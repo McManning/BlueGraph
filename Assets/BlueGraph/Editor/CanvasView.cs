@@ -248,7 +248,7 @@ namespace BlueGraphEditor
 
             if (edge.output.capacity == Port.Capacity.Single)
             {
-                foreach (var conn in edge.input.connections)
+                foreach (var conn in edge.output.connections)
                 {
                     edgesToRemove.Add(conn);
                 }
