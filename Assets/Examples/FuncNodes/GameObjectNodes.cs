@@ -20,12 +20,13 @@ namespace BlueGraphExamples.FuncNodes
         //public static void SetPosition(GameObject go, Vector3 position) => go.transform.position = position;
         //public static void SetLocalPosition(GameObject go, Vector3 position) => go.transform.localPosition = position;
 
-        // TODO: Rename-able default output slot...
-        public static Vector3 BreakTransform(Transform t, out Quaternion rot, out Vector3 scale)
+        // TODO: Rename-able default output slot...3
+        [FuncNode("Break (Transform)", returnName = "Scale")]
+        public static Vector3 BreakTransform(Transform t, out Vector3 position, out Quaternion rotation)
         {
-            rot = t.rotation;
-            scale = t.lossyScale;
-            return t.position;
+            position = t.position;
+            rotation = t.rotation;
+            return t.lossyScale;
         }
     }
 }
