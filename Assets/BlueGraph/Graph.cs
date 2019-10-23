@@ -20,7 +20,7 @@ namespace BlueGraph
 
         public List<GraphComment> comments = new List<GraphComment>();
         
-        public void AddNode(AbstractNode node)
+        public virtual void AddNode(AbstractNode node)
         {
             node.graph = this;
             node.RegenerateGuid();
