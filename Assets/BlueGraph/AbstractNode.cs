@@ -64,7 +64,7 @@ namespace BlueGraph
             if (port == null)
             {
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Cannot read unknown port {name}. Returning default."
+                    $"<b>[{this.name}]</b> Unknown port name `{name}`. Returning default."
                 );
                 return defaultValue;
             }
