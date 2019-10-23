@@ -226,7 +226,8 @@ namespace BlueGraphEditor
         {    
             var attr = method.GetCustomAttribute<FuncNodeAttribute>();
             string name = attr?.name ?? ObjectNames.NicifyVariableName(method.Name);
-
+            string returnPortName = attr?.returnName ?? "Result";
+            
             // FuncNode.module can override FuncNodeModule.path. 
             string path = attr?.module ?? moduleAttr.path;
         
@@ -259,7 +260,7 @@ namespace BlueGraphEditor
             {
                 node.ports.Add(new PortReflectionData() {
                     type = method.ReturnType,
-                    portName = "Result",
+                    portName = returnPortName,
                     fieldName = null,
                     isMulti = true,
                     isInput = false

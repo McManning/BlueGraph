@@ -130,6 +130,11 @@ namespace BlueGraph
         /// </summary>
         public string module;
 
+        /// <summary>
+        /// Display name of the return value. Defaults to "Result"
+        /// </summary>
+        public string returnName;
+
         public FuncNodeAttribute(string name = null)
         {
             this.name = name;    

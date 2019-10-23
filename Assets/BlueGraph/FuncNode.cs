@@ -38,8 +38,10 @@ namespace BlueGraph
             // TODO: Don't re-execute unless we dirty inputs
             ExecuteMethod();
 
-            // TODO: Technically a slot in args? 
-            if (name == "Result")
+            // Return value is always the LAST port in the list
+            // TODO: Technically a slot in args - we just don't write back. Should we?
+            // Can then eliminate this check here and just use the loop below. 
+            if (name == ports[ports.Count - 1].portName)
             {
                 return m_ReturnValue;
             }

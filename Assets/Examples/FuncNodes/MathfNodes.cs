@@ -34,7 +34,7 @@ namespace BlueGraphExamples.FuncNodes
         public static float Tan(float f) => Mathf.Tan(f);
 
         [FuncNode("Perlin Noise")]
-        public static float PerlinNoise(float x, float y) => Mathf.PerlinNoise(x, y);
+        public static float PerlinNoise(Vector2 v) => Mathf.PerlinNoise(v.x, v.y);
 
         // Technically not Mathf, but close enough.
         [FuncNode("Random (float)")]
