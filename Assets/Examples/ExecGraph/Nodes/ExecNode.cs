@@ -21,17 +21,17 @@ namespace BlueGraphExamples.ExecGraph
         public virtual ExecNode Execute(ExecData data)
         {
             // noop.
-            return GetNext();
+            return GetNextExec();
         }
 
         /// <summary>
         /// Get the next node that should be executed
         /// </summary>
         /// <returns></returns>
-        public virtual ExecNode GetNext(string portName = "_execOut")
+        public virtual ExecNode GetNextExec(string portName = "_execOut")
         {
             NodePort port = GetOutputPort(portName);
-            if (port.connections.Count < 1) {
+            if (!port.IsConnected) {
                 return null;
             }
             

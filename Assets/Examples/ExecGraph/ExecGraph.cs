@@ -1,13 +1,14 @@
 ﻿
 using UnityEngine;
 using BlueGraph;
+using System.Text;
 
 namespace BlueGraphExamples.ExecGraph
 {
     /// <summary>
     /// Execution data that can pass through execution ports on nodes
     /// </summary>
-    public struct ExecData
+    public class ExecData
     {
         // Whatever can go here.
     }
@@ -35,6 +36,7 @@ namespace BlueGraphExamples.ExecGraph
             if (!entryPoint)
             {
                 Debug.LogError($"<b>[{name}]</b> No EntryPoint node found");
+                return;
             }
 
             ExecData data = new ExecData(); 
@@ -53,6 +55,39 @@ namespace BlueGraphExamples.ExecGraph
                     Debug.LogError("Potential infinite loop detected. Stopping early.");
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Use CodeBuilder to compile this graph into a fast runtime
+        /// </summary>
+        public void Compile()
+        {
+            if (!entryPoint)
+            {
+                Debug.LogError($"<b>[{name}]</b> No EntryPoint node found");
+                return;
+            }
+
+            if (entryPoint is ICanCompile node)
+            {
+                CodeBuilder builder = new CodeBuilder
+                {
+                    // TODO: Better naming convention
+                    className = name.Replace(" ", string.Empty) + "AOT"
+                };
+
+                node.Compile(builder);
+                
+                // TODO: Save out an asset or something
+                Debug.Log(builder);
+            }
+            else 
+            {
+                Debug.LogError(
+                    $"<b>[{name}]</b> Entry point node `{entryPoint.name}` " +
+                    $"must implement interface `ICanCompile`"
+                );
             }
         }
 

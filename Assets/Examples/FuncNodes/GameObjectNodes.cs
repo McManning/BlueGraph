@@ -19,8 +19,7 @@ namespace BlueGraphExamples.FuncNodes
         // Setters should have an execution line, I'd think. Otherwise it's risky as to *when* they can be set.
         //public static void SetPosition(GameObject go, Vector3 position) => go.transform.position = position;
         //public static void SetLocalPosition(GameObject go, Vector3 position) => go.transform.localPosition = position;
-
-        // TODO: Rename-able default output slot...3
+        
         [FuncNode("Break (Transform)", returnName = "Scale")]
         public static Vector3 BreakTransform(Transform t, out Vector3 position, out Quaternion rotation)
         {

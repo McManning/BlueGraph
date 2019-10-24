@@ -34,9 +34,12 @@ namespace BlueGraphExamples.ExecGraph
                 {
                     graph.Execute();
                 }
-
-                // So on and so forth.
-
+                
+                if (GUILayout.Button("Compile", EditorStyles.toolbarButton))
+                {
+                    graph.Compile();
+                }
+                
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             });
