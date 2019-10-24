@@ -19,10 +19,10 @@ namespace BlueGraph
         // I can probably just call CreateLambda directly.
         public string className;
         public string methodName;
+        public bool hasReturnValue;
         
         Func<object[], object> m_Func;
-
-        bool m_HasReturnValue;
+        
         object m_ReturnValue;
 
         public void Awake()
@@ -84,7 +84,7 @@ namespace BlueGraph
         {
             methodName = method.Name;
             className = method.DeclaringType.FullName;
-            m_HasReturnValue = method.ReturnType != typeof(void);
+            hasReturnValue = method.ReturnType != typeof(void);
 
             // If a copy of the lambda delegate is already in cache, use that.
             string key = $"{className}|{methodName}";
@@ -118,7 +118,7 @@ namespace BlueGraph
             List<ParameterExpression> outputs = new List<ParameterExpression>();
             
             // First port is the return value. Skip as a param.
-            int paramsLen = m_HasReturnValue ? ports.Count - 1 : ports.Count;
+            int paramsLen = hasReturnValue ? ports.Count - 1 : ports.Count;
 
             Expression[] paramsExps = new Expression[paramsLen];
             List<Expression> blockExps = new List<Expression>();
@@ -160,7 +160,7 @@ namespace BlueGraph
                 }
             }
             
-            if (m_HasReturnValue)
+            if (hasReturnValue)
             {
                 // Add another output variable for return value of the method
                 ParameterExpression ret = Expression.Variable(method.ReturnType, "ret");
@@ -207,7 +207,7 @@ namespace BlueGraph
                 throw new Exception($"[{name}] Delegate does not exist");
             }
 
-            int argsLen = m_HasReturnValue ? ports.Count - 1 : ports.Count;
+            int argsLen = hasReturnValue ? ports.Count - 1 : ports.Count;
 
             if (m_ArgsCache == null)
             {
