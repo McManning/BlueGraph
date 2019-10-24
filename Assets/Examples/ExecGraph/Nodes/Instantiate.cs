@@ -5,7 +5,7 @@ using BlueGraph;
 namespace BlueGraphExamples.ExecGraph
 {
     [Node(module = "ExecGraph/GameObject")]
-    public class Instantiate : ExecNode
+    public class Instantiate : ExecNode, ICanCompile
     {
         [Input] public GameObject prefab;
         [Input] public Vector3 localPosition;
@@ -27,6 +27,65 @@ namespace BlueGraphExamples.ExecGraph
             }
             
             return base.Execute(data);
+        }
+        
+        public void Compile(CodeBuilder builder)
+        {
+            string prefabVar = ConstantOrVariable<GameObject>(builder, "Prefab", null);
+            string parentVar = null;
+            string localPositionVar = ConstantOrVariable(builder, "Local Position", localPosition);
+            string localRotationVar = ConstantOrVariable(builder, "Local Rotation", localRotation);
+            
+            NodePort port = GetInputPort("Parent");
+            if (port.IsConnected)
+            {
+                NodePort outputPort = port.GetConnection(0);
+                builder.CompileInputs(port);
+
+                parentVar = builder.PortToVariable(outputPort);
+            }
+            
+            if (parentVar != null)
+            {
+                builder.AppendLine($"GameObject TODO = Instantiate(" +
+                    $"{prefabVar}, {localPositionVar}, {localRotationVar}, {parentVar}.transform" +
+                    $");"
+                );
+            }
+            else // Shorter version without a parent transform
+            {
+                builder.AppendLine($"GameObject TODO = Instantiate(" +
+                    $"{prefabVar}, {localPositionVar}, {localRotationVar}" +
+                    $");"
+                );
+            }
+            
+            // Continue to next executable node
+            // TODO: This would be duplicated for every ExecNode. 
+            // Put it in ExecNode or something as the base behavior
+            var next = GetNextExec();
+            if (next is ICanCompile nextNode)
+            {
+                nextNode.Compile(builder);
+            }
+        }
+
+        /// <summary>
+        /// If the given input port has a connection, compile and return the connection's
+        /// output variable name. If not, return a constant representing the default (inline) value.
+        /// </summary>
+        private string ConstantOrVariable<T>(CodeBuilder builder, string portName, T defaultValue = default)
+        {
+            NodePort port = GetInputPort(portName);
+            if (!port.IsConnected)
+            {
+                return builder.Constant(defaultValue);
+            }
+            
+            NodePort outputPort = port.GetConnection(0);
+            builder.CompileInputs(outputPort);
+
+            return builder.PortToVariable(outputPort);
         }
     }
 }

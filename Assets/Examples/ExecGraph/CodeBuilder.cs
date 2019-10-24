@@ -137,17 +137,35 @@ namespace BlueGraphExamples.ExecGraph
             {
                 return "null";
             }
-
+            
+            // This is where things get dicey. 
+            // TODO: Figure out a smarter way to deal with 
+            // structs so they're not all hand crafted here.
             switch (value)
             {
                 case float f: return $"{f}f";
-                case int i: return i.ToString();
-                case bool b: return b.ToString();
                 case string s: return $"\"{s}\"";
-                // and so on?
+                case int i: return i.ToString();
+                case Vector2 v: return $"new Vector2({v.x}f, {v.y}f)";
+                case Vector3 v: return $"new Vector3({v.x}f, {v.y}f, {v.z}f)";
+                case Vector4 v: return $"new Vector4({v.x}f, {v.y}f, {v.z}f, {v.w}f)";
+                case Quaternion q: return $"new Quaternion({q.x}f, {q.y}f, {q.z}f, {q.w}f)";
+                case Color c: return $"new Color({c.r}f, {c.g}f, {c.b}f, {c.a}f)";
+            }
+            
+            Type type = value.GetType();
+            if (type.IsClass)
+            {
+                return $"new {HoistNamespace(type.FullName)}()";
             }
 
-            return $"CONST`{value.ToString()}`";
+            // TODO: No clue how to deal with things like AnimationCurves here.
+            // Need to reference instances from ... somewhere.
+
+            // Same deal for Prefab GOs. We'll need a separate solution here to
+            // reference them. (Maybe somehow deep link into the source graph's SO?)
+
+            throw new Exception($"Cannot create constant form of type `{type}`");
         }
 
         /// <summary>
@@ -174,6 +192,10 @@ namespace BlueGraphExamples.ExecGraph
             if (outputPort.node is FuncNode funcNode)
             {
                 CompileFuncNode(funcNode);
+            }
+            else if (outputPort.node is ICanCompile node)
+            {
+                node.Compile(this);
             }
         }
 
@@ -222,12 +244,9 @@ namespace BlueGraphExamples.ExecGraph
                 }
                 else
                 {
-                    if (port.connections.Count > 0)
+                    if (port.IsConnected)
                     {
-                        NodePort outputPort = port.connections[0].node.GetOutputPort(
-                            port.connections[0].portName
-                        );
-
+                        NodePort outputPort = port.GetConnection(0);
                         CompileInputs(outputPort);
                         args.Add(PortToVariable(outputPort));
                     }
