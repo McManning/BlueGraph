@@ -58,6 +58,8 @@ namespace BlueGraph
         /// List of current connections out of this port
         /// </summary>
         public List<Connection> connections = new List<Connection>();
+        
+        public bool IsConnected { get { return connections.Count > 0; } }
     
         public void Connect(NodePort other)
         {
@@ -66,7 +68,7 @@ namespace BlueGraph
 
         public void Connect(AbstractNode node, string portName)
         {
-            if (!IsConnected(node, portName))
+            if (!IsConnectedTo(node, portName))
             {
                 connections.Add(new Connection() {
                     node = node, 
@@ -91,12 +93,32 @@ namespace BlueGraph
         {
             connections.Clear();
         }
-
-        public bool IsConnected(AbstractNode node, string portName)
+        
+        /// <summary>
+        /// Test if there's already a connection to the given node+port combination
+        /// </summary>
+        public bool IsConnectedTo(AbstractNode node, string portName)
         {
             return connections.Find(
                 (conn) => conn.node == node && conn.portName == portName
             ) != null;
+        }
+
+        /// <summary>
+        /// Retrieve the connected NodePort at the given index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public NodePort GetConnection(int index)
+        {
+            if (index > connections.Count - 1)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            return connections[index].node.GetOutputPort(
+                connections[index].portName
+            );
         }
 
         public void OnBeforeSerialize()
