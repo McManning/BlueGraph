@@ -7,7 +7,7 @@ namespace BlueGraphExamples.ExecGraph
     /// <summary>
     /// Example of an execution node representing if (cond) { ... } else { ... }
     /// </summary>
-    [Node(module = "ExecGraph")]
+    [Node(module = "ExecGraph/Flow Control")]
     public class Branch : ExecNode, ICanCompile
     {
         [Input] public bool condition;
@@ -37,24 +37,10 @@ namespace BlueGraphExamples.ExecGraph
              *   elseExec
              * }
              */
-            NodePort input = GetInputPort("Condition");
-            if (!input.IsConnected)
-            {
-                // Easy case: inlined constant condition
-                builder.AppendLine();
-                builder.AppendLine($"if ({(condition ? "true" : "false")})");
-            }
-            else
-            {
-                // Need to compile up nodes to get the condition output
-                NodePort outputPort = input.GetConnection(0);
-                builder.CompileInputs(outputPort);
-
-                string variableName = builder.PortToVariable(outputPort);
-                
-                builder.AppendLine();
-                builder.AppendLine($"if ({variableName})");
-            }
+            var conditionVar = builder.PortToValue(GetInputPort("Condition"), condition);
+            
+            builder.AppendLine();
+            builder.AppendLine($"if ({conditionVar})");
             
             builder.BeginScope();
 

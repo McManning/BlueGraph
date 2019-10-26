@@ -59,23 +59,10 @@ namespace BlueGraphExamples.ExecGraph
 
             // Get either a constant value for the count or the input variable
             // if the port has a connection 
-            NodePort countPort = GetInputPort("Count");
-            if (countPort.IsConnected)
-            {
-                NodePort outputPort = countPort.GetConnection(0);
-                builder.CompileInputs(outputPort);
-
-                string variableName = builder.PortToVariable(outputPort);
-
-                builder.AppendLine();
-                builder.AppendLine($"for (int i = 0; i < {variableName}; i++)");
-            } 
-            else
-            {
-                // Constant loop count
-                builder.AppendLine();
-                builder.AppendLine($"for (int i = 0; i < {count}; i++)");
-            }
+            var countVar = builder.PortToValue(GetInputPort("Count"), count);
+            
+            builder.AppendLine();
+            builder.AppendLine($"for (int i = 0; i < {countVar}; i++)");
             
             // Add the loop body in scope
             builder.BeginScope();
