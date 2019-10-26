@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using BlueGraph;
+using System;
 
 namespace BlueGraphExamples.ExecGraph
 {
@@ -42,7 +43,7 @@ namespace BlueGraphExamples.ExecGraph
                 NodePort outputPort = port.GetConnection(0);
                 builder.CompileInputs(port);
 
-                parentVar = builder.PortToVariable(outputPort);
+                parentVar = builder.PortToVariableName(outputPort);
             }
             
             if (parentVar != null)
@@ -77,15 +78,7 @@ namespace BlueGraphExamples.ExecGraph
         private string ConstantOrVariable<T>(CodeBuilder builder, string portName, T defaultValue = default)
         {
             NodePort port = GetInputPort(portName);
-            if (!port.IsConnected)
-            {
-                return builder.Constant(defaultValue);
-            }
-            
-            NodePort outputPort = port.GetConnection(0);
-            builder.CompileInputs(outputPort);
-
-            return builder.PortToVariable(outputPort);
+            return builder.PortToValue(port, defaultValue).ToString();
         }
     }
 }

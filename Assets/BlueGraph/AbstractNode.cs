@@ -77,9 +77,9 @@ namespace BlueGraph
             NodePort.Connection conn = port.connections[0];
             object output = conn.node.GetOutputValue(conn.portName);
 
+            // Short circuit Convert.ChangeType if it's already the expected type
             if (output.GetType() == typeof(T))
             {
-                Debug.Log("Type match for " + typeof(T));
                 return (T)output;
             }
             

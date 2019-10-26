@@ -40,6 +40,10 @@ namespace BlueGraphExamples.ExecGraph
 
             // Nodes executed in this scope
             public List<AbstractNode> nodes = new List<AbstractNode>();
+
+            // Variables with a `const` keyword in scope. Used to determine
+            // if other operations within scope should also be constant.
+            public HashSet<string> constants = new HashSet<string>();
             
             public Scope(Scope parent = null)
             {
@@ -57,9 +61,14 @@ namespace BlueGraphExamples.ExecGraph
             public bool AlreadyExecutedInScope(AbstractNode node)
             {
                 if (nodes.Contains(node)) return true;
-
                 if (parent != null) return parent.AlreadyExecutedInScope(node);
+                return false;
+            }
 
+            public bool IsConstInScope(string varName)
+            {
+                if (constants.Contains(varName)) return true;
+                if (parent != null) return parent.IsConstInScope(varName);
                 return false;
             }
         }
@@ -120,10 +129,68 @@ namespace BlueGraphExamples.ExecGraph
         /// <summary>
         /// Convert a NodePort to a unique C# variable name 
         /// </summary>
-        public string PortToVariable(NodePort port)
+        public string PortToVariableName(NodePort port)
         {
             // TODO: Drastically improve this 
-            return $"{port.portName ?? "Unnamed"}_{port.node.guid.Substring(0, 8)}";
+            return $"{port.portName}_{port.node.guid.Substring(0, 8)}";
+        }
+
+        /// <summary>
+        /// Stores either a variable name referencing a value, a  
+        /// stringified representation of a constant value type, 
+        /// or a stringified object constructor
+        /// </summary>
+        public struct ValueFragment
+        {
+            public string fragment;
+
+            /// <summary>
+            /// Can this value be treated as `const` to the IL.
+            /// This excludes class instances, structs, etc. 
+            /// </summary>
+            public bool isConstant;
+
+            public ValueFragment(string fragment, bool isConstant = false)
+            {
+                this.fragment = fragment;
+                this.isConstant = isConstant;
+            }
+
+            public override string ToString() => fragment;
+        }
+
+        /// <summary>
+        /// Get the value to be inserted into the given port. This can either
+        /// be a reference to a variable from an output port, or a constant value.
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public ValueFragment PortToValue(NodePort port, object defaultValue)
+        {
+            if (port.IsConnected)
+            {
+                // TODO: Support for multiple inputs to this port
+
+                NodePort outputPort = port.GetConnection(0);
+                CompileInputs(outputPort);
+
+                string varName = PortToVariableName(outputPort);
+                return new ValueFragment(varName, IsConstInScope(varName));
+            }
+
+            //  Otherwise, inline default value.
+            return Constant(defaultValue);
+        }
+
+        public bool IsConstInScope(string varName)
+        {
+            return m_CurrentScope.IsConstInScope(varName);
+        }
+
+        public void AddConstToScope(string varName)
+        {
+            m_CurrentScope.constants.Add(varName);
         }
 
         /// <summary>
@@ -131,11 +198,11 @@ namespace BlueGraphExamples.ExecGraph
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public string Constant(object value)
+        public ValueFragment Constant(object value)
         {
             if (value == null)
             {
-                return "null";
+                return new ValueFragment("null");
             }
             
             // This is where things get dicey. 
@@ -143,20 +210,21 @@ namespace BlueGraphExamples.ExecGraph
             // structs so they're not all hand crafted here.
             switch (value)
             {
-                case float f: return $"{f}f";
-                case string s: return $"\"{s}\"";
-                case int i: return i.ToString();
-                case Vector2 v: return $"new Vector2({v.x}f, {v.y}f)";
-                case Vector3 v: return $"new Vector3({v.x}f, {v.y}f, {v.z}f)";
-                case Vector4 v: return $"new Vector4({v.x}f, {v.y}f, {v.z}f, {v.w}f)";
-                case Quaternion q: return $"new Quaternion({q.x}f, {q.y}f, {q.z}f, {q.w}f)";
-                case Color c: return $"new Color({c.r}f, {c.g}f, {c.b}f, {c.a}f)";
+                case int i: return new ValueFragment(i.ToString(), true);
+                case bool b: return new ValueFragment(b.ToString(), true);
+                case float f: return new ValueFragment($"{f}f", true);
+                case string s: return new ValueFragment($"\"{s}\"", true);
+                case Vector2 v: return  new ValueFragment($"new Vector2({v.x}f, {v.y}f)");
+                case Vector3 v: return  new ValueFragment($"new Vector3({v.x}f, {v.y}f, {v.z}f)");
+                case Vector4 v: return  new ValueFragment($"new Vector4({v.x}f, {v.y}f, {v.z}f, {v.w}f)");
+                case Quaternion q: return  new ValueFragment($"new Quaternion({q.x}f, {q.y}f, {q.z}f, {q.w}f)");
+                case Color c: return  new ValueFragment($"new Color({c.r}f, {c.g}f, {c.b}f, {c.a}f)");
             }
             
             Type type = value.GetType();
             if (type.IsClass)
             {
-                return $"new {HoistNamespace(type.FullName)}()";
+                return new ValueFragment($"new {HoistNamespace(type.FullName)}()");
             }
 
             // TODO: No clue how to deal with things like AnimationCurves here.
@@ -173,7 +241,7 @@ namespace BlueGraphExamples.ExecGraph
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public string DefaultValue(Type type) 
+        public ValueFragment DefaultValue(Type type) 
         {
             if (type.IsValueType)
             {
@@ -189,14 +257,8 @@ namespace BlueGraphExamples.ExecGraph
         /// <param name="outputPort"></param>
         public void CompileInputs(NodePort outputPort)
         {
-            if (outputPort.node is FuncNode funcNode)
-            {
-                CompileFuncNode(funcNode);
-            }
-            else if (outputPort.node is ICanCompile node)
-            {
-                node.Compile(this);
-            }
+            // For now, just deal with singular ports.
+            CompileNode(outputPort.node);
         }
 
         /// <summary>
@@ -208,16 +270,30 @@ namespace BlueGraphExamples.ExecGraph
             return m_CurrentScope.AlreadyExecutedInScope(node);
         }
 
-        public void CompileFuncNode(FuncNode node)
+        public void CompileNode(AbstractNode node)
         {
+            // Make sure we don't try to compile the same 
+            // node twice to the same scope or higher
             if (AlreadyInScope(node)) 
             {
                 AppendLine($"// Already compiled {node.name} ({node.guid.Substring(0, 8)}) in scope");
                 return;
             }
-
+                
             m_CurrentScope.nodes.Add(node);
+            
+            if (node is FuncNode funcNode)
+            {
+                CompileFuncNode(funcNode);
+            }
+            else if (node is ICanCompile compilableNode)
+            {
+                compilableNode.Compile(this);
+            }
+        }
 
+        protected void CompileFuncNode(FuncNode node)
+        {
             string className = HoistNamespace(node.className);
             string methodName = node.methodName;
             string returnValue = "";
@@ -227,7 +303,7 @@ namespace BlueGraphExamples.ExecGraph
             for (int i = 0; i < node.ports.Count; i++) 
             {
                 NodePort port = node.ports[i];
-                string variableName = PortToVariable(port);
+                string variableName = PortToVariableName(port);
 
                 // Handle return value separately, since it's not an argument
                 if (node.hasReturnValue && i == node.ports.Count - 1)
@@ -248,12 +324,12 @@ namespace BlueGraphExamples.ExecGraph
                     {
                         NodePort outputPort = port.GetConnection(0);
                         CompileInputs(outputPort);
-                        args.Add(PortToVariable(outputPort));
+                        args.Add(PortToVariableName(outputPort));
                     }
                     else
                     {
                         // Constant default (actual inline editables / non default() not yet supported)
-                        args.Add(DefaultValue(port.type));
+                        args.Add(DefaultValue(port.type).ToString());
                     }
                 }
             }
