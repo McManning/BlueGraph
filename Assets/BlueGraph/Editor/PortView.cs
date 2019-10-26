@@ -26,6 +26,7 @@ namespace BlueGraphEditor
             AddToClassList("portView");
             
             visualClass = GetTypeVisualClass(type);
+            tooltip = type.FullName;
         }
     
         public static PortView Create(
