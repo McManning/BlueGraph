@@ -15,7 +15,7 @@ namespace BlueGraphExamples.ExecGraph
 
         [Output] GameObject instance;
 
-        public override ExecNode Execute(ExecData data)
+        public override ICanExec Execute(ExecData data)
         {
             GameObject go = GetInputValue<GameObject>("Prefab", null);
             GameObject pgo = GetInputValue<GameObject>("Parent", null);

@@ -14,14 +14,14 @@ namespace BlueGraphExamples.ExecGraph
             builder.AppendLine("public static void Run()");
             builder.BeginScope();
           
-            var next = GetNextExec();
+            ICanExec next = GetNextExec();
             if (next is ICanCompile node)
             {
                 node.Compile(builder);
             }
             else
             {
-                builder.AppendLine($"// Not ICanCompile {next?.name}");
+                builder.AppendLine($"// Not ICanCompile {(next as AbstractNode).name}");
             }
 
             builder.EndScope();

@@ -22,7 +22,7 @@ namespace BlueGraphExamples.ExecGraph
         
         [Editable] public LogLevel level = LogLevel.Info;
 
-        public override ExecNode Execute(ExecData data)
+        public override ICanExec Execute(ExecData data)
         {
             string value = GetInputValue("Value", this.value);
             object obj = GetInputValue("Obj", this.obj);
@@ -46,13 +46,13 @@ namespace BlueGraphExamples.ExecGraph
             var valueVar = builder.PortToValue(valuePort, value);
             var objVar = builder.PortToValue(objPort, obj);
             
-            if (objVar.fragment != "null")
+            if (objVar.value != "null")
             {
-                objVar.fragment = $" + {objVar}.ToString()";
+                objVar.value = $" + {objVar}.ToString()";
             } 
             else
             {
-                objVar.fragment = "";
+                objVar.value = "";
             }
 
             string method = "Log";

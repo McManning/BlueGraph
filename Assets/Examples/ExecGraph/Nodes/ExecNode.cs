@@ -8,7 +8,7 @@ namespace BlueGraphExamples.ExecGraph
     /// Node that exposes an execution port for both IO. 
     /// Inherit to make a node executable for forward execution. 
     /// </summary>
-    public class ExecNode : AbstractNode
+    public class ExecNode : AbstractNode, ICanExec
     {
         [Input("_execIn", multiple = true)] public ExecData execIn;
         [Output("_execOut", multiple = false)] readonly ExecData execOut;
@@ -18,7 +18,7 @@ namespace BlueGraphExamples.ExecGraph
         /// Override with your custom execution logic. 
         /// </summary>
         /// <returns></returns>
-        public virtual ExecNode Execute(ExecData data)
+        public virtual ICanExec Execute(ExecData data)
         {
             // noop.
             return GetNextExec();
@@ -28,20 +28,20 @@ namespace BlueGraphExamples.ExecGraph
         /// Get the next node that should be executed
         /// </summary>
         /// <returns></returns>
-        public virtual ExecNode GetNextExec(string portName = "_execOut")
+        public virtual ICanExec GetNextExec(string portName = "_execOut")
         {
             NodePort port = GetOutputPort(portName);
             if (!port.IsConnected) {
                 return null;
             }
             
-            if (port.connections[0].node is ExecNode node)
+            if (port.connections[0].node is ICanExec node)
             {
                 return node;
             }
 
             Debug.LogWarning(
-                $"<b>[{name}]</b> Output is not an instance of ExecNode. " +
+                $"<b>[{name}]</b> Output is not an instance of ICanExec. " +
                 $"Cannot execute past this point."
             );
 

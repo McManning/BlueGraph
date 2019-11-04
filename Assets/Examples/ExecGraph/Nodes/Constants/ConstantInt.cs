@@ -3,5 +3,5 @@
 namespace BlueGraphExamples.ExecGraph
 {
     [Node("Constant (int)", module = "ExecGraph/Constant")]
-    public class ConstantInt : ConstantValue<int> { }
+    public class ConstantInt : ConstantValueImpl<int> { }
 }

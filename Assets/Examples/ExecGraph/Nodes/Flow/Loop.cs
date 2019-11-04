@@ -15,7 +15,7 @@ namespace BlueGraphExamples.ExecGraph
         [Output("Count")] int m_currentCount;
         [Output("Then", multiple = false)] readonly ExecData elseExec;
 
-        public override ExecNode Execute(ExecData data)
+        public override ICanExec Execute(ExecData data)
         {
             int count = GetInputValue("Count", this.count);
 
@@ -24,8 +24,8 @@ namespace BlueGraphExamples.ExecGraph
             // This implies we repeat the code from ExecGraph.Execute though
             for (m_currentCount = 0; m_currentCount < count; m_currentCount++)
             {
-                ExecNode next = GetNextExec();
-                while (next)
+                ICanExec next = GetNextExec();
+                while (next != null)
                 {
                     next = next.Execute(data);
                 }
@@ -74,7 +74,7 @@ namespace BlueGraphExamples.ExecGraph
             }
             else
             {
-                builder.AppendLine($"// TODO: Handling no ICanCompile {loopExec?.name}");
+                builder.AppendLine($"// TODO: Handling no ICanCompile {(loopExec as AbstractNode).name}");
             }
             
             builder.EndScope();

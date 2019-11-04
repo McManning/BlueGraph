@@ -33,7 +33,7 @@ namespace BlueGraphExamples.ExecGraph
             // iterate nodes
             Debug.Log("Execute!");
 
-            if (!entryPoint)
+            if (entryPoint == null)
             {
                 Debug.LogError($"<b>[{name}]</b> No EntryPoint node found");
                 return;
@@ -42,7 +42,7 @@ namespace BlueGraphExamples.ExecGraph
             ExecData data = new ExecData(); 
             
             // Execute through the graph until we run out of nodes to execute
-            ExecNode next = entryPoint;
+            ICanExec next = entryPoint;
             int sanityCheck = 0;
             while (next != null)
             {
@@ -63,7 +63,7 @@ namespace BlueGraphExamples.ExecGraph
         /// </summary>
         public void Compile()
         {
-            if (!entryPoint)
+            if (entryPoint == null)
             {
                 Debug.LogError($"<b>[{name}]</b> No EntryPoint node found");
                 return;

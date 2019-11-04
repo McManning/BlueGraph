@@ -13,7 +13,7 @@ namespace BlueGraphExamples.ExecGraph
         [Input] public bool condition;
         [Output("Else", multiple = false)] readonly ExecData elseExec;
 
-        public override ExecNode Execute(ExecData data)
+        public override ICanExec Execute(ExecData data)
         {
             bool condition = GetInputValue("Condition", this.condition);
 
@@ -51,7 +51,7 @@ namespace BlueGraphExamples.ExecGraph
             }
             else
             {
-                builder.AppendLine($"// TODO: Handling no ICanCompile {next?.name}");
+                builder.AppendLine($"// TODO: Handling no ICanCompile {(next as AbstractNode)?.name}");
             }
             
             builder.EndScope();
