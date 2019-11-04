@@ -136,27 +136,31 @@ namespace BlueGraphExamples.ExecGraph
         }
 
         /// <summary>
-        /// Stores either a variable name referencing a value, a  
-        /// stringified representation of a constant value type, 
-        /// or a stringified object constructor
+        /// Representation of some assignable value
         /// </summary>
-        public struct ValueFragment
+        /// <remarks>
+        /// Stringified form can represent either:
+        /// - Variable name referencing a stored value
+        /// - Constant value type (numbers, strings, booleans)
+        /// - Stringified object constructor (new Foo(...))
+        /// </remarks>
+        public struct Assignable
         {
-            public string fragment;
+            public string value;
 
             /// <summary>
-            /// Can this value be treated as `const` to the IL.
+            /// Can this value be treated as const to the IL.
             /// This excludes class instances, structs, etc. 
             /// </summary>
-            public bool isConstant;
+            public bool isConst;
 
-            public ValueFragment(string fragment, bool isConstant = false)
+            public Assignable(string value, bool isConst = false)
             {
-                this.fragment = fragment;
-                this.isConstant = isConstant;
+                this.value = value;
+                this.isConst = isConst;
             }
 
-            public override string ToString() => fragment;
+            public override string ToString() => value;
         }
 
         /// <summary>
@@ -166,7 +170,7 @@ namespace BlueGraphExamples.ExecGraph
         /// <param name="port"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public ValueFragment PortToValue(NodePort port, object defaultValue)
+        public Assignable PortToValue(NodePort port, object defaultValue)
         {
             if (port.IsConnected)
             {
@@ -176,11 +180,11 @@ namespace BlueGraphExamples.ExecGraph
                 CompileInputs(outputPort);
 
                 string varName = PortToVariableName(outputPort);
-                return new ValueFragment(varName, IsConstInScope(varName));
+                return new Assignable(varName, IsConstInScope(varName));
             }
 
             //  Otherwise, inline default value.
-            return Constant(defaultValue);
+            return GetAssignable(defaultValue);
         }
 
         public bool IsConstInScope(string varName)
@@ -198,11 +202,11 @@ namespace BlueGraphExamples.ExecGraph
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public ValueFragment Constant(object value)
+        public Assignable GetAssignable(object value)
         {
             if (value == null)
             {
-                return new ValueFragment("null");
+                return new Assignable("null");
             }
             
             // This is where things get dicey. 
@@ -210,21 +214,21 @@ namespace BlueGraphExamples.ExecGraph
             // structs so they're not all hand crafted here.
             switch (value)
             {
-                case int i: return new ValueFragment(i.ToString(), true);
-                case bool b: return new ValueFragment(b.ToString(), true);
-                case float f: return new ValueFragment($"{f}f", true);
-                case string s: return new ValueFragment($"\"{s}\"", true);
-                case Vector2 v: return  new ValueFragment($"new Vector2({v.x}f, {v.y}f)");
-                case Vector3 v: return  new ValueFragment($"new Vector3({v.x}f, {v.y}f, {v.z}f)");
-                case Vector4 v: return  new ValueFragment($"new Vector4({v.x}f, {v.y}f, {v.z}f, {v.w}f)");
-                case Quaternion q: return  new ValueFragment($"new Quaternion({q.x}f, {q.y}f, {q.z}f, {q.w}f)");
-                case Color c: return  new ValueFragment($"new Color({c.r}f, {c.g}f, {c.b}f, {c.a}f)");
+                case int i: return new Assignable(i.ToString(), true);
+                case bool b: return new Assignable(b.ToString(), true);
+                case float f: return new Assignable($"{f}f", true);
+                case string s: return new Assignable($"\"{s}\"", true);
+                case Vector2 v: return  new Assignable($"new Vector2({v.x}f, {v.y}f)");
+                case Vector3 v: return  new Assignable($"new Vector3({v.x}f, {v.y}f, {v.z}f)");
+                case Vector4 v: return  new Assignable($"new Vector4({v.x}f, {v.y}f, {v.z}f, {v.w}f)");
+                case Quaternion q: return  new Assignable($"new Quaternion({q.x}f, {q.y}f, {q.z}f, {q.w}f)");
+                case Color c: return  new Assignable($"new Color({c.r}f, {c.g}f, {c.b}f, {c.a}f)");
             }
             
             Type type = value.GetType();
             if (type.IsClass)
             {
-                return new ValueFragment($"new {HoistNamespace(type.FullName)}()");
+                return new Assignable($"new {HoistNamespace(type.FullName)}()");
             }
 
             // TODO: No clue how to deal with things like AnimationCurves here.
@@ -241,14 +245,14 @@ namespace BlueGraphExamples.ExecGraph
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public ValueFragment DefaultValue(Type type) 
+        public Assignable DefaultValue(Type type) 
         {
             if (type.IsValueType)
             {
-                return Constant(Activator.CreateInstance(type));
+                return GetAssignable(Activator.CreateInstance(type));
             }
 
-            return Constant(null);
+            return GetAssignable(null);
         }
 
         /// <summary>

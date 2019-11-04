@@ -32,12 +32,12 @@ namespace BlueGraphExamples.ExecGraph
             var bVar = builder.PortToValue(GetInputPort("B"), b);
 
             string varName = builder.PortToVariableName(GetOutputPort(""));
-            string constKeyword = (aVar.isConstant && bVar.isConstant) ? "const " : "";
+            string constKeyword = (aVar.isConst && bVar.isConst) ? "const " : "";
             string returnType = builder.HoistNamespace(typeof(R));
-            string operation = CompileOperation(aVar.fragment, bVar.fragment);
+            string operation = CompileOperation(aVar.value, bVar.value);
 
             // If the operation executes on two constants, also make the operation constant.
-            if (aVar.isConstant && bVar.isConstant)
+            if (aVar.isConst && bVar.isConst)
             {
                 builder.AddConstToScope(varName);
             }
