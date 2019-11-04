@@ -25,7 +25,7 @@ namespace BlueGraph
         
         object m_ReturnValue;
 
-        public void Awake()
+        public virtual void Awake()
         {
             CheckForDelegate();
         }
@@ -69,8 +69,15 @@ namespace BlueGraph
             {
                 // TODO: This is going to probably be slow due to each node
                 // wanting to load it. Probably not cached well.
-                MethodInfo method = Type.GetType(className).GetMethod(methodName);
-                CreateDelegate(method);
+                try
+                {
+                    MethodInfo method = Type.GetType(className).GetMethod(methodName);
+                    CreateDelegate(method);
+                } 
+                catch (Exception e)
+                {
+                    Debug.LogError($"<b>[{name}]</b> Failed to create delegate: {e}");
+                }
             }
         }
         

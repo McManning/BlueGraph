@@ -230,10 +230,14 @@ namespace BlueGraphEditor
             
             // FuncNode.module can override FuncNodeModule.path. 
             string path = attr?.module ?? moduleAttr.path;
-        
+            
+            // FuncNode.classType can override default class type
+            Type classType = attr?.classType ?? typeof(FuncNode);
+
+            Debug.Log($"Ref {classType} for {name}");
             var node = new NodeReflectionData()
             {
-                type = typeof(FuncNode),
+                type = classType,
                 path = path?.Split('/'),
                 name = name,
                 tooltip = "TODO!",
@@ -406,9 +410,8 @@ namespace BlueGraphEditor
             var nodeEditors = new Dictionary<Type, Type>();
             foreach (var t in types) 
             {
-                Debug.Log(t);
-                var attr = t.GetCustomAttribute<CustomNodeViewAttribute>();
-                if (attr != null)
+                var attrs = t.GetCustomAttributes<CustomNodeViewAttribute>();
+                foreach (var attr in attrs)
                 {
                     nodeEditors[attr.nodeType] = t;
                 }

@@ -135,9 +135,16 @@ namespace BlueGraph
         /// </summary>
         public string returnName;
 
+        /// <summary>
+        /// Class to instantiate while wrapping each function
+        /// as a node on the graph. Must be a type that inherits
+        /// from `FuncNode`. 
+        /// </summary>
+        public Type classType;
+
         public FuncNodeAttribute(string name = null)
         {
-            this.name = name;    
+            this.name = name;
         }
     }
 

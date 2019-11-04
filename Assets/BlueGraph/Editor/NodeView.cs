@@ -10,7 +10,7 @@ using BlueGraph;
 
 namespace BlueGraphEditor
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNodeViewAttribute : Attribute
     {
         public Type nodeType;
