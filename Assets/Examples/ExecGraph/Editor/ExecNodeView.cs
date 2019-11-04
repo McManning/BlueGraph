@@ -7,6 +7,7 @@ using BlueGraphEditor;
 namespace BlueGraphExamples.ExecGraph
 {
     [CustomNodeView(typeof(ExecNode))]
+    [CustomNodeView(typeof(ExecFuncNode))]
     class ExecNodeView : NodeView
     {
         public override void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
@@ -20,8 +21,9 @@ namespace BlueGraphExamples.ExecGraph
             PortView inView = GetInputPort("_execIn");
             PortView outView = GetOutputPort("_execOut");
 
-            inView.AddToClassList("execInPortView");
-            outView.AddToClassList("execOutPortView");
+            if (inView != null) inView.AddToClassList("execInPortView");
+            
+            if (outView != null) outView.AddToClassList("execOutPortView");
         }
     }
 }
