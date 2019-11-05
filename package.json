@@ -1,0 +1,39 @@
+{
+    "name": "com.github.mcmanning.bluegraph",
+    "displayName": "BlueGraph",
+    "version": "0.1.0",
+    "unity": "2018.1",
+    "description": "Visual Scripting Framework for Unity",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/McManning/BlueGraph",
+        "revision": ""
+    },
+    "author": {
+        "name": "Chase McManning",
+        "email": "cmcmanning@gmail.com",
+        "url": "https://github.com/McManning"
+    },
+    "samples": [
+        {
+            "displayName": "DynamicVector",
+            "description": "Description for DynamicVector",
+            "path": "Samples~/DynamicVector"
+        },
+        {
+            "displayName": "ExecGraph",
+            "description": "Description for ExecGraph",
+            "path": "Samples~/ExecGraph"
+        },
+        {
+            "displayName": "FuncNodes",
+            "description": "Description for FuncNodes",
+            "path": "Samples~/FuncNodes"
+        },
+        {
+            "displayName": "Misc",
+            "description": "Description for Misc",
+            "path": "Samples~/Misc"
+        } 
+    ]
+}
