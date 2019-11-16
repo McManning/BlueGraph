@@ -288,6 +288,18 @@ namespace BlueGraphEditor
             }
         }
 
+        /// <summary>
+        /// Dirty all nodes on the canvas for a complete refresh
+        /// </summary>
+        public void DirtyAll()
+        {
+            nodes.ForEach((node) =>
+            {
+                if (node is ICanDirty dnode)
+                    m_Dirty.Add(dnode);
+            });
+        }
+
         public void Update()
         {
             // Propagate change on dirty elements
