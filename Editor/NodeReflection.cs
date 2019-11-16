@@ -94,6 +94,64 @@ namespace BlueGraphEditor
 
             return false;
         }
+        
+        /// <summary>
+        /// Add ports based on attributes on the class fields 
+        /// </summary>
+        /// <param name="type"></param>
+        public void AddPortsFromClass(Type type)
+        {
+            var fields = new List<FieldInfo>(type.GetFields(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+            ));
+        
+            // Extract port and editable metadata from each tagged field
+            for (int i = 0; i < fields.Count; i++)
+            {
+                object[] attribs = fields[i].GetCustomAttributes(true);
+                for (int j = 0; j < attribs.Length; j++)
+                {
+                    if (attribs[j] is InputAttribute)
+                    {
+                        var attr = attribs[j] as InputAttribute;
+                        
+                        ports.Add(new PortReflectionData()
+                        {
+                            type = fields[i].FieldType,
+                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            fieldName = fields[i].Name,
+                            isInput = true,
+                            isMulti = attr.multiple,
+                            isEditable = attr.editable
+                        });
+                    }
+                    else if (attribs[j] is OutputAttribute)
+                    {
+                        var attr = attribs[j] as OutputAttribute;
+                        
+                        ports.Add(new PortReflectionData()
+                        {
+                            type = fields[i].FieldType,
+                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            fieldName = fields[i].Name,
+                            isInput = false,
+                            isMulti = attr.multiple,
+                            isEditable = false
+                        });
+                    }
+                    else if (attribs[j] is EditableAttribute)
+                    {
+                        var attr = attribs[j] as EditableAttribute;
+                        
+                        editables.Add(new EditableReflectionData()
+                        {
+                            type = fields[i].FieldType,
+                            fieldName = fields[i].Name
+                        });
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Create a node instance from the reflected type data
@@ -126,6 +184,20 @@ namespace BlueGraphEditor
             }
 
             return node;
+        }
+
+        public override string ToString()
+        {
+            List<string> inputs = new List<string>();
+            List<string> outputs = new List<string>();
+
+            foreach (var port in ports)
+            {
+                if (port.isInput) inputs.Add(port.portName);
+                else if (!port.isEditable) outputs.Add(port.portName);
+            }
+
+            return $"<{name}, IN: {string.Join(", ", inputs)}, OUT: {string.Join(", ", outputs)}>";
         }
     }
     
@@ -217,6 +289,13 @@ namespace BlueGraphEditor
                     nodes[$"{type.FullName}|{method.Name}"] = LoadMethodReflection(method, attr);
                 }
             }
+
+            // Debug dump types
+            foreach (var node in nodes)
+            {
+                
+                Debug.Log($"{node.Key} : {node.Value.ToString()}");
+            }
         
             k_NodeTypes = nodes;
             return k_NodeTypes;
@@ -270,7 +349,11 @@ namespace BlueGraphEditor
                     isInput = false
                 });
             }
-            
+
+            // Merge in any reflection data from the wrapper class itself
+            // Specifically if it contains additional ports to include
+            node.AddPortsFromClass(classType);
+
             return node;
         }
 
@@ -292,65 +375,7 @@ namespace BlueGraphEditor
                 tooltip = nodeAttr.help
             };
 
-            var fields = new List<FieldInfo>(type.GetFields(
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
-            ));
-        
-            // Iterate through inherited private fields as well
-            var temp = type;
-            while ((temp = temp.BaseType) != typeof(AbstractNode))
-            {
-                fields.AddRange(temp.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
-            }
-        
-            // Extract port and editable metadata from each tagged field
-            var ports = new List<PortReflectionData>();
-            for (int i = 0; i < fields.Count; i++)
-            {
-                object[] attribs = fields[i].GetCustomAttributes(true);
-                for (int j = 0; j < attribs.Length; j++)
-                {
-                    if (attribs[j] is InputAttribute)
-                    {
-                        var attr = attribs[j] as InputAttribute;
-                        
-                        node.ports.Add(new PortReflectionData()
-                        {
-                            type = fields[i].FieldType,
-                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
-                            fieldName = fields[i].Name,
-                            isInput = true,
-                            isMulti = attr.multiple,
-                            isEditable = attr.editable
-                        });
-                    }
-                    else if (attribs[j] is OutputAttribute)
-                    {
-                        var attr = attribs[j] as OutputAttribute;
-
-                        node.ports.Add(new PortReflectionData()
-                        {
-                            type = fields[i].FieldType,
-                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
-                            fieldName = fields[i].Name,
-                            isInput = false,
-                            isMulti = attr.multiple,
-                            isEditable = false
-                        });
-                    }
-                    else if (attribs[j] is EditableAttribute)
-                    {
-                        var attr = attribs[j] as EditableAttribute;
-                        
-                        node.editables.Add(new EditableReflectionData()
-                        {
-                            type = fields[i].FieldType,
-                            fieldName = fields[i].Name
-                        });
-                    }
-                }
-            }
-
+            node.AddPortsFromClass(type);
             return node;
         }
         
