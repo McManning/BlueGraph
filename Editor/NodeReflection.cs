@@ -364,7 +364,7 @@ namespace BlueGraphEditor
         /// <returns></returns>
         private static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
         {
-            string name = nodeAttr.name ?? type.Name;
+            string name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
             string path = nodeAttr.module;
             
             var node = new NodeReflectionData()
