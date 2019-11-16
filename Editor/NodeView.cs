@@ -106,6 +106,7 @@ namespace BlueGraphEditor
         {
             var field = new PropertyField(prop);
             field.Bind(m_SerializedNode);
+            field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
             
             extensionContainer.Add(field);
         }
@@ -158,6 +159,17 @@ namespace BlueGraphEditor
             return outputs.Find((port) => port.IsCompatibleWith(input));
         }
 
+        /// <summary>
+        /// A property has been updated, either by a port or a connection 
+        /// </summary>
+        public virtual void OnPropertyChange()
+        {
+            Debug.Log($"{name} propchange");
+
+            var canvas = GetFirstAncestorOfType<CanvasView>();
+            canvas?.Dirty(this);
+        }
+        
         /// <summary>
         /// Dirty this node in response to a change in connectivity. Invalidate
         /// any cache in prep for an OnUpdate() followup call. 
