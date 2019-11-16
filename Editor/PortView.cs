@@ -36,11 +36,9 @@ namespace BlueGraphEditor
         }
     
         public static PortView Create(
-            NodePort port, 
-            SerializedProperty prop, 
+            NodePort port,
             Type type,
-            IEdgeConnectorListener connectorListener,
-            bool hasPropertyEditor
+            IEdgeConnectorListener connectorListener
         ) {
             var view = new PortView(
                 Orientation.Horizontal, 
@@ -61,18 +59,20 @@ namespace BlueGraphEditor
             // view.m_ConnectorText.text = refPort.displayName;
 
             view.AddManipulator(view.m_EdgeConnector);
-
-            // Bind to the underlying field
-            if (prop != null && hasPropertyEditor)
-            {
-                view.m_PropertyField = new PropertyField(prop, " ");
-                view.m_PropertyField.Bind(prop.serializedObject);
-                view.m_ConnectorBox.parent.Add(view.m_PropertyField);
-            }
-
             return view;
         }
 
+        public void SetPropertyField(PropertyField field)
+        {
+            if (m_PropertyField != null)
+            {
+                m_ConnectorBox.parent.Remove(m_PropertyField);
+            }
+
+            m_PropertyField = field;
+            m_ConnectorBox.parent.Add(m_PropertyField);
+        }
+        
         /// <summary>
         /// Return true if this port can be connected with an edge to the given port
         /// </summary>

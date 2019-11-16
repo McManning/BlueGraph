@@ -112,27 +112,27 @@ namespace BlueGraphEditor
 
         protected virtual void AddInputPort(NodePort port)
         {
-            var view = PortView.Create(
-                port, 
-                m_SerializedNode.FindProperty(port.fieldName), 
-                port.type,
-                m_ConnectorListener,
-                true
-            );
-            
+            var view = PortView.Create(port, port.type, m_ConnectorListener);
+
+            // If we want to display an inline editable field as part 
+            // of the port, create a new PropertyField and bind it. 
+            var prop = m_SerializedNode.FindProperty(port.fieldName);
+            if (prop != null)
+            {
+                var field = new PropertyField(prop, " ");
+                field.Bind(m_SerializedNode);
+                field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
+
+                view.SetPropertyField(field);
+            }
+
             inputs.Add(view);
             inputContainer.Add(view);
         }
         
         protected virtual void AddOutputPort(NodePort port)
         {
-            var view = PortView.Create(
-                port,
-                m_SerializedNode.FindProperty(port.fieldName), 
-                port.type,
-                m_ConnectorListener,
-                false
-            );
+            var view = PortView.Create(port, port.type, m_ConnectorListener);
             
             outputs.Add(view);
             outputContainer.Add(view);
