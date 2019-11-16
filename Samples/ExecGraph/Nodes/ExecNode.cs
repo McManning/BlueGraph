@@ -11,7 +11,7 @@ namespace BlueGraphExamples.ExecGraph
     public class ExecNode : AbstractNode, ICanExec
     {
         [Input("_execIn", multiple = true)] public ExecData execIn;
-        [Output("_execOut", multiple = false)] readonly ExecData execOut;
+        [Output("_execOut", multiple = false)] protected readonly ExecData execOut;
 
         /// <summary>
         /// Execute this node and return the next node to be executed.

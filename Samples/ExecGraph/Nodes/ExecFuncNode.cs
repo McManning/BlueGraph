@@ -10,7 +10,7 @@ namespace BlueGraphExamples.ExecGraph
     public class ExecFuncNode : FuncNode, ICanExec
     {
         public ExecData execIn;
-        readonly ExecData execOut;
+        protected readonly ExecData execOut;
         
         public override void Awake()
         {
