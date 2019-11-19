@@ -68,7 +68,7 @@ namespace BlueGraph
             if (port == null)
             {
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Unknown port name `{name}`. Returning default."
+                    $"<b>[{this.name}]</b> Unknown input port name `{name}`. Returning default."
                 );
                 return defaultValue;
             }
@@ -85,7 +85,7 @@ namespace BlueGraph
             {
                 // Can't ChangeType a null when expecting a value type. Bail.
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Received null on input {name}. " +
+                    $"<b>[{this.name}]</b> Received null on input port `{name}`. " +
                     $"Expected value type {typeof(T).FullName}. " +
                     $"Returning default."
                 );
@@ -105,8 +105,8 @@ namespace BlueGraph
             catch (Exception e)
             {
                 Debug.LogError(
-                    $"<b>[{this.name}]</b> Could not cast output `{conn.portName}` with type `{output.GetType()}` " +
-                    $"to input `{this.name}` type `{typeof(T)}`. " +
+                    $"<b>[{this.name}]</b> Could not cast output port `{conn.portName}` with type `{output.GetType()}` " +
+                    $"to input port `{this.name}` type `{typeof(T)}`. " +
                     $"Returning default."
                 );
             }
