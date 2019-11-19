@@ -1,15 +1,18 @@
 ﻿
 .nodeView #title {
 	background-color: #3B4C64;
+	height: 30px;
 }
 
 .nodeView #contents > #top > #input {
 	background-color: #393A40;
+	opacity: 0.95;
 }
 
 .nodeView #contents > #top > #output {
 	flex: 0 0 auto;
 	background-color: #232932;
+	opacity: 0.95;
 }
 
 .nodeView #contents
@@ -30,6 +33,7 @@
 
 .nodeView #collapsible-area {
 	background-color: #3F3F3F;
+	opacity: 0.95;
 }
 
 .nodeView #extension {
