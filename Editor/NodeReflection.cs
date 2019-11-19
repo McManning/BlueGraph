@@ -289,14 +289,7 @@ namespace BlueGraphEditor
                     nodes[$"{type.FullName}|{method.Name}"] = LoadMethodReflection(method, attr);
                 }
             }
-
-            // Debug dump types
-            foreach (var node in nodes)
-            {
-                
-                Debug.Log($"{node.Key} : {node.Value.ToString()}");
-            }
-        
+            
             k_NodeTypes = nodes;
             return k_NodeTypes;
         }
@@ -312,8 +305,7 @@ namespace BlueGraphEditor
             
             // FuncNode.classType can override default class type
             Type classType = attr?.classType ?? typeof(FuncNode);
-
-            Debug.Log($"Ref {classType} for {name}");
+            
             var node = new NodeReflectionData()
             {
                 type = classType,
