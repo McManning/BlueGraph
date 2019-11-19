@@ -124,8 +124,11 @@ namespace BlueGraphEditor
                     field.Bind(m_SerializedNode);
                     field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
 
-                view.SetPropertyField(field);
+                    var container = new VisualElement();
+                    container.AddToClassList("property-field-container");
+                    container.Add(field);
 
+                    view.SetEditorField(container);
                 }
             }
             

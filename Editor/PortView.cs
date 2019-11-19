@@ -14,12 +14,12 @@ namespace BlueGraphEditor
         public NodePort target;
 
         /// <summary>
-        /// Should the inline PropertyField disappear once one or more
+        /// Should the inline editor field disappear once one or more
         /// connections have been made to this port view
         /// </summary>
-        public bool hidePropertyWhenConnected = true;
+        public bool hideEditorFieldOnConnection = true;
 
-        VisualElement m_PropertyField;
+        VisualElement m_EditorField;
         
         protected PortView(
             Orientation portOrientation, 
@@ -62,15 +62,15 @@ namespace BlueGraphEditor
             return view;
         }
 
-        public void SetPropertyField(PropertyField field)
+        public void SetEditorField(VisualElement field)
         {
-            if (m_PropertyField != null)
+            if (m_EditorField != null)
             {
-                m_ConnectorBox.parent.Remove(m_PropertyField);
+                m_ConnectorBox.parent.Remove(m_EditorField);
             }
 
-            m_PropertyField = field;
-            m_ConnectorBox.parent.Add(m_PropertyField);
+            m_EditorField = field;
+            m_ConnectorBox.parent.Add(m_EditorField);
         }
         
         /// <summary>
@@ -149,14 +149,14 @@ namespace BlueGraphEditor
         /// </summary>
         public void OnUpdate()
         {
-            if (connected && m_PropertyField != null && hidePropertyWhenConnected)
+            if (connected && m_EditorField != null && hideEditorFieldOnConnection)
             {
-                m_PropertyField.style.display = DisplayStyle.None;
+                m_EditorField.style.display = DisplayStyle.None;
             }
 
-            if (!connected && m_PropertyField != null)
+            if (!connected && m_EditorField != null)
             {
-                m_PropertyField.style.display = DisplayStyle.Flex;
+                m_EditorField.style.display = DisplayStyle.Flex;
             }
         }
     }
