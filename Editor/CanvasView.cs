@@ -88,16 +88,10 @@ namespace BlueGraphEditor
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
-            // Dirty moved elements to update the target assets
             if (change.movedElements != null)
             {
                 foreach (var element in change.movedElements)
                 {
-                    if (element is ICanDirty)
-                    {
-                        Dirty(element as ICanDirty);
-                    }
-
                     // TODO: Move/optimize
                     if (element is NodeView)
                     {
@@ -162,7 +156,6 @@ namespace BlueGraphEditor
                 }
             }
         }
-        
         public void CreateNode(NodeReflectionData data, Vector2 screenPosition, PortView connectedPort = null)
         {
             var windowRoot = m_EditorWindow.rootVisualElement;
