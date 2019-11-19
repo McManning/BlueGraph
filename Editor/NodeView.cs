@@ -44,8 +44,6 @@ namespace BlueGraphEditor
             SetPosition(new Rect(node.position, Vector2.one));
             m_ConnectorListener = connectorListener;
             title = node.name;
-
-            Debug.Log("NODE POS: " + GetPosition());
             
             m_SerializedNode = new SerializedObject(node);
             
@@ -117,16 +115,20 @@ namespace BlueGraphEditor
 
             // If we want to display an inline editable field as part 
             // of the port, create a new PropertyField and bind it. 
-            var prop = m_SerializedNode.FindProperty(port.fieldName);
-            if (prop != null)
+            if (port.fieldName != null)
             {
-                var field = new PropertyField(prop, " ");
-                field.Bind(m_SerializedNode);
-                field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
+                var prop = m_SerializedNode.FindProperty(port.fieldName);
+                if (prop != null)
+                {
+                    var field = new PropertyField(prop, " ");
+                    field.Bind(m_SerializedNode);
+                    field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
 
                 view.SetPropertyField(field);
-            }
 
+                }
+            }
+            
             inputs.Add(view);
             inputContainer.Add(view);
         }

@@ -167,14 +167,22 @@ namespace BlueGraphEditor
             {
                 // Now it's basically everything from reflection.
                 // TODO Get rid of reflection?
-                node.AddPort(new NodePort() {
+                var nodePort = new NodePort() {
                     node = node,
                     portName = port.portName,
                     isMulti = port.isMulti,
                     isInput = port.isInput,
-                    type = port.type,
-                    fieldName = port.fieldName
-                });
+                    type = port.type
+                };
+
+                // Only pass the field name along if we allow
+                // inline editing of the port
+                if (port.isEditable)
+                {
+                    nodePort.fieldName = port.fieldName;
+                }
+
+                node.AddPort(nodePort);
             }
             
             // If we spawned a FuncNode, bind it to the method. 
