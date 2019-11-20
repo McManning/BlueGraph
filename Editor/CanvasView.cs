@@ -93,9 +93,9 @@ namespace BlueGraphEditor
                 foreach (var element in change.movedElements)
                 {
                     // TODO: Move/optimize
-                    if (element is NodeView)
+                    if (element is NodeView node)
                     {
-                        UpdateCommentLink(element as NodeView);
+                        UpdateCommentLink(node);
                     }
                 }
             }
@@ -104,17 +104,22 @@ namespace BlueGraphEditor
             {
                 foreach (var element in change.elementsToRemove)
                 {
-                    if (element is NodeView)
+                    if (element is NodeView node)
                     {
-                        DestroyNode(element as NodeView);
+                        DestroyNode(node);
                     }
-                    else if (element is Edge)
+                    else if (element is Edge edge)
                     {
-                        DestroyEdge(element as Edge);
+                        DestroyEdge(edge);
                     }
-                    else if (element is CommentView)
+                    else if (element is CommentView comment)
                     {
-                        DestroyComment(element as CommentView);
+                        DestroyComment(comment);
+                    }
+                    
+                    if (element is ICanDirty canDirty)
+                    {
+                        m_Dirty.Remove(canDirty);
                     }
                 }
                 
