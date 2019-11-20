@@ -41,7 +41,7 @@ namespace BlueGraphEditor
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
-            SetPosition(new Rect(node.position, Vector2.one));
+            SetPosition(new Rect(node.graphPosition, Vector2.one));
             m_ConnectorListener = connectorListener;
             title = node.name;
             
@@ -206,13 +206,13 @@ namespace BlueGraphEditor
                 return position;
             }
             
-            return new Rect(target.position, Vector2.one);
+            return new Rect(target.graphPosition, Vector2.one);
         }
 
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            target.position = newPos.position;
+            target.graphPosition = newPos.position;
         }
         
         protected void OnTooltip(TooltipEvent evt)

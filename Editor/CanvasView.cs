@@ -167,7 +167,7 @@ namespace BlueGraphEditor
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
             var node = data.CreateInstance();
-            node.position = graphMousePosition;
+            node.graphPosition = graphMousePosition;
 
             m_Graph.AddNode(node);
             
@@ -386,7 +386,7 @@ namespace BlueGraphEditor
                 
                 foreach (var node in nodeMap)
                 {
-                    node.Value.SetPosition(new Rect(node.Key.position + delta, Vector2.one));
+                    node.Value.SetPosition(new Rect(node.Key.graphPosition + delta, Vector2.one));
                 }
             }
 

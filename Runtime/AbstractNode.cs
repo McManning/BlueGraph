@@ -13,7 +13,7 @@ namespace BlueGraph
         public List<NodePort> ports = new List<NodePort>();
         
         /// Graph metadata
-        public Vector2 position;
+        public Vector2 graphPosition;
 
         public void RegenerateGuid()
         {
