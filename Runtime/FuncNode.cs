@@ -76,7 +76,7 @@ namespace BlueGraph
                 } 
                 catch (Exception e)
                 {
-                    Debug.LogError($"<b>[{name}]</b> Failed to create delegate: {e}");
+                    Debug.LogError($"<b>[{name}]</b> Failed to create delegate: {e}", this);
                 }
             }
         }
@@ -236,7 +236,11 @@ namespace BlueGraph
                         }
                         catch (Exception e)
                         {
-                            Debug.LogError($"<b>[{name}]</b>: Cannot convert input port `{port.portName}` value to type `{port.type}`");
+                            Debug.LogError(
+                                $"<b>[{name}]</b>: Cannot convert input port " +
+                                $"`{port.portName}` value to type `{port.type}`", 
+                                this
+                            );
                         }
                     }
                     // TODO: if value is null and port.type is a value type, ChangeType will
@@ -254,7 +258,7 @@ namespace BlueGraph
             } 
             catch (Exception e)
             {
-                Debug.LogError($"<b>[{name}]</b>: Delegate exception: {e}");
+                Debug.LogError($"<b>[{name}]</b>: Delegate exception: {e}", this);
                 // TODO: Don't LogError, just throw an error status onto the node UI
                 // (done in the view during execution - not the nodes themselves?)
             }

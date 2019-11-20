@@ -33,7 +33,8 @@ namespace BlueGraph
         public virtual object GetOutputValue(string name)
         {
             Debug.LogWarning(
-                $"<b>[{this.name}]</b> Invalid output port `{name}`. Returning null."
+                $"<b>[{this.name}]</b> Invalid output port `{name}`. Returning null.",
+                this
             );
 
             return null;
@@ -48,7 +49,8 @@ namespace BlueGraph
             if (port == null)
             {
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Invalid input port `{name}`. Returning default."
+                    $"<b>[{this.name}]</b> Invalid input port `{name}`. Returning default.",
+                    this
                 );
                 return defaultValue;
             }
@@ -68,7 +70,8 @@ namespace BlueGraph
             if (port == null)
             {
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Unknown input port name `{name}`. Returning default."
+                    $"<b>[{this.name}]</b> Unknown input port name `{name}`. Returning default.",
+                    this
                 );
                 return defaultValue;
             }
@@ -87,7 +90,8 @@ namespace BlueGraph
                 Debug.LogWarning(
                     $"<b>[{this.name}]</b> Received null on input port `{name}`. " +
                     $"Expected value type {typeof(T).FullName}. " +
-                    $"Returning default."
+                    $"Returning default.",
+                    this
                 );
                 return defaultValue;
             }
@@ -107,7 +111,8 @@ namespace BlueGraph
                 Debug.LogError(
                     $"<b>[{this.name}]</b> Could not cast output port `{conn.portName}` with type `{output.GetType()}` " +
                     $"to input port `{this.name}` type `{typeof(T)}`. " +
-                    $"Returning default."
+                    $"Returning default.", 
+                    this
                 );
             }
 

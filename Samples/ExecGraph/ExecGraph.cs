@@ -35,7 +35,7 @@ namespace BlueGraphExamples.ExecGraph
 
             if (entryPoint == null)
             {
-                Debug.LogError($"<b>[{name}]</b> No EntryPoint node found");
+                Debug.LogError($"<b>[{name}]</b> No EntryPoint node found", this);
                 return;
             }
 
@@ -52,7 +52,7 @@ namespace BlueGraphExamples.ExecGraph
                 sanityCheck++;
                 if (sanityCheck > 2000)
                 {
-                    Debug.LogError("Potential infinite loop detected. Stopping early.");
+                    Debug.LogError("Potential infinite loop detected. Stopping early.", this);
                     break;
                 }
             }
@@ -65,7 +65,7 @@ namespace BlueGraphExamples.ExecGraph
         {
             if (entryPoint == null)
             {
-                Debug.LogError($"<b>[{name}]</b> No EntryPoint node found");
+                Debug.LogError($"<b>[{name}]</b> No EntryPoint node found", this);
                 return;
             }
 
@@ -86,7 +86,8 @@ namespace BlueGraphExamples.ExecGraph
             {
                 Debug.LogError(
                     $"<b>[{name}]</b> Entry point node `{entryPoint.name}` " +
-                    $"must implement interface `ICanCompile`"
+                    $"must implement interface `ICanCompile`", 
+                    this
                 );
             }
         }

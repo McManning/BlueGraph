@@ -42,7 +42,8 @@ namespace BlueGraphExamples.ExecGraph
 
             Debug.LogWarning(
                 $"<b>[{name}]</b> Output is not an instance of ICanExec. " +
-                $"Cannot execute past this point."
+                $"Cannot execute past this point.",
+                this
             );
 
             return null;

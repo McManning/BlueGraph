@@ -416,11 +416,19 @@ namespace BlueGraphEditor
                         
                             if (inPort == null)
                             {
-                                Debug.LogError($"Could not connect `{node.Value.title}:{port.portName}` -> `{conn.node.name}:{conn.portName}`. Input port `{port.portName}` no longer exists.");
+                                Debug.LogError(
+                                    $"Could not connect `{node.Value.title}:{port.portName}` -> `{conn.node.name}:{conn.portName}`. " +
+                                    $"Input port `{port.portName}` no longer exists.",
+                                    node.Key
+                                );
                             }
                             else if (outPort == null)
                             {
-                                Debug.LogError($"Could not connect `{conn.node.name}:{conn.portName}` to `{node.Value.name}:{port.portName}`. Output port `{conn.portName}` no longer exists.");
+                                Debug.LogError(
+                                    $"Could not connect `{conn.node.name}:{conn.portName}` to `{node.Value.name}:{port.portName}`. " +
+                                    $"Output port `{conn.portName}` no longer exists.",
+                                    conn.node
+                                );
                             }
                             else
                             {
