@@ -97,7 +97,7 @@ namespace BlueGraph
             }
             
             // Short circuit Convert.ChangeType if it's already the expected type
-            if (output == null || output.GetType() == typeof(T))
+            if (output == null || output.GetType() == typeof(T) || output is T)
             {
                 return (T)output;
             }
