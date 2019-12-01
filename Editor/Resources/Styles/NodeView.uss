@@ -5,12 +5,13 @@
 }
 
 .nodeView #contents > #top > #input {
+	flex: 100 0 auto; /* TODO: I don't like this grow 100 prop */
 	background-color: #393A40;
 	opacity: 0.95;
 }
 
 .nodeView #contents > #top > #output {
-	flex: 0 0 auto;
+	flex: 1 0 auto;
 	background-color: #232932;
 	opacity: 0.95;
 }
@@ -44,3 +45,24 @@
 .nodeView:selected > #selection-border {
 	border-color: #FFD244; /* Orange/yellow */
 }
+
+.nodeView #input {
+	display: none;
+}
+
+.nodeView #output {
+	display: none;
+}
+
+.nodeView #contents {
+	flex-direction: column;
+}
+
+.nodeView.hasInputs #input {
+	display: flex;
+}
+
+.nodeView.hasOutputs #output {
+	display: flex;
+}
+

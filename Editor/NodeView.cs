@@ -98,6 +98,10 @@ namespace BlueGraphEditor
             
             // Toggle visibility of the extension container
             RefreshExpandedState();
+
+            // Update state classes
+            EnableInClassList("hasInputs", inputs.Count > 0);
+            EnableInClassList("hasOutputs", outputs.Count > 0);
         }
 
         protected void AddEditableField(SerializedProperty prop)
