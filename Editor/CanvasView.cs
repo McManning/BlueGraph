@@ -16,7 +16,7 @@ namespace BlueGraphEditor
     {
         public Label title;
         
-        public List<CommentView> comments = new List<CommentView>();
+        List<CommentView> m_CommentViews = new List<CommentView>();
         
         GraphEditor m_GraphEditor;
         Graph m_Graph;
@@ -226,7 +226,7 @@ namespace BlueGraphEditor
 
         public void DestroyComment(CommentView comment)
         {
-            comments.Remove(comment);
+            m_CommentViews.Remove(comment);
             m_Graph.comments.Remove(comment.target);
         }
 
@@ -325,7 +325,7 @@ namespace BlueGraphEditor
             }
 
             // Find new comment associations
-            foreach (var comment in comments)
+            foreach (var comment in m_CommentViews)
             {
                 Debug.Log("Try overlap");
                 if (comment.OverlapsElement(node))
@@ -526,7 +526,7 @@ namespace BlueGraphEditor
             
 
             m_Graph.comments.Add(comment);
-            comments.Add(commentView);
+            m_CommentViews.Add(commentView);
             AddElement(commentView);
 
             Dirty(commentView);
