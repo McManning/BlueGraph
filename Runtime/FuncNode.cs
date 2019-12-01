@@ -20,6 +20,11 @@ namespace BlueGraph
         public string className;
         public string methodName;
         public bool hasReturnValue;
+
+        // Number of arguments to pass into the method.
+        // TODO: This is kind of a hack to support adding new ports via a class interface
+        // that are in addition to the standard wrapped method ports. 
+        public int argCount; 
         
         Func<object[], object> m_Func;
         
@@ -41,6 +46,8 @@ namespace BlueGraph
             // Return value is always the LAST port in the list
             // TODO: Technically a slot in args - we just don't write back. Should we?
             // Can then eliminate this check here and just use the loop below. 
+            // Can't assume it's called "Result" either, could be anything.
+            // Also - not necessarily last port if we add ports via [Output]
             if (name == ports[ports.Count - 1].portName)
             {
                 return m_ReturnValue;
@@ -71,7 +78,18 @@ namespace BlueGraph
                 // wanting to load it. Probably not cached well.
                 try
                 {
-                    MethodInfo method = Type.GetType(className).GetMethod(methodName);
+                    Type classType = Type.GetType(className);
+                    if (classType == null)
+                    {
+                        throw new Exception($"Missing class {className}");
+                    }
+
+                    MethodInfo method = classType.GetMethod(methodName);
+                    if (method == null)
+                    {
+                        throw new Exception($"Missing method {className}.{methodName}");
+                    }
+
                     CreateDelegate(method);
                 } 
                 catch (Exception e)
@@ -124,8 +142,7 @@ namespace BlueGraph
             // to an interior variable and then copied back onto the input array.
             List<ParameterExpression> outputs = new List<ParameterExpression>();
             
-            // First port is the return value. Skip as a param.
-            int paramsLen = hasReturnValue ? ports.Count - 1 : ports.Count;
+            int paramsLen = method.GetParameters().Length;
 
             Expression[] paramsExps = new Expression[paramsLen];
             List<Expression> blockExps = new List<Expression>();
@@ -185,6 +202,14 @@ namespace BlueGraph
             {
                 // Return void, just insert the method call at the beginning with no assignment
                 blockExps.Insert(0, Expression.Call(method, paramsExps));
+                
+                // TODO: Ideally, we don't do this fake integer assignment here
+                // call it as an Action<object[]>. It'd require some refactoring though.
+                ParameterExpression ret = Expression.Variable(typeof(int), "ret");
+                outputs.Add(ret);
+                
+                blockExps.Add(Expression.Assign(ret, Expression.Constant(0)));
+                blockExps.Add(Expression.Convert(ret, typeof(object)));
             }
             
             BlockExpression block = Expression.Block(outputs, blockExps);
@@ -195,6 +220,7 @@ namespace BlueGraph
             
             // Finally compile the expression into a callable delegate
             LambdaExpression lambdaExp = Expression.Lambda(block, argsExp);
+            
             m_Func = (Func<object[], object>)lambdaExp.Compile();
             
             Debug.Log(lambdaExp);
