@@ -14,7 +14,22 @@ namespace BlueGraphEditor
     /// </summary>
     public class CanvasView : GraphView
     {
-        public Label title;
+        /// <summary>
+        /// Title displayed in the bottom left of the canvas
+        /// </summary>
+        public string Title
+        {
+            get
+            {
+                return m_title.text;
+            }
+            set
+            {
+                m_title.text = value;
+            }
+        }
+        
+        Label m_title;
         
         List<CommentView> m_CommentViews = new List<CommentView>();
         
@@ -62,11 +77,10 @@ namespace BlueGraphEditor
         
             RegisterCallback<GeometryChangedEvent>(OnFirstResize);
 
-            title = new Label();
-            title.text = "BLUEGRAPH";
-            title.AddToClassList("canvasViewTitle");
+            m_title = new Label();
+            m_title.AddToClassList("canvasViewTitle");
 
-            Add(title);
+            Add(m_title);
             
             // Add a grid renderer *behind* content containers
             Insert(0, new GridBackground());
@@ -371,6 +385,12 @@ namespace BlueGraphEditor
             {
                 var editorType = NodeReflection.GetNodeEditorType(node.GetType());
                 var element = Activator.CreateInstance(editorType) as NodeView;
+
+                if (node == null)
+                {
+                    Debug.LogError("Null node");
+                }
+
                 element.Initialize(node, m_EdgeListener);
                 AddElement(element);
                 
@@ -408,6 +428,15 @@ namespace BlueGraphEditor
 
                     foreach (var conn in port.connections)
                     {
+                        if (conn.node == null)
+                        {
+                            Debug.LogError(
+                                 $"Could not connect `{node.Value.title}:{port.portName}`: " +
+                                 $"Connected node no longer exists."
+                            );
+                            continue;
+                        }
+
                         // Only add if the linked node is in the collection
                         if (nodeMap.ContainsKey(conn.node))
                         {
