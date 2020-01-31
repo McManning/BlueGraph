@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using BlueGraph;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     /// <summary>
     /// Converts graph data into a format that can be stored on the clipboard
@@ -44,6 +43,9 @@ namespace BlueGraphEditor
         {
             var graph = CreateInstance<CopyPasteGraph>();
             
+            throw new Exception("TODO: Reimplement");
+
+            /*
             foreach (var element in elements)
             {
                 if (element is NodeView)
@@ -82,7 +84,7 @@ namespace BlueGraphEditor
                 }
             }
             
-            return JsonUtility.ToJson(graph);
+            return JsonUtility.ToJson(graph);*/
         }
 
         public static bool CanDeserialize(string data)
@@ -105,9 +107,11 @@ namespace BlueGraphEditor
             
             var graph = CreateInstance<Graph>();
 
-            var nodeMap = new Dictionary<string, AbstractNode>();
-            var guidMap = new Dictionary<string, string>();
+            var nodeMap = new Dictionary<int, AbstractNode>();
+            var guidMap = new Dictionary<int, int>();
 
+            throw new Exception("TODO: Reimplement");
+            /*
             foreach (var node in cpGraph.m_SerializedNodes)
             {
                 var instance = CreateInstance(node.type) as AbstractNode;
@@ -139,7 +143,7 @@ namespace BlueGraphEditor
                 }
             }
 
-            return graph;
+            return graph; */
         }
     }
 }

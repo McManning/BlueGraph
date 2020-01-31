@@ -1,17 +1,18 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
-using BlueGraph;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     /// <summary>
     /// Custom inspector that adds a button to display the graph editor window for an asset.
+    /// </summary>
+    /// <remarks>
     /// You can inherit from this to add the basic functionality, but this is more of an
     /// example of basic setup. 
-    /// </summary>
+    /// </remarks>
     [CustomEditor(typeof(Graph))]
-    public class GraphEditor : Editor
+    public class GraphEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

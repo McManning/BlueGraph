@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
+    /// <summary>
+    /// Extensions to the Type class for checking cast operations
+    /// </summary>
     public static class TypeExtension
     {
         /// Caching of castability between types to avoid repeat reflection
@@ -70,10 +71,10 @@ namespace BlueGraphEditor
             Type type, Func<MethodInfo, Type> baseType, 
             Func<MethodInfo, Type> derivedType, bool implicitly, bool lookInBase
         ) {
-            var bindinFlags = BindingFlags.Public | BindingFlags.Static
+            var bindingFlags = BindingFlags.Public | BindingFlags.Static
                             | (lookInBase ? BindingFlags.FlattenHierarchy : BindingFlags.DeclaredOnly);
 
-            return type.GetMethods(bindinFlags).Any(
+            return type.GetMethods(bindingFlags).Any(
                 m => (m.Name == "op_Implicit" || (!implicitly && m.Name == "op_Explicit"))
                     && baseType(m).IsAssignableFrom(derivedType(m))
             );

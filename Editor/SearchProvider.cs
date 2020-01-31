@@ -5,12 +5,12 @@ using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using System.Linq;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     public class SearchProvider : ScriptableObject, ISearchWindowProvider
     {
         public CanvasView target;
-        public PortView connectedPort;
+        public PortView sourcePort;
 
         /// <summary>
         /// Whitelist of node modules to include in search results.
@@ -53,14 +53,14 @@ namespace BlueGraphEditor
             }
         }
 
-        protected bool IsCompatibleWithConnectedPort(NodeReflectionData node)
+        protected bool IsCompatibleWithSourcePort(NodeReflectionData node)
         {
-            if (connectedPort.direction == Direction.Output)
+            if (sourcePort.direction == Direction.Output)
             {
-                return node.HasInputOfType(connectedPort.portType);
+                return node.HasInputOfType(sourcePort.portType);
             }
 
-            return node.HasOutputOfType(connectedPort.portType);
+            return node.HasOutputOfType(sourcePort.portType);
         }
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
@@ -70,7 +70,7 @@ namespace BlueGraphEditor
             // First item is the title of the window
             tree.Add(new SearchTreeGroupEntry(new GUIContent("Add Node"), 0));
 
-            // TODO: Custom top level pieces (Comments, new variables, etc)
+            // TODO: Hooks for custom top level pieces (Comments, new variables, etc)
      
             // Construct a tree of available nodes by module path
             var nodes = NodeReflection.GetNodeTypes();
@@ -85,7 +85,7 @@ namespace BlueGraphEditor
 
                 // If we're coming from a port, make sure to only add nodes that accept
                 // an input (or output) that's compatible. 
-                if (connectedPort == null || IsCompatibleWithConnectedPort(node))
+                if (sourcePort == null || IsCompatibleWithSourcePort(node))
                 {
                     var group = groups;
                     if (path != null)
@@ -139,10 +139,10 @@ namespace BlueGraphEditor
 
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
-            target.CreateNode(
+            target.AddNodeFromReflectionData(
                 entry.userData as NodeReflectionData, 
                 context.screenMousePosition, 
-                connectedPort
+                sourcePort
             );
 
             return true;

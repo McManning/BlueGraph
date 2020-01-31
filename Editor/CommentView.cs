@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
-using BlueGraph;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     public class CommentView : GraphElement, ICanDirty
     {
@@ -19,7 +18,7 @@ namespace BlueGraphEditor
             Blue
         }
         
-        public GraphComment target;
+        public Comment target;
         public List<NodeView> containedNodes = new List<NodeView>();
         
         public Action<CommentView> onResize;
@@ -31,10 +30,10 @@ namespace BlueGraphEditor
         Label m_TitleLabel;
         bool m_EditingCancelled;
 
-        public CommentView(GraphComment comment)
+        public CommentView(Comment comment)
         {
             target = comment;
-            SetPosition(comment.position);
+            SetPosition(comment.graphRect);
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CommentView"));
             
@@ -197,7 +196,7 @@ namespace BlueGraphEditor
             Vector2 delta = newPos.position - GetPosition().position;
             MoveElements(delta);
 
-            target.position = newPos;
+            target.graphRect = newPos;
 
             base.SetPosition(newPos);
         }

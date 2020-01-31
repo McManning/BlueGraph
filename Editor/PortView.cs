@@ -2,16 +2,13 @@
 using System;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
-using UnityEditor;
 using UnityEngine;
-using BlueGraph;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
-    public class PortView : Port
+    public class PortView : UnityEditor.Experimental.GraphView.Port
     {
-        public NodePort target;
+        public Port target;
 
         /// <summary>
         /// Should the inline editor field disappear once one or more
@@ -36,18 +33,18 @@ namespace BlueGraphEditor
         }
     
         public static PortView Create(
-            NodePort port,
+            Port port,
             Type type,
             IEdgeConnectorListener connectorListener
         ) {
             var view = new PortView(
                 Orientation.Horizontal, 
                 port.isInput ? Direction.Input : Direction.Output, 
-                port.isMulti ? Capacity.Multi : Capacity.Single, 
+                port.acceptsMultipleConnections ? Capacity.Multi : Capacity.Single, 
                 type
             ) {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
-                portName = port.portName,
+                portName = port.name,
                 target = port
             };
 
@@ -90,39 +87,10 @@ namespace BlueGraphEditor
             return (other.direction == Direction.Input && portType.IsCastableTo(other.portType, true)) ||
                     (other.direction == Direction.Output && other.portType.IsCastableTo(portType, true));
         }
-
-        public override void Disconnect(Edge edge)
-        {
-            // Copy the disconnect onto the linked data
-            if (direction == Direction.Input)
-            {
-                target.Disconnect((edge.output as PortView).target);
-            }
-            else
-            {
-                target.Disconnect((edge.input as PortView).target);
-            }
-            
-            base.Disconnect(edge);
-        }
-
-        public override void Connect(Edge edge)
-        {
-            // Copy the connect onto the linked data
-            // TODO: This happens also when we load the graph for every node.
-            // How can this be optimized out?
-            if (direction == Direction.Input)
-            {
-                target.Connect((edge.output as PortView).target);
-            }
-            else
-            {
-                target.Connect((edge.input as PortView).target);
-            }
-
-            base.Connect(edge);
-        }
         
+        /// <summary>
+        /// Convert a Type to a USS class name
+        /// </summary>
         public string GetTypeVisualClass(Type type)
         {
             // TODO: Better variant that handles lists and such.

@@ -48,7 +48,7 @@ namespace BlueGraph
             // Can then eliminate this check here and just use the loop below. 
             // Can't assume it's called "Result" either, could be anything.
             // Also - not necessarily last port if we add ports via [Output]
-            if (name == ports[ports.Count - 1].portName)
+            if (name == ports[ports.Count - 1].name)
             {
                 return m_ReturnValue;
             }
@@ -56,7 +56,7 @@ namespace BlueGraph
             // Other out argument, find matching index
             for (int i = 0; i < ports.Count - 1; i++) 
             {
-                if (!ports[i].isInput && ports[i].portName == name)
+                if (!ports[i].isInput && ports[i].name == name)
                 {
                     return m_ArgsCache[i];
                 }
@@ -94,7 +94,7 @@ namespace BlueGraph
                 } 
                 catch (Exception e)
                 {
-                    Debug.LogError($"<b>[{name}]</b> Failed to create delegate: {e}", this);
+                    Debug.LogError($"<b>[{name}]</b> Failed to create delegate: {e}");
                 }
             }
         }
@@ -152,7 +152,7 @@ namespace BlueGraph
             // or a temp variable + assignment for `out` parameters. 
             for (int i = 0; i < paramsLen; i++)
             {
-                NodePort port = ports[i];
+                Port port = ports[i];
 
                 if (port.isInput)
                 {
@@ -165,7 +165,7 @@ namespace BlueGraph
                 {
                     // Output case: Foo(out object o) -> object o; Foo(o); args[i] = o;
 
-                    Debug.Log($"Out: {port.portName} of type {port.type}");
+                    Debug.Log($"Out: {port.name} of type {port.type}");
 
                     // Create a temp variable to store the out parameter
                     // (float f)
@@ -253,7 +253,7 @@ namespace BlueGraph
 
                 if (port.isInput)
                 {
-                    object value = GetInputValue(port.portName);
+                    object value = GetInputValue(port.name);
                     if (value != null)
                     {
                         try
@@ -264,8 +264,7 @@ namespace BlueGraph
                         {
                             Debug.LogError(
                                 $"<b>[{name}]</b>: Cannot convert input port " +
-                                $"`{port.portName}` value to type `{port.type}`", 
-                                this
+                                $"`{port.name}` value to type `{port.type}`"
                             );
                         }
                     }
@@ -284,7 +283,7 @@ namespace BlueGraph
             } 
             catch (Exception e)
             {
-                Debug.LogError($"<b>[{name}]</b>: Delegate exception: {e}", this);
+                Debug.LogError($"<b>[{name}]</b>: Delegate exception: {e}");
                 // TODO: Don't LogError, just throw an error status onto the node UI
                 // (done in the view during execution - not the nodes themselves?)
             }

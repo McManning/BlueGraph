@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
-using BlueGraph;
 using UnityEngine;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     public class PortReflectionData
     {
@@ -14,9 +13,9 @@ namespace BlueGraphEditor
         public string portName;
         public string fieldName;
 
-        public bool isMulti;
+        public bool acceptsMultipleConnections;
         public bool isInput;
-        public bool isEditable; // TODO: Rename
+        public bool isEditable; // TODO: Rename?
     }
 
     public class EditableReflectionData
@@ -121,7 +120,7 @@ namespace BlueGraphEditor
                             portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = true,
-                            isMulti = attr.multiple,
+                            acceptsMultipleConnections = attr.multiple,
                             isEditable = attr.editable
                         });
                     }
@@ -135,7 +134,7 @@ namespace BlueGraphEditor
                             portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             fieldName = fields[i].Name,
                             isInput = false,
-                            isMulti = attr.multiple,
+                            acceptsMultipleConnections = attr.multiple,
                             isEditable = false
                         });
                     }
@@ -158,8 +157,7 @@ namespace BlueGraphEditor
         /// </summary>
         public AbstractNode CreateInstance()
         {
-            AbstractNode node = ScriptableObject.CreateInstance(type) as AbstractNode;
-            node.RegenerateGuid();
+            var node = Activator.CreateInstance(type) as AbstractNode;
             node.name = name;
             
             // Setup ports
@@ -167,10 +165,10 @@ namespace BlueGraphEditor
             {
                 // Now it's basically everything from reflection.
                 // TODO Get rid of reflection?
-                var nodePort = new NodePort() {
+                var nodePort = new Port() {
                     node = node,
-                    portName = port.portName,
-                    isMulti = port.isMulti,
+                    name = port.portName,
+                    acceptsMultipleConnections = port.acceptsMultipleConnections,
                     isInput = port.isInput,
                     type = port.type
                 };
@@ -196,8 +194,8 @@ namespace BlueGraphEditor
 
         public override string ToString()
         {
-            List<string> inputs = new List<string>();
-            List<string> outputs = new List<string>();
+            var inputs = new List<string>();
+            var outputs = new List<string>();
 
             foreach (var port in ports)
             {
@@ -235,7 +233,7 @@ namespace BlueGraphEditor
             return GetReflectionData($"{classFullName}|{method}");
         }
 
-        public static NodeReflectionData GetReflectionData(string key)
+        static NodeReflectionData GetReflectionData(string key)
         {
             var types = GetNodeTypes();
             if (types.ContainsKey(key))
@@ -302,17 +300,17 @@ namespace BlueGraphEditor
             return k_NodeTypes;
         }
 
-        private static NodeReflectionData LoadMethodReflection(MethodInfo method, FuncNodeModuleAttribute moduleAttr)
+        static NodeReflectionData LoadMethodReflection(MethodInfo method, FuncNodeModuleAttribute moduleAttr)
         {    
             var attr = method.GetCustomAttribute<FuncNodeAttribute>();
-            string name = attr?.name ?? ObjectNames.NicifyVariableName(method.Name);
-            string returnPortName = attr?.returnName ?? "Result";
+            var name = attr?.name ?? ObjectNames.NicifyVariableName(method.Name);
+            var returnPortName = attr?.returnName ?? "Result";
             
             // FuncNode.module can override FuncNodeModule.path. 
-            string path = attr?.module ?? moduleAttr.path;
+            var path = attr?.module ?? moduleAttr.path;
             
             // FuncNode.classType can override default class type
-            Type classType = attr?.classType ?? typeof(FuncNode);
+            var classType = attr?.classType ?? typeof(FuncNode);
             
             var node = new NodeReflectionData()
             {
@@ -323,8 +321,7 @@ namespace BlueGraphEditor
                 method = method
             };
             
-            ParameterInfo[] parameters = method.GetParameters();
-            
+            var parameters = method.GetParameters();
             foreach (var parameter in parameters)
             {
                 node.ports.Add(new PortReflectionData() {
@@ -333,7 +330,7 @@ namespace BlueGraphEditor
                         parameter.ParameterType,
                     portName = ObjectNames.NicifyVariableName(parameter.Name),
                     fieldName = parameter.Name,
-                    isMulti = parameter.IsOut,
+                    acceptsMultipleConnections = parameter.IsOut,
                     isInput = !parameter.IsOut
                 });
             }
@@ -345,7 +342,7 @@ namespace BlueGraphEditor
                     type = method.ReturnType,
                     portName = returnPortName,
                     fieldName = null,
-                    isMulti = true,
+                    acceptsMultipleConnections = true,
                     isInput = false
                 });
             }
@@ -362,7 +359,7 @@ namespace BlueGraphEditor
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        private static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
+        static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
         {
             string name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
             string path = nodeAttr.module;
@@ -412,7 +409,7 @@ namespace BlueGraphEditor
         /// Load and cache a mapping between AbstractNode classes and their 
         /// NodeView editor equivalent, if a custom editor has been defined.
         /// </summary>
-        private static void LoadNodeEditorTypes()
+        static void LoadNodeEditorTypes()
         {
             var baseType = typeof(NodeView);
             var types = new List<Type>();

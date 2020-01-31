@@ -1,5 +1,5 @@
 ﻿
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     public interface ICanDirty
     {

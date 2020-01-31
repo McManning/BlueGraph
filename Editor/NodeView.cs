@@ -6,9 +6,8 @@ using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using BlueGraph;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNodeViewAttribute : Attribute
@@ -31,21 +30,21 @@ namespace BlueGraphEditor
         public CommentView comment;
 
         protected EdgeConnectorListener m_ConnectorListener;
-        protected SerializedObject m_SerializedNode;
+        protected SerializedProperty m_SerializedNode;
 
-        public virtual void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
+        public void Initialize(AbstractNode node, SerializedProperty serializedNode, EdgeConnectorListener connectorListener)
         {
-            viewDataKey = node.guid;
+            viewDataKey = node.id.ToString();
             target = node;
 
+            m_SerializedNode = serializedNode;
+            m_ConnectorListener = connectorListener;
+            
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
             SetPosition(new Rect(node.graphPosition, Vector2.one));
-            m_ConnectorListener = connectorListener;
             title = node.name;
-            
-            m_SerializedNode = new SerializedObject(node);
             
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
             RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
@@ -53,11 +52,21 @@ namespace BlueGraphEditor
 
             UpdatePorts();
 
-            // TODO: Don't do it this way.
+            OnInitialize();
+
+            // TODO: Don't do it this way. Move to an OnInitialize somewhere else.
             if (node is FuncNode func)
             {
                 func.Awake();
             }
+        }
+
+        /// <summary>
+        /// Executed once this node has been added to the canvas
+        /// </summary>
+        protected virtual void OnInitialize()
+        {
+
         }
         
         /// <summary>
@@ -85,14 +94,12 @@ namespace BlueGraphEditor
                 }
             }
             
-            // TODO: Support FuncNode since GetNodeType won't work for those
-            // as they're registered under a different type. 
             var reflectionData = NodeReflection.GetNodeType(target.GetType());
             if (reflectionData != null) 
             {
                 foreach (var editable in reflectionData.editables)
                 {
-                    AddEditableField(m_SerializedNode.FindProperty(editable.fieldName));
+                    AddEditableField(m_SerializedNode.FindPropertyRelative(editable.fieldName));
                 }
             }
             
@@ -107,13 +114,13 @@ namespace BlueGraphEditor
         protected void AddEditableField(SerializedProperty prop)
         {
             var field = new PropertyField(prop);
-            field.Bind(m_SerializedNode);
+            field.Bind(m_SerializedNode.serializedObject);
             field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
             
             extensionContainer.Add(field);
         }
 
-        protected virtual void AddInputPort(NodePort port)
+        protected virtual void AddInputPort(Port port)
         {
             var view = PortView.Create(port, port.type, m_ConnectorListener);
 
@@ -121,11 +128,11 @@ namespace BlueGraphEditor
             // of the port, create a new PropertyField and bind it. 
             if (port.fieldName != null)
             {
-                var prop = m_SerializedNode.FindProperty(port.fieldName);
+                var prop = m_SerializedNode.FindPropertyRelative(port.fieldName);
                 if (prop != null)
                 {
                     var field = new PropertyField(prop, " ");
-                    field.Bind(m_SerializedNode);
+                    field.Bind(m_SerializedNode.serializedObject);
                     field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
 
                     var container = new VisualElement();
@@ -140,7 +147,7 @@ namespace BlueGraphEditor
             inputContainer.Add(view);
         }
         
-        protected virtual void AddOutputPort(NodePort port)
+        protected virtual void AddOutputPort(Port port)
         {
             var view = PortView.Create(port, port.type, m_ConnectorListener);
             
@@ -175,6 +182,7 @@ namespace BlueGraphEditor
         {
             Debug.Log($"{name} propchange");
 
+            // TODO: Cache. This lookup will be slow.
             var canvas = GetFirstAncestorOfType<CanvasView>();
             canvas?.Dirty(this);
         }

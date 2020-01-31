@@ -161,4 +161,14 @@ namespace BlueGraph
             this.modules = modules;
         }
     }
+    
+    /// <summary>
+    /// Mark a node as deprecated and automatically migrate instances
+    /// to a new class when encountered in the editor.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public class DeprecatedAttribute : Attribute
+    {
+        public Type replaceWith;
+    }
 }

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     /// <summary>
     /// Custom connector listener so that we can link up nodes and 
@@ -19,26 +19,29 @@ namespace BlueGraphEditor
     
         public void OnDrop(GraphView graphView, Edge edge)
         {
-            m_Canvas.ConnectNodes(edge);
+            m_Canvas.AddEdge(edge);
         }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
         {
-            Port draggedPort = null;
-            if (edge.output != null)
-            {
-                draggedPort = edge.output.edgeConnector.edgeDragHelper.draggedPort;
-            }
-            else if (edge.input != null)
-            {
-                draggedPort = edge.input.edgeConnector.edgeDragHelper.draggedPort;
-            }
-            
-            Vector2 screenPosition = GUIUtility.GUIToScreenPoint(
+            var screenPosition = GUIUtility.GUIToScreenPoint(
                 Event.current.mousePosition
             );
             
-            m_Canvas.OpenSearch(screenPosition, draggedPort as PortView);
+            if (edge.output != null)
+            {
+                m_Canvas.OpenSearch(
+                    screenPosition, 
+                    edge.output.edgeConnector.edgeDragHelper.draggedPort as PortView
+                );
+            }
+            else if (edge.input != null)
+            {
+                m_Canvas.OpenSearch(
+                    screenPosition, 
+                    edge.input.edgeConnector.edgeDragHelper.draggedPort as PortView
+                );
+            }
         }
     }
 }

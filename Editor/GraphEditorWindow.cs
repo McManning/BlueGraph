@@ -1,9 +1,8 @@
 ﻿
 using UnityEditor;
 using UnityEngine;
-using BlueGraph;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
     /// <summary>
     /// Build a basic window container for the BlueGraph canvas

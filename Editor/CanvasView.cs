@@ -1,14 +1,16 @@
 ﻿
-using BlueGraph;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.Experimental.GraphView;
+using Edge = UnityEditor.Experimental.GraphView.Edge;
 
-namespace BlueGraphEditor
+namespace BlueGraph.Editor
 {
+    using Port = UnityEditor.Experimental.GraphView.Port;
+
     /// <summary>
     /// Graph view that contains the nodes, edges, etc. 
     /// </summary>
@@ -35,6 +37,7 @@ namespace BlueGraphEditor
         
         GraphEditor m_GraphEditor;
         Graph m_Graph;
+        SerializedObject m_SerializedGraph;
         
         SearchProvider m_SearchProvider;
         EditorWindow m_EditorWindow;
@@ -112,6 +115,8 @@ namespace BlueGraphEditor
                         UpdateCommentLink(node);
                     }
                 }
+                
+                EditorUtility.SetDirty(m_Graph);
             }
             
             if (change.elementsToRemove != null)
@@ -120,15 +125,15 @@ namespace BlueGraphEditor
                 {
                     if (element is NodeView node)
                     {
-                        DestroyNode(node);
+                        RemoveNode(node);
                     }
                     else if (element is Edge edge)
                     {
-                        DestroyEdge(edge);
+                        RemoveEdge(edge);
                     }
                     else if (element is CommentView comment)
                     {
-                        DestroyComment(comment);
+                        RemoveComment(comment);
                     }
                     
                     if (element is ICanDirty canDirty)
@@ -136,9 +141,6 @@ namespace BlueGraphEditor
                         m_Dirty.Remove(canDirty);
                     }
                 }
-                
-                // Save the batch of changes all at once
-                AssetDatabase.SaveAssets();
             }
             
             return change;
@@ -156,9 +158,10 @@ namespace BlueGraphEditor
         public void Load(Graph graph)
         {
             m_Graph = graph;
+            m_SerializedGraph = new SerializedObject(m_Graph);
             
-            AddNodes(graph.nodes);
-            AddComments(graph.comments);
+            AddNodeViews(graph.nodes);
+            AddCommentViews(graph.comments);
 
             // Reset the lookup to a new set of whitelisted modules
             m_SearchProvider.modules.Clear();
@@ -175,8 +178,16 @@ namespace BlueGraphEditor
                 }
             }
         }
-        public void CreateNode(NodeReflectionData data, Vector2 screenPosition, PortView connectedPort = null)
-        {
+
+        /// <summary>
+        /// Create a new node from reflection data and insert into the Graph.
+        /// </summary>
+        internal void AddNodeFromReflectionData(
+            NodeReflectionData data,
+            Vector2 screenPosition, 
+            PortView connectedPort = null
+        ) {
+            // Calculate where to place this node on the graph
             var windowRoot = m_EditorWindow.rootVisualElement;
             var windowMousePosition = m_EditorWindow.rootVisualElement.ChangeCoordinatesTo(
                 windowRoot.parent, 
@@ -185,20 +196,24 @@ namespace BlueGraphEditor
 
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
+            // Create a new node instance and set initial data (ports, etc) 
             var node = data.CreateInstance();
             node.graphPosition = graphMousePosition;
 
             m_Graph.AddNode(node);
+            m_SerializedGraph.Update();
+
+            var serializedNodesArr = m_SerializedGraph.FindProperty("nodes");
+            var serializedNode = serializedNodesArr.GetArrayElementAtIndex(serializedNodesArr.arraySize - 1);
             
             // Add a node to the visual graph
             var editorType = NodeReflection.GetNodeEditorType(data.type);
             var element = Activator.CreateInstance(editorType) as NodeView;
-            element.Initialize(node, m_EdgeListener);
+            element.Initialize(node, serializedNode, m_EdgeListener);
 
             AddElement(element);
             
-            AssetDatabase.AddObjectToAsset(node, m_Graph);
-            AssetDatabase.SaveAssets();
+            EditorUtility.SetDirty(m_Graph);
             
             // If there was a provided existing port to connect to, find the best 
             // candidate port on the new node and connect. 
@@ -217,39 +232,53 @@ namespace BlueGraphEditor
                     edge.input = element.GetCompatibleInputPort(connectedPort);
                 }
                 
-                ConnectNodes(edge);
+                AddEdge(edge);
             }
             
             Dirty(element);
         }
         
         /// <summary>
-        /// Remove a node from both the graph and the linked asset
+        /// Remove a node from both the canvas view and the graph model
         /// </summary>
         /// <param name="node"></param>
-        public void DestroyNode(NodeView node)
+        public void RemoveNode(NodeView node)
         {
+            Undo.RegisterCompleteObjectUndo(m_Graph, $"Delete Node {node.name}");
+
             if (node.comment != null)
             {
                 node.comment.RemoveElement(node);
             }
 
             m_Graph.RemoveNode(node.target);
-            ScriptableObject.DestroyImmediate(node.target, true);
+
+            EditorUtility.SetDirty(m_Graph);
         }
 
-        public void DestroyComment(CommentView comment)
+        /// <summary>
+        /// Remove a comment from both the canvas view and the graph model
+        /// </summary>
+        /// <param name="comment"></param>
+        public void RemoveComment(CommentView comment)
         {
+            Undo.RegisterCompleteObjectUndo(m_Graph, "Delete Comment");
+
             m_CommentViews.Remove(comment);
             m_Graph.comments.Remove(comment.target);
+
+            EditorUtility.SetDirty(m_Graph);
         }
 
-        public void ConnectNodes(Edge edge)
+        /// <summary>
+        /// Add a new edge to both the canvas view and the underlying graph model
+        /// </summary>
+        public void AddEdge(Edge edge)
         {
             if (edge.input == null || edge.output == null) return;
             
             // Handle single connection ports on either end. 
-            var edgesToRemove = new List<GraphElement>();
+            var edgesToRemove = new List<Edge>();
             if (edge.input.capacity == Port.Capacity.Single)
             {
                 foreach (var conn in edge.input.connections)
@@ -266,16 +295,57 @@ namespace BlueGraphEditor
                 }
             }
 
-            if (edgesToRemove.Count > 0)
+            foreach (var edgeToRemove in edgesToRemove)
             {
-                DeleteElements(edgesToRemove);
+                RemoveEdge(edgeToRemove);
             }
+            
+            var input = edge.input as PortView;
+            var output = edge.output as PortView;
 
-            var newEdge = edge.input.ConnectTo(edge.output);
+            // Connect the ports in the model
+            m_Graph.AddEdge(input.target, output.target);
+
+            // Add a matching edge view onto the canvas
+            var newEdge = input.ConnectTo(output);
+            AddElement(newEdge);
+
+            // Sync serialized with the updated models
+            m_SerializedGraph.Update();
+            
+            // Dirty the affected node views
+            Dirty(input.node as NodeView);
+            Dirty(output.node as NodeView);
+        }
+        
+        /// <summary>
+        /// Remove an edge from both the canvas view and the underlying graph model
+        /// </summary>
+        public void RemoveEdge(Edge edge)
+        {
+            var input = edge.input as PortView;
+            var output = edge.output as PortView;
+
+            // Disconnect the ports in the model
+            m_Graph.RemoveEdge(input.target, output.target);
+
+            // Add a matching edge view onto the canvas
+            var newEdge = input.ConnectTo(output);
             AddElement(newEdge);
             
-            Dirty(edge.input.node as NodeView);
-            Dirty(edge.output.node as NodeView);
+            // Remove the edge view
+            edge.input.Disconnect(edge);
+            edge.output.Disconnect(edge);
+            edge.input = null;
+            edge.output = null;
+            RemoveElement(edge);
+            
+            // Sync serialized with the updated models
+            m_SerializedGraph.Update();
+
+            // Dirty the affected node views
+            Dirty(input.node as NodeView);
+            Dirty(output.node as NodeView);
         }
 
         /// <summary>
@@ -308,7 +378,9 @@ namespace BlueGraphEditor
             nodes.ForEach((node) =>
             {
                 if (node is ICanDirty dnode)
+                {
                     m_Dirty.Add(dnode);
+                }
             });
         }
 
@@ -351,47 +423,34 @@ namespace BlueGraphEditor
             }
         }
 
-        public void DestroyEdge(Edge edge)
-        {
-            var input = edge.input.node as NodeView;
-            var output = edge.output.node as NodeView;
-
-            edge.input.Disconnect(edge);
-            edge.output.Disconnect(edge);
-
-            edge.input = null;
-            edge.output = null;
-
-            RemoveElement(edge);
-
-            Dirty(input);
-            Dirty(output);
-        }
-
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)
         {
-            m_SearchProvider.connectedPort = connectedPort;
+            m_SearchProvider.sourcePort = connectedPort;
             SearchWindow.Open(new SearchWindowContext(screenPosition), m_SearchProvider);
         }
         
         /// <summary>
         /// Append views for nodes from a Graph
         /// </summary>
-        private void AddNodes(List<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
+        void AddNodeViews(List<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
+            var serializedNodesArr = m_SerializedGraph.FindProperty("nodes");
+            
             // Add views of each node from the graph
             Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
-            foreach (var node in nodes)
+            // TODO: Could just be a list with index checking. 
+
+            for (int i = 0; i < nodes.Count; i++)
             {
+                // TODO: This assumes it exists on the graph already and serialized.
+                // Not correct for pasting. 
+                var node = nodes[i];
+                var serializedNode = serializedNodesArr.GetArrayElementAtIndex(i);
+
                 var editorType = NodeReflection.GetNodeEditorType(node.GetType());
                 var element = Activator.CreateInstance(editorType) as NodeView;
-
-                if (node == null)
-                {
-                    Debug.LogError("Null node");
-                }
-
-                element.Initialize(node, m_EdgeListener);
+                
+                element.Initialize(node, serializedNode, m_EdgeListener);
                 AddElement(element);
                 
                 nodeMap.Add(node, element);
@@ -417,6 +476,7 @@ namespace BlueGraphEditor
 
             // Sync edges on the graph with our graph's connections 
             // TODO: Deal with trash connections from bad imports
+            // and try to just refactor this whole thing tbh
             foreach (var node in nodeMap)
             {
                 foreach (var port in node.Key.ports)
@@ -426,12 +486,13 @@ namespace BlueGraphEditor
                         continue;
                     }
 
-                    foreach (var conn in port.connections)
+                    var connections = port.Connections;
+                    foreach (var conn in connections)
                     {
                         if (conn.node == null)
                         {
                             Debug.LogError(
-                                 $"Could not connect `{node.Value.title}:{port.portName}`: " +
+                                 $"Could not connect `{node.Value.title}:{port.name}`: " +
                                  $"Connected node no longer exists."
                             );
                             continue;
@@ -440,23 +501,21 @@ namespace BlueGraphEditor
                         // Only add if the linked node is in the collection
                         if (nodeMap.ContainsKey(conn.node))
                         {
-                            var inPort = node.Value.GetInputPort(port.portName);
-                            var outPort = nodeMap[conn.node].GetOutputPort(conn.portName);
+                            var inPort = node.Value.GetInputPort(port.name);
+                            var outPort = nodeMap[conn.node].GetOutputPort(conn.name);
                         
                             if (inPort == null)
                             {
                                 Debug.LogError(
-                                    $"Could not connect `{node.Value.title}:{port.portName}` -> `{conn.node.name}:{conn.portName}`. " +
-                                    $"Input port `{port.portName}` no longer exists.",
-                                    node.Key
+                                    $"Could not connect `{node.Value.title}:{port.name}` -> `{conn.node.name}:{conn.name}`. " +
+                                    $"Input port `{port.name}` no longer exists."
                                 );
                             }
                             else if (outPort == null)
                             {
                                 Debug.LogError(
-                                    $"Could not connect `{conn.node.name}:{conn.portName}` to `{node.Value.name}:{port.portName}`. " +
-                                    $"Output port `{conn.portName}` no longer exists.",
-                                    conn.node
+                                    $"Could not connect `{conn.node.name}:{conn.name}` to `{node.Value.name}:{port.name}`. " +
+                                    $"Output port `{conn.name}` no longer exists."
                                 );
                             }
                             else
@@ -469,16 +528,11 @@ namespace BlueGraphEditor
                 }
             }
         }
-
-        private NodeView GetNodeElement(AbstractNode node)
-        {
-            return GetNodeByGuid(node.guid) as NodeView;
-        }
-
+        
         /// <summary>
         /// Append views for comments from a Graph
         /// </summary>
-        private void AddComments(List<GraphComment> comments)
+        private void AddCommentViews(List<Comment> comments)
         { 
             foreach (var comment in comments)
             {
@@ -488,6 +542,9 @@ namespace BlueGraphEditor
             }
         }
 
+        /// <summary>
+        /// Calculate the bounding box for a set of elements
+        /// </summary>
         Rect GetBounds(IEnumerable<ISelectable> items)
         {
             Rect contentRect = Rect.zero;
@@ -546,18 +603,17 @@ namespace BlueGraphEditor
             bounds.width += padding * 2;
             bounds.height += padding * 3; 
 
-            var comment = new GraphComment();
+            var comment = new Comment();
             comment.title = "New Comment";
-            comment.position = bounds;
+            comment.graphRect = bounds;
 
             var commentView = new CommentView(comment);
             commentView.onResize += Dirty;
             
-
             m_Graph.comments.Add(comment);
             m_CommentViews.Add(commentView);
-            AddElement(commentView);
 
+            AddElement(commentView);
             Dirty(commentView);
         }
         
@@ -568,6 +624,8 @@ namespace BlueGraphEditor
         /// <param name="data"></param>
         private void OnUnserializeAndPaste(string operationName, string data)
         {
+            throw new Exception("TODO: Reimplement");
+            /*
             var graph = CopyPasteGraph.Deserialize(data);
             
             // Add each node to the working graph
@@ -581,7 +639,7 @@ namespace BlueGraphEditor
 
             // Add the new nodes and select them
             ClearSelection();
-            AddNodes(graph.nodes, true, true);
+            AddNodeViews(graph.nodes, true, true);*/
         }
 
         private bool OnTryPasteSerializedData(string data)

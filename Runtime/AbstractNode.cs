@@ -5,103 +5,121 @@ using UnityEngine;
 namespace BlueGraph
 {
     [Serializable]
-    public class AbstractNode : ScriptableObject
+    public abstract class AbstractNode : ISerializationCallbackReceiver
     {
-        public string guid;
+        public string name;
+    
+        public int id;
         public Graph graph;
+    
+        public List<Port> ports = new List<Port>();
         
-        public List<NodePort> ports = new List<NodePort>();
-        
-        /// Graph metadata
         public Vector2 graphPosition;
 
-        public void RegenerateGuid()
+        public virtual void OnAfterDeserialize()
         {
-            guid = Guid.NewGuid().ToString();
-        }
+            Debug.Log($"Node {name}:{id} After Deserialize");
         
-        public NodePort GetInputPort(string name)
-        {
-            return ports.Find((port) => port.isInput && port.portName == name);
-        }
+            if (graph == null)
+            {
+                throw new Exception("No graph after deserialize");
+            }
         
-        public NodePort GetOutputPort(string name)
-        {
-            return ports.Find((port) => !port.isInput && port.portName == name);
-        }
+            Debug.Log($"graph is {graph.displayName}");
         
-        public virtual object GetOutputValue(string name)
-        {
-            Debug.LogWarning(
-                $"<b>[{this.name}]</b> Invalid output port `{name}`. Returning null.",
-                this
-            );
+            if (ports == null)
+            {
+                throw new Exception("No ports after deserialize");
+            }
+        
+            // Ports are deserialized first, and then this node.
+            // Here, we assign the references back onto each port 
+            // for connection lookups.
+            foreach (var port in ports)
+            {
+                port.node = this;
+                port.graph = graph;
+            }
+        }
 
+        public virtual void OnBeforeSerialize()
+        {
+            //Debug.Log($"Node {name} Before Serialize");
+        }
+    
+        public virtual void OnAddedToGraph()
+        {
+            // Refresh port references to the graph
+            foreach (var port in ports)
+            {
+                port.node = this;
+                port.graph = graph;
+            }
+        }
+
+        public virtual void OnRemovedFromGraph()
+        {
+
+        }
+    
+        public Port GetPort(string portName)
+        {
+            return ports.Find((port) => port.name == portName);
+        }
+
+        public virtual object GetOutputValue(string portName)
+        {
+            // Default behaviour is "not implemented"
+            Debug.LogWarning(
+                $"<b>[{name}]</b> Tried to GetOutputValue of an unknown port `{portName}`. " +
+                $"Returning null"
+            );
             return null;
         }
 
-        /// <summary>
-        /// Retrieve an input value without attempting a typecast. 
-        /// </summary>
-        public object GetInputValue(string name, object defaultValue = null)
+        public object GetInputValue(string portName, object defaultValue = null)
         {
-            var port = GetInputPort(name);
+            var port = GetPort(portName);
             if (port == null)
             {
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Invalid input port `{name}`. Returning default.",
-                    this
+                    $"<b>[{name}]</b> Tried to GetInputValue of an unknown port `{portName}`. " +
+                    $"Returning default"
                 );
                 return defaultValue;
             }
 
-            if (port.connections.Count < 1)
+            var conn = port.Connections;
+            if (conn.Length < 1)
             {
                 return defaultValue;
             }
-            
-            NodePort.Connection conn = port.connections[0];
-            return conn.node.GetOutputValue(conn.portName);
+
+            return conn[0].node.GetOutputValue(conn[0].name);
         }
-        
-        public T GetInputValue<T>(string name, T defaultValue = default)
-        {
-            var port = GetInputPort(name);
-            if (port == null)
-            {
-                Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Unknown input port name `{name}`. Returning default.",
-                    this
-                );
-                return defaultValue;
-            }
 
-            if (port.connections.Count < 1)
-            {
-                return defaultValue;
-            }
-            
-            NodePort.Connection conn = port.connections[0];
-            object output = conn.node.GetOutputValue(conn.portName);
+        public T GetInputValue<T>(string portName, T defaultValue = default)
+        {
+            var output = GetInputValue(portName, null);
             
             if (output == null && typeof(T).IsValueType)
             {
                 // Can't ChangeType a null when expecting a value type. Bail.
                 Debug.LogWarning(
-                    $"<b>[{this.name}]</b> Received null on input port `{name}`. " +
+                    $"<b>[{name}]</b> Received null on input port `{portName}`. " +
                     $"Expected value type {typeof(T).FullName}. " +
-                    $"Returning default.",
-                    this
+                    $"Returning default."
                 );
                 return defaultValue;
             }
             
-            // Short circuit Convert.ChangeType if it's already the expected type
-            if (output == null || output.GetType() == typeof(T) || output is T)
+            // Short circuit Convert.ChangeType if we can cast it fast
+            if (output == null || typeof(T).IsAssignableFrom(output.GetType()))
             {
                 return (T)output;
             }
             
+            // Try for IConvertible support
             try
             {
                 return (T)Convert.ChangeType(output, typeof(T));
@@ -109,39 +127,44 @@ namespace BlueGraph
             catch (Exception e)
             {
                 Debug.LogError(
-                    $"<b>[{this.name}]</b> Could not cast output port `{conn.portName}` with type `{output.GetType()}` " +
-                    $"to input port `{this.name}` type `{typeof(T)}`. " +
-                    $"Returning default.", 
-                    this
+                    $"<b>[{name}]</b> Could not cast output with type `{output.GetType()}` " +
+                    $"to input port `{portName}` of type `{typeof(T)}`. Error: {e}. " +
+                    $"Returning default."
                 );
             }
 
             return defaultValue;
         }
-
-        public T[] GetInputValues<T>(string name, T defaultValue = default)
+    
+        public void AddPort(Port port)
         {
-            List<T> values = new List<T>();
-            NodePort port = GetInputPort(name);
-
-            if (port.connections.Count < 1 && defaultValue != null)
+            var match = ports.Find((p) => p.name == port.name);
+            if (match != null)
             {
-                values.Add(defaultValue);
-            }
-            else
-            {
-                port.connections.ForEach(
-                    (conn) => values.Add((T)conn.node.GetOutputValue(conn.portName))
+                throw new ArgumentException(
+                    $"[{name}] A port named `{port.name}` already exists"
                 );
             }
-            
-            return values.ToArray();
+        
+            port.node = this;
+            port.graph = graph;
+
+            ports.Add(port);
         }
 
-        public virtual void AddPort(NodePort port)
+        public void RemovePort(Port port)
         {
-            // TODO: Redundancy check
-            ports.Add(port);
+            // Cleanup the port and connections
+            port.DisconnectAll();
+            port.node = null;
+            port.graph = null;
+            
+            ports.Remove(port);
+        }
+
+        public void DisconnectAllPorts()
+        {
+            ports.ForEach((port) => port.DisconnectAll());
         }
     }
 }
