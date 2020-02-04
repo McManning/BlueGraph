@@ -19,7 +19,7 @@ namespace BlueGraph.Editor
     
         public void OnDrop(GraphView graphView, Edge edge)
         {
-            m_Canvas.AddEdge(edge);
+            m_Canvas.AddEdge(edge, true);
         }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
