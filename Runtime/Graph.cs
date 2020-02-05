@@ -7,8 +7,6 @@ namespace BlueGraph
 {
     public class Graph : ScriptableObject, ISerializationCallbackReceiver
     {
-        public string displayName;
-    
         [SerializeReference]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
@@ -16,31 +14,17 @@ namespace BlueGraph
 
         public void Awake()
         {
-            displayName = "Foo Graph";
-        
             Debug.Log("Graph Awake");
-            Debug.Log("A > Count: " + nodes.Count);
-        
-            if (nodes.Count > 0)
-                Debug.Log("A > First item: " + nodes[0]);
         }
 
         public void OnEnable()
         {
             Debug.Log("Graph Enable");
-            Debug.Log("E > Count: " + nodes.Count);
-        
-            if (nodes.Count > 0)
-                Debug.Log("E > First item: " + nodes[0]);
         }
-    
+
         private void OnDisable()
         {
             Debug.Log("Graph Disable");
-            Debug.Log("D > Count: " + nodes.Count);
-        
-            if (nodes.Count > 0)
-                Debug.Log("D > First item: " + nodes[0]);
         }
 
         public void OnAfterDeserialize()
@@ -54,9 +38,9 @@ namespace BlueGraph
             // deprecated before trying to persist this graph.
             UpgradeDeprecatedNodes();
         }
-    
+
         void UpgradeDeprecatedNodes()
-        { 
+        {
             for (int i = 0; i < nodes.Count; i++)
             {
                 if (Attribute.GetCustomAttribute(nodes[i].GetType(), typeof(DeprecatedAttribute)) is DeprecatedAttribute deprecated)
@@ -65,15 +49,15 @@ namespace BlueGraph
                         $"{nodes[i].GetType().Name} is deprecated. " +
                         $"Upgrading to {deprecated.replaceWith.Name}."
                     );
-                
+
                     // Gross workaround that abuses JSON serialization for recasting
-                    var json = JsonUtility.ToJson(nodes[i]);
+                    string json = JsonUtility.ToJson(nodes[i]);
                     nodes[i] = JsonUtility.FromJson(json, deprecated.replaceWith) as AbstractNode;
                 }
             }
         }
-    
-        public AbstractNode FindNodeById(int id)
+
+        public AbstractNode FindNodeById(string id)
         {
             return nodes.Find((node) => node.id == id);
         }
@@ -88,7 +72,7 @@ namespace BlueGraph
             // TODO: More performant solution?
             var matches = new List<T>();
 
-            for (var i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < nodes.Count; i++)
             {
                 if (typeof(T).IsAssignableFrom(nodes[i].GetType()))
                 {
@@ -98,28 +82,19 @@ namespace BlueGraph
 
             return matches;
         }
-    
-        public int GetUniqueNodeId()
-        {
-            int id = 0;
-            nodes.ForEach((node) => id = Math.Max(id, node.id));
-            return id + 1;
-        }
-    
-        public void AddNode(AbstractNode node)
-        { 
-            node.id = GetUniqueNodeId();
-            node.graph = this;
         
+        public void AddNode(AbstractNode node)
+        {
+            node.graph = this;
             nodes.Add(node);
             node.OnAddedToGraph();
         }
-    
+
         public void AddEdge(Port output, Port input)
         {
             output.Connect(input);
         }
-    
+
         public void RemoveEdge(Port output, Port input)
         {
             output.Disconnect(input);
@@ -132,6 +107,34 @@ namespace BlueGraph
 
             node.graph = null;
             node.OnRemovedFromGraph();
+        }
+
+        /// <summary>
+        /// Return a list of tuples representing all edges on the graph
+        /// </summary>
+        /// <returns></returns>
+        public List<(Port input, Port output)> GetEdges()
+        {
+            List<(Port, Port)> edges = new List<(Port, Port)>();
+
+            // TODO: Better algorithm.
+            // The way the data structure works now - it's not easy to get
+            // an independent edge list - since it's not optimized for that.
+            foreach (AbstractNode node in nodes)
+            {
+                foreach (Port port in node.ports)
+                {
+                    if (port.isInput)
+                    {
+                        foreach (Port output in port.ConnectedPorts)
+                        {
+                            edges.Add((port, output));
+                        }
+                    }
+                }
+            }
+
+            return edges;
         }
     }
 }

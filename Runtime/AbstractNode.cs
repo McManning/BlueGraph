@@ -7,35 +7,34 @@ namespace BlueGraph
     [Serializable]
     public abstract class AbstractNode : ISerializationCallbackReceiver
     {
+        public string id;
         public string name;
     
-        public int id;
         public Graph graph;
     
         public List<Port> ports = new List<Port>();
         
         public Vector2 graphPosition;
 
+        public AbstractNode()
+        {
+            id = Guid.NewGuid().ToString();
+        }
+
         public virtual void OnAfterDeserialize()
         {
-            Debug.Log($"Node {name}:{id} After Deserialize");
-        
             if (graph == null)
             {
-                throw new Exception("No graph after deserialize");
-            }
-        
-            Debug.Log($"graph is {graph.displayName}");
-        
-            if (ports == null)
-            {
-                throw new Exception("No ports after deserialize");
+                throw new Exception(
+                    $"[{name} - {id}] Node deserialized without a graph reference. " +
+                    $"This could point to a potential memory leak"
+                );
             }
         
             // Ports are deserialized first, and then this node.
             // Here, we assign the references back onto each port 
             // for connection lookups.
-            foreach (var port in ports)
+            foreach (Port port in ports)
             {
                 port.node = this;
                 port.graph = graph;
@@ -50,7 +49,7 @@ namespace BlueGraph
         public virtual void OnAddedToGraph()
         {
             // Refresh port references to the graph
-            foreach (var port in ports)
+            foreach (Port port in ports)
             {
                 port.node = this;
                 port.graph = graph;
@@ -79,7 +78,7 @@ namespace BlueGraph
 
         public object GetInputValue(string portName, object defaultValue = null)
         {
-            var port = GetPort(portName);
+            Port port = GetPort(portName);
             if (port == null)
             {
                 Debug.LogWarning(
@@ -89,18 +88,18 @@ namespace BlueGraph
                 return defaultValue;
             }
 
-            var conn = port.Connections;
-            if (conn.Length < 1)
+            if (!port.IsConnected)
             {
                 return defaultValue;
             }
 
-            return conn[0].node.GetOutputValue(conn[0].name);
+            Port[] connections = port.ConnectedPorts;
+            return connections[0].node.GetOutputValue(connections[0].name);
         }
 
         public T GetInputValue<T>(string portName, T defaultValue = default)
         {
-            var output = GetInputValue(portName, null);
+            object output = GetInputValue(portName, null);
             
             if (output == null && typeof(T).IsValueType)
             {
@@ -138,7 +137,7 @@ namespace BlueGraph
     
         public void AddPort(Port port)
         {
-            var match = ports.Find((p) => p.name == port.name);
+            Port match = ports.Find((p) => p.name == port.name);
             if (match != null)
             {
                 throw new ArgumentException(

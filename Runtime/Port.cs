@@ -64,8 +64,8 @@ namespace BlueGraph
         {
             get
             {
-                var len = connections.Count;
-                var ports = new Port[len];
+                int len = connections.Count;
+                Port[] ports = new Port[len];
         
                 for (int i = 0; i < len; i++)
                 {
@@ -82,8 +82,8 @@ namespace BlueGraph
                     // complexity and dependencies that break when an undo operation is performed on the graph.
                     // Referring to the graph as the source of truth reduces our complexity considerably. 
                 
-                    var serialized = connections[i];
-                    var connected = graph.FindNodeById(serialized.nodeId); // O(1) - ideally. Currently O(Graph nodes)
+                    Connection serialized = connections[i];
+                    AbstractNode connected = graph.FindNodeById(serialized.nodeId); // O(1) - ideally. Currently O(Graph nodes)
                     ports[i] = connected.GetPort(serialized.portName); // O(1) - ideally. Current O(Local ports)
                 }
             
@@ -130,24 +130,19 @@ namespace BlueGraph
     
         internal void Disconnect(Port other)
         {
-            // find connection and do the thing. Both sides.
-            var conn = FindConnection(other);
-            if (conn != null)
-            {
-                connections.Remove(conn);
-            }
+            connections.RemoveAll(
+                 (c) => c.nodeId == other.node.id && c.portName == other.name
+            );
             
-            var otherConn = other.FindConnection(this);
-            if (otherConn != null)
-            {
-                other.connections.Remove(otherConn);
-            }
+            other.connections.RemoveAll(
+                (c) => c.nodeId == node.id && c.portName == name
+            );
         }
         
         internal void DisconnectAll()
         {
             // Erase our connection backref from every connected port
-            var conns = ConnectedPorts;
+            Port[] conns = ConnectedPorts;
             for (var i = 0; i < conns.Length; i++)
             {
                 var backref = conns[i].FindConnection(this);
