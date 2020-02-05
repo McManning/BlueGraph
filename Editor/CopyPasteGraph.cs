@@ -6,144 +6,88 @@ using UnityEngine;
 namespace BlueGraph.Editor
 {
     /// <summary>
-    /// Converts graph data into a format that can be stored on the clipboard
-    /// for copy/paste actions. 
+    /// Converts graph data into a format that can be stored on the clipboard for copy/paste
     /// </summary>
     public class CopyPasteGraph : ScriptableObject
     {
-        [Serializable]
-        public class SerializedEdge
-        {
-            public string inputGuid;
-            public string inputPortName;
-
-            public string outputGuid;
-            public string outputPortName;
-        }
-
-        [Serializable]
-        public class SerializedNode
-        {
-            public string guid;
-            public string name;
-            public string type;
-            public string JSON;
-        }
-        
-        [NonSerialized]
+        [SerializeReference]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
-        [SerializeField]
-        List<SerializedNode> m_SerializedNodes = new List<SerializedNode>();
-        
-        [SerializeField]
-        List<SerializedEdge> m_SerializedEdges = new List<SerializedEdge>();
+        public List<Comment> comments = new List<Comment>();
 
         public static string Serialize(IEnumerable<GraphElement> elements)
         {
             var graph = CreateInstance<CopyPasteGraph>();
             
-            throw new Exception("TODO: Reimplement");
-
-            /*
             foreach (var element in elements)
             {
-                if (element is NodeView)
+                if (element is NodeView node)
                 {
-                    var src = (element as NodeView).target;
-                    var node = Instantiate(src);
-                    node.name = src.name;
-
-                    // Convert connections to something that can be serialized
-                    foreach (var port in node.ports)
-                    {
-                        // Just serialize input connections to reduce a bit of redundancy
-                        if (port.isInput)
-                        {
-                            foreach (var conn in port.connections)
-                            {
-                                graph.m_SerializedEdges.Add(new SerializedEdge()
-                                {
-                                    inputGuid = node.guid,
-                                    inputPortName = port.portName,
-                                    outputGuid = conn.node.guid,
-                                    outputPortName = conn.portName
-                                });
-                            }
-                        }
-                       
-                        port.connections.Clear();
-                    }
-                    
-                    graph.m_SerializedNodes.Add(new SerializedNode() {
-                        guid = node.guid,
-                        name = node.name,
-                        type = node.GetType().FullName,
-                        JSON = JsonUtility.ToJson(node)
-                    });
+                    graph.nodes.Add(node.target);
+                }
+                else if (element is CommentView comment)
+                {
+                    graph.comments.Add(comment.target);
                 }
             }
             
-            return JsonUtility.ToJson(graph);*/
+            string json = JsonUtility.ToJson(graph, true);
+            DestroyImmediate(graph);
+
+            Debug.Log(json);
+            return json;
         }
 
         public static bool CanDeserialize(string data)
         {
             try
             {
+                // TODO: Verson/graph module compat testing. 
+                // Otherwise someone could paste nodes into a graph that
+                // doesn't have access to those particular nodes.
                 var graph = CreateInstance<CopyPasteGraph>();
                 JsonUtility.FromJsonOverwrite(data, graph);
-                return graph.m_SerializedNodes.Count > 0;
+                DestroyImmediate(graph);
+                return true;
             } 
             catch { }
         
             return false;
         }
 
-        public static Graph Deserialize(string data)
+        public static CopyPasteGraph Deserialize(string data)
         {
-            var cpGraph = CreateInstance<CopyPasteGraph>();
-            JsonUtility.FromJsonOverwrite(data, cpGraph);
+            var graph = CreateInstance<CopyPasteGraph>();
+            JsonUtility.FromJsonOverwrite(data, graph);
             
-            var graph = CreateInstance<Graph>();
+            // Generate unique IDs for each node and de-reference ports.
 
-            var nodeMap = new Dictionary<int, AbstractNode>();
-            var guidMap = new Dictionary<int, int>();
-
-            throw new Exception("TODO: Reimplement");
-            /*
-            foreach (var node in cpGraph.m_SerializedNodes)
+            Dictionary<string, string> remap = new Dictionary<string, string>();
+            
+            // Generate new unique IDs for each node in the list
+            foreach (AbstractNode node in graph.nodes)
             {
-                var instance = CreateInstance(node.type) as AbstractNode;
-                JsonUtility.FromJsonOverwrite(node.JSON, instance);
-                instance.name = node.name;
-                
-                nodeMap[node.guid] = instance;
-                guidMap[node.guid] = instance.guid;
-                graph.AddNode(instance);
-                
-                // Remap port associations
-                foreach (var port in instance.ports)
+                string id = node.id;
+                node.id = Guid.NewGuid().ToString();
+                remap[id] = node.id;
+            }
+
+            // Remap connection IDs and prune connections to nodes outside the subset
+            foreach (AbstractNode node in graph.nodes)
+            {
+                foreach (Port port in node.ports)
                 {
-                    port.node = instance;
-                }
-            }
-            
-            // Re-associate edges to the new node instances
-            foreach (var edge in cpGraph.m_SerializedEdges)
-            {
-                if (nodeMap.ContainsKey(edge.inputGuid) && 
-                    nodeMap.ContainsKey(edge.outputGuid)
-                ) {
-                    var inPort = nodeMap[edge.inputGuid].GetInputPort(edge.inputPortName);
-                    var outPort = nodeMap[edge.outputGuid].GetOutputPort(edge.outputPortName);
+                    port.connections.RemoveAll(
+                        (conn) => !remap.ContainsKey(conn.nodeId)
+                    );
 
-                    inPort.Connect(outPort);
-                    outPort.Connect(inPort);
+                    port.connections.ForEach(
+                        (conn) => conn.nodeId = remap[conn.nodeId]
+                    );
                 }
             }
 
-            return graph; */
+            return graph;
         }
     }
 }

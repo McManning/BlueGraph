@@ -106,7 +106,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Event handler to frame the graph view on initial layout
         /// </summary>
-        private void OnFirstResize(GeometryChangedEvent evt)
+        void OnFirstResize(GeometryChangedEvent evt)
         {
             UnregisterCallback<GeometryChangedEvent>(OnFirstResize);
             FrameAll();
@@ -125,6 +125,7 @@ namespace BlueGraph.Editor
                     }
                 }
                 
+                // Moved nodes will update their underlying models automatically.
                 EditorUtility.SetDirty(m_Graph);
             }
             
@@ -166,8 +167,6 @@ namespace BlueGraph.Editor
         
         public void Load(Graph graph)
         {
-            // Reset();
-
             m_Graph = graph;
             m_SerializedGraph = new SerializedObject(m_Graph);
             
@@ -217,9 +216,12 @@ namespace BlueGraph.Editor
 
             m_Graph.AddNode(node);
             m_SerializedGraph.Update();
+            EditorUtility.SetDirty(m_Graph);
 
             var serializedNodesArr = m_SerializedGraph.FindProperty("nodes");
-            var serializedNode = serializedNodesArr.GetArrayElementAtIndex(serializedNodesArr.arraySize - 1);
+
+            var nodeIdx = m_Graph.nodes.IndexOf(node);
+            var serializedNode = serializedNodesArr.GetArrayElementAtIndex(nodeIdx);
             
             // Add a node to the visual graph
             var editorType = NodeReflection.GetNodeEditorType(data.type);
@@ -227,8 +229,6 @@ namespace BlueGraph.Editor
             element.Initialize(node, serializedNode, m_EdgeListener);
             
             AddElement(element);
-            
-            EditorUtility.SetDirty(m_Graph);
             
             // If there was a provided existing port to connect to, find the best 
             // candidate port on the new node and connect. 
@@ -269,8 +269,10 @@ namespace BlueGraph.Editor
             }
 
             m_Graph.RemoveNode(node.target);
-
+            m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
+
+            RemoveElement(node);
         }
 
         /// <summary>
@@ -315,15 +317,12 @@ namespace BlueGraph.Editor
 
             // Connect the ports in the model
             m_Graph.AddEdge(input.target, output.target);
+            m_SerializedGraph.Update();
+            EditorUtility.SetDirty(m_Graph);
 
             // Add a matching edge view onto the canvas
             var newEdge = input.ConnectTo(output);
             AddElement(newEdge);
-
-            // Sync serialized with the updated models
-            m_SerializedGraph.Update();
-
-            EditorUtility.SetDirty(m_Graph);
             
             // Dirty the affected node views
             Dirty(input.node as NodeView);
@@ -347,6 +346,8 @@ namespace BlueGraph.Editor
 
             // Disconnect the ports in the model
             m_Graph.RemoveEdge(input.target, output.target);
+            m_SerializedGraph.Update();
+            EditorUtility.SetDirty(m_Graph);
             
             // Remove the edge view
             edge.input.Disconnect(edge);
@@ -355,9 +356,6 @@ namespace BlueGraph.Editor
             edge.output = null;
             RemoveElement(edge);
             
-            // Sync serialized with the updated models
-            m_SerializedGraph.Update();
-
             // Dirty the affected node views
             Dirty(input.node as NodeView);
             Dirty(output.node as NodeView);
@@ -458,7 +456,7 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Append views for nodes from a Graph
+        /// Append views for a set of nodes
         /// </summary>
         void AddNodeViews(List<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
@@ -470,23 +468,30 @@ namespace BlueGraph.Editor
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                // TODO: This assumes it exists on the graph already and serialized.
-                // Not correct for pasting. 
                 var node = nodes[i];
-                var serializedNode = serializedNodesArr.GetArrayElementAtIndex(i);
+                var graphIdx = m_Graph.nodes.IndexOf(node);
 
-                var editorType = NodeReflection.GetNodeEditorType(node.GetType());
-                var element = Activator.CreateInstance(editorType) as NodeView;
-                
-                element.Initialize(node, serializedNode, m_EdgeListener);
-                AddElement(element);
-                
-                nodeMap.Add(node, element);
-                Dirty(element);
-                
-                if (selectOnceAdded)
+                if (graphIdx < 0)
                 {
-                    AddToSelection(element);
+                    Debug.LogError("Cannot add NodeView: Node is not indexed on the graph");
+                }
+                else
+                {
+                    var serializedNode = serializedNodesArr.GetArrayElementAtIndex(graphIdx);
+
+                    var editorType = NodeReflection.GetNodeEditorType(node.GetType());
+                    var element = Activator.CreateInstance(editorType) as NodeView;
+                
+                    element.Initialize(node, serializedNode, m_EdgeListener);
+                    AddElement(element);
+                
+                    nodeMap.Add(node, element);
+                    Dirty(element);
+                
+                    if (selectOnceAdded)
+                    {
+                        AddToSelection(element);
+                    }
                 }
             }
             
@@ -514,7 +519,7 @@ namespace BlueGraph.Editor
                         continue;
                     }
 
-                    var connections = port.Connections;
+                    var connections = port.ConnectedPorts;
                     foreach (var conn in connections)
                     {
                         if (conn.node == null)
@@ -560,11 +565,12 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Append views for comments from a Graph
         /// </summary>
-        private void AddCommentViews(List<Comment> comments)
+        void AddCommentViews(IEnumerable<Comment> comments)
         { 
             foreach (var comment in comments)
             {
                 var commentView = new CommentView(comment);
+                m_CommentViews.Add(commentView);
                 AddElement(commentView);
                 Dirty(commentView);
             }
@@ -607,7 +613,7 @@ namespace BlueGraph.Editor
         /// If there are selected nodes, this'll encapsulate the selection with
         /// the comment box. Otherwise, it'll add at defaultPosition.
         /// </summary>
-        private void AddComment()
+        void AddComment()
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, "Add Comment");
             
@@ -642,13 +648,15 @@ namespace BlueGraph.Editor
             var commentView = new CommentView(comment);
             commentView.onResize += Dirty;
             
+            // Add to the model
             m_Graph.comments.Add(comment);
-            m_CommentViews.Add(commentView);
-
-            AddElement(commentView);
-            Dirty(commentView);
-            
+            m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
+
+            m_CommentViews.Add(commentView);
+            AddElement(commentView);
+            
+            Dirty(commentView);
         }
         
         /// <summary>
@@ -661,10 +669,13 @@ namespace BlueGraph.Editor
             
             Debug.Log($"-comment {comment.target.title}");
 
-            m_CommentViews.Remove(comment);
+            // Remove from the model
             m_Graph.comments.Remove(comment.target);
-
+            m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
+            
+            RemoveElement(comment);
+            m_CommentViews.Remove(comment);
         }
 
         /// <summary>
@@ -674,22 +685,29 @@ namespace BlueGraph.Editor
         /// <param name="data"></param>
         private void OnUnserializeAndPaste(string operationName, string data)
         {
-            throw new Exception("TODO: Reimplement");
-            /*
-            var graph = CopyPasteGraph.Deserialize(data);
+            Undo.RegisterCompleteObjectUndo(m_Graph, "Paste Subgraph");
+
+            var cpg = CopyPasteGraph.Deserialize(data);
             
-            // Add each node to the working graph
-            foreach (var node in graph.nodes)
+            foreach (var node in cpg.nodes)
             {
                 m_Graph.AddNode(node);
-                AssetDatabase.AddObjectToAsset(node, m_Graph);
+            }
+
+            foreach (var comment in cpg.comments)
+            {
+                m_Graph.comments.Add(comment);
             }
             
-            AssetDatabase.SaveAssets();
-
-            // Add the new nodes and select them
+            m_SerializedGraph.Update();
+            EditorUtility.SetDirty(m_Graph);
+            
+            // Add views for all the new elements
             ClearSelection();
-            AddNodeViews(graph.nodes, true, true);*/
+            AddNodeViews(cpg.nodes, true, true);
+            AddCommentViews(cpg.comments);
+
+            ScriptableObject.DestroyImmediate(cpg);
         }
 
         private bool OnTryPasteSerializedData(string data)
