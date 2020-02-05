@@ -73,9 +73,9 @@ namespace BlueGraph.Tests
             
             node2.RemovePort(portToRemove);
 
-            Assert.AreEqual(0, node1.GetPort("Output").Connections.Length);
-            Assert.AreEqual(1, node2.GetPort("Output").Connections.Length);
-            Assert.AreEqual(1, node3.GetPort("Input").Connections.Length);
+            Assert.AreEqual(0, node1.GetPort("Output").connections.Count);
+            Assert.AreEqual(1, node2.GetPort("Output").connections.Count);
+            Assert.AreEqual(1, node3.GetPort("Input").connections.Count);
         }
         
         [Test]
@@ -111,15 +111,5 @@ namespace BlueGraph.Tests
 
             Assert.IsNull(actual);
         }
-
-        /// <summary>
-        /// General test to check if an object emitted from one 
-        /// </summary>
-        [Test]
-        public void CanPassIO()
-        {
-
-        }
-
     }
 }

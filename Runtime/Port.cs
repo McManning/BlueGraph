@@ -7,9 +7,9 @@ using UnityEditor;
 namespace BlueGraph
 {
     [Serializable]
-    internal class SerializedConnection
+    public class Connection
     {
-        public int nodeId;
+        public string nodeId;
         public string portName;
     }
     
@@ -46,8 +46,50 @@ namespace BlueGraph
         [NonSerialized] public Graph graph;
         [NonSerialized] public AbstractNode node;
     
-        [SerializeField] List<SerializedConnection> m_Connections = new List<SerializedConnection>();
+        [SerializeField] public List<Connection> connections = new List<Connection>();
         [SerializeField] string m_Type;
+        
+        public bool IsConnected
+        {
+            get
+            {
+                return connections.Count > 0;
+            }
+        }
+        
+        /// <summary>
+        /// Retrieve a list of Ports currently connected to this Port
+        /// </summary>
+        public Port[] ConnectedPorts
+        {
+            get
+            {
+                var len = connections.Count;
+                var ports = new Port[len];
+        
+                for (int i = 0; i < len; i++)
+                {
+                    // A graph lookup is done here instead of storing on the port in order
+                    // to work around the (de)serialization order issues that Unity has 
+                    // when using [SerializeReference]. Specifically:
+                
+                    // 1. In the current (2019.3) implementation, Unity will deserialize the Graph node list 
+                    // with all nulls, then each Node is deserialized separately and add them to the graph *after* 
+                    // Graph.OnAfterDeserialization(). This causes any type of node lookup done by a port 
+                    // deserialization to fail.
+                
+                    // 2. Storing the connected nodes as a [SerializedReference] on the port introduces
+                    // complexity and dependencies that break when an undo operation is performed on the graph.
+                    // Referring to the graph as the source of truth reduces our complexity considerably. 
+                
+                    var serialized = connections[i];
+                    var connected = graph.FindNodeById(serialized.nodeId); // O(1) - ideally. Currently O(Graph nodes)
+                    ports[i] = connected.GetPort(serialized.portName); // O(1) - ideally. Current O(Local ports)
+                }
+            
+                return ports;
+            }
+        }
 
         public void OnAfterDeserialize()
         {
@@ -73,13 +115,13 @@ namespace BlueGraph
         
             // TODO: Enforcement of multiple connection limits
 
-            m_Connections.Add(new SerializedConnection
+            connections.Add(new Connection
             {
                 nodeId = other.node.id,
                 portName = other.name
             });
         
-            other.m_Connections.Add(new SerializedConnection
+            other.connections.Add(new Connection
             {
                 nodeId = node.id,
                 portName = name
@@ -92,77 +134,38 @@ namespace BlueGraph
             var conn = FindConnection(other);
             if (conn != null)
             {
-                m_Connections.Remove(conn);
+                connections.Remove(conn);
             }
             
             var otherConn = other.FindConnection(this);
             if (otherConn != null)
             {
-                other.m_Connections.Remove(otherConn);
+                other.connections.Remove(otherConn);
             }
         }
         
-        SerializedConnection FindConnection(Port other)
-        {
-            return m_Connections.Find(
-                (conn) => conn.nodeId == other.node.id && conn.portName == other.name
-            );
-        }
-
-        public void DisconnectAll()
+        internal void DisconnectAll()
         {
             // Erase our connection backref from every connected port
-            var conns = Connections;
+            var conns = ConnectedPorts;
             for (var i = 0; i < conns.Length; i++)
             {
                 var backref = conns[i].FindConnection(this);
                 if (backref != null)
                 {
-                    conns[i].m_Connections.Remove(backref);
+                    conns[i].connections.Remove(backref);
                 }
             }
 
             // Finally - clear the local connection list 
-            m_Connections.Clear();
-        }
-
-        public bool IsConnected
-        {
-            get
-            {
-                return m_Connections.Count > 0;
-            }
+            connections.Clear();
         }
         
-        public Port[] Connections
+        internal Connection FindConnection(Port other)
         {
-            get
-            {
-                var len = m_Connections.Count;
-                var ports = new Port[len];
-        
-                for (int i = 0; i < len; i++)
-                {
-                    // A graph lookup is done here instead of storing on the port in order
-                    // to work around the (de)serialization order issues that Unity has 
-                    // when using [SerializeReference]. Specifically:
-                
-                    // 1. In the current (2019.3) implementation, Unity will deserialize the Graph node list 
-                    // with all nulls, then each Node is deserialized separately and add them to the graph *after* 
-                    // Graph.OnAfterDeserialization(). This causes any type of node lookup done by a port 
-                    // deserialization to fail.
-                
-                    // 2. Storing the connected nodes as a [SerializedReference] on the port introduces
-                    // complexity and dependencies that break when an undo operation is performed on the graph.
-                    // Referring to the graph as the source of truth reduces our complexity considerably. 
-                
-                    var serialized = m_Connections[i];
-                    var connected = graph.FindNodeById(serialized.nodeId); // O(1) - ideally. Currently O(Graph nodes)
-                    ports[i] = connected.GetPort(serialized.portName); // O(1) - ideally. Current O(Local ports)
-                }
-            
-                return ports;
-            }
+            return connections.Find(
+                (conn) => conn.nodeId == other.node.id && conn.portName == other.name
+            );
         }
     }
 }
