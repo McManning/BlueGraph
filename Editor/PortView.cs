@@ -3,10 +3,11 @@ using System;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using GraphViewPort = UnityEditor.Experimental.GraphView.Port;
 
 namespace BlueGraph.Editor
 {
-    public class PortView : UnityEditor.Experimental.GraphView.Port
+    public class PortView : GraphViewPort
     {
         public Port target;
 
@@ -18,7 +19,7 @@ namespace BlueGraph.Editor
 
         VisualElement m_EditorField;
         
-        protected PortView(
+        public PortView(
             Orientation portOrientation, 
             Direction portDirection, 
             Capacity portCapacity, 

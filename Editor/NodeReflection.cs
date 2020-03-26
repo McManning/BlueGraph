@@ -3,15 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
+/// <summary>
+/// Suite of reflection methods and caching for retrieving available
+/// graph nodes and their associated editor views
+/// </summary>
 namespace BlueGraph.Editor
 {
     public class PortReflectionData
     {
-        public Type type;
+        public Type Type => field.FieldType;
+
+        public FieldInfo field;
+
         public string portName;
-        public string fieldName;
 
         public bool acceptsMultipleConnections;
         public bool isInput;
@@ -20,8 +29,10 @@ namespace BlueGraph.Editor
 
     public class EditableReflectionData
     {
-        public Type type;
-        public string fieldName;
+        public Type Type => field.FieldType;
+
+        public string displayName;
+        public FieldInfo field;
     }
 
     public class NodeReflectionData
@@ -55,6 +66,8 @@ namespace BlueGraph.Editor
         public List<PortReflectionData> ports = new List<PortReflectionData>();
         public List<EditableReflectionData> editables = new List<EditableReflectionData>();
     
+        public List<FieldInfo> fields = new List<FieldInfo>();
+
         public bool HasSingleOutput()
         {
             return ports.Count((port) => !port.isInput) < 2;
@@ -67,7 +80,7 @@ namespace BlueGraph.Editor
                 if (!port.isInput) continue;
        
                 // Cast direction type -> port input
-                if (type.IsCastableTo(port.type, true))
+                if (type.IsCastableTo(port.Type, true))
                 {
                     return true;
                 }
@@ -78,14 +91,12 @@ namespace BlueGraph.Editor
 
         public bool HasOutputOfType(Type type)
         {
-            // return ports.Count((port) => !port.isInput && port.type == type) > 0;
-            
             foreach (var port in ports)
             {
                 if (port.isInput) continue;
        
                 // Cast direction port output -> type
-                if (port.type.IsCastableTo(type, true))
+                if (port.Type.IsCastableTo(type, true))
                 {
                     return true;
                 }
@@ -100,25 +111,24 @@ namespace BlueGraph.Editor
         /// <param name="type"></param>
         public void AddPortsFromClass(Type type)
         {
-            var fields = new List<FieldInfo>(type.GetFields(
+            fields.AddRange(type.GetFields(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
             ));
         
             // Extract port and editable metadata from each tagged field
             for (int i = 0; i < fields.Count; i++)
             {
-                object[] attribs = fields[i].GetCustomAttributes(true);
+                var attribs = fields[i].GetCustomAttributes(true);
                 for (int j = 0; j < attribs.Length; j++)
                 {
                     if (attribs[j] is InputAttribute)
                     {
                         var attr = attribs[j] as InputAttribute;
-                        
+
                         ports.Add(new PortReflectionData()
                         {
-                            type = fields[i].FieldType,
                             portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
-                            fieldName = fields[i].Name,
+                            field = fields[i],
                             isInput = true,
                             acceptsMultipleConnections = attr.multiple,
                             isEditable = attr.editable
@@ -130,9 +140,8 @@ namespace BlueGraph.Editor
                         
                         ports.Add(new PortReflectionData()
                         {
-                            type = fields[i].FieldType,
                             portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
-                            fieldName = fields[i].Name,
+                            field = fields[i],
                             isInput = false,
                             acceptsMultipleConnections = attr.multiple,
                             isEditable = false
@@ -144,8 +153,8 @@ namespace BlueGraph.Editor
                         
                         editables.Add(new EditableReflectionData()
                         {
-                            type = fields[i].FieldType,
-                            fieldName = fields[i].Name
+                            displayName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            field = fields[i]
                         });
                     }
                 }
@@ -165,33 +174,115 @@ namespace BlueGraph.Editor
             {
                 // Now it's basically everything from reflection.
                 // TODO Get rid of reflection?
-                var nodePort = new Port() {
+                var nodePort = new Port {
+                    Type = port.Type,
                     node = node,
                     name = port.portName,
                     acceptsMultipleConnections = port.acceptsMultipleConnections,
-                    isInput = port.isInput,
-                    type = port.type
+                    isInput = port.isInput
                 };
 
                 // Only pass the field name along if we allow
                 // inline editing of the port
                 if (port.isEditable)
                 {
-                    nodePort.fieldName = port.fieldName;
+                    nodePort.fieldName = port.field.Name;
                 }
 
                 node.AddPort(nodePort);
             }
-            
-            // If we spawned a FuncNode, bind it to the method. 
-            if (method != null && node is FuncNode func)
-            {
-                func.CreateDelegate(method);
-            }
 
             return node;
         }
+        
+        /// <summary>
+        /// Create a VisualElement for a port's inline editor based on the field data type
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public VisualElement GetControlElement(NodeView view, string fieldName)
+        {
+            var fieldInfo = fields.Find((field) => field.Name == fieldName);
+            if (fieldInfo == null)
+            {
+                return null;
+            }
+            
+            // TODO: Rip this out from this point and put somewhere else that's pretty + extendable.
 
+            // This mess is similar to what Unity is doing for ShaderGraph. It's not great.
+            // But the automatic alternatives depend on SerializableObject which is a performance bottleneck.
+            // Ref: https://github.com/Unity-Technologies/ScriptableRenderPipeline/blob/master/com.unity.shadergraph/Editor/Drawing/Controls/DefaultControl.cs
+            
+            // Builtin unity type editors
+            if (fieldInfo.FieldType == typeof(bool))
+                return CreateControlElement<Toggle, bool>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(int))
+                return CreateControlElement<IntegerField, int>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(float))
+                return CreateControlElement<FloatField, float>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(string))
+                return CreateControlElement<TextField, string>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Rect))
+                return CreateControlElement<RectField, Rect>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Color))
+                return CreateControlElement<ColorField, Color>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Vector2))
+                return CreateControlElement<Vector2Field, Vector2>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Vector3))
+                return CreateControlElement<Vector3Field, Vector3>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Vector4))
+                return CreateControlElement<Vector4Field, Vector4>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Matrix4x4))
+                return CreateControlElement<Vector4Field, Vector4>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(Gradient))
+                return CreateControlElement<GradientField, Gradient>(view, fieldInfo);
+            
+            if (fieldInfo.FieldType == typeof(AnimationCurve))
+                return CreateControlElement<CurveField, AnimationCurve>(view, fieldInfo);
+            
+            if (typeof(Enum).IsAssignableFrom(fieldInfo.FieldType))
+                return CreateControlElement<EnumField, Enum>(view, fieldInfo); 
+    
+            // TODO: EnumFlags/Masks
+
+            if (typeof(Object).IsAssignableFrom(fieldInfo.FieldType))
+                return CreateControlElement<ObjectField, Object>(view, fieldInfo);
+
+            // TODO: Specialized common types. Transform, Rotation, Texture2D, etc.
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Generic factory for instantiating and configuring builtin Unity controls for value types.
+        /// 
+        /// The control will be created and bound to the given NodeView and its associated target node. 
+        /// </summary>
+        VisualElement CreateControlElement<TField, TType>(NodeView view, FieldInfo fieldInfo) where TField: BaseField<TType>, new()
+        {
+            var field = new TField();
+            field.SetValueWithoutNotify((TType)fieldInfo.GetValue(view.target));
+            field.RegisterValueChangedCallback((change) =>
+            {
+                fieldInfo.SetValue(view.target, change.newValue);
+                view.OnPropertyChange();
+            });
+
+            return field;
+        }
+        
         public override string ToString()
         {
             var inputs = new List<string>();
@@ -207,10 +298,6 @@ namespace BlueGraph.Editor
         }
     }
     
-    /// <summary>
-    /// Suite of reflection methods and caching for retrieving available
-    /// graph nodes and their associated custom editors
-    /// </summary>
     public static class NodeReflection
     {
         private static Dictionary<string, NodeReflectionData> k_NodeTypes = null;
@@ -285,7 +372,7 @@ namespace BlueGraph.Editor
             }
         
             // Run through modules and add tagged methods as FuncNodes
-            foreach (var type in moduleTypes) 
+            /*foreach (var type in moduleTypes) 
             {
                 var attr = type.GetCustomAttribute<FuncNodeModuleAttribute>();
                 var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
@@ -294,12 +381,13 @@ namespace BlueGraph.Editor
                 {
                     nodes[$"{type.FullName}|{method.Name}"] = LoadMethodReflection(method, attr);
                 }
-            }
+            }*/
             
             k_NodeTypes = nodes;
             return k_NodeTypes;
         }
 
+        /*
         static NodeReflectionData LoadMethodReflection(MethodInfo method, FuncNodeModuleAttribute moduleAttr)
         {    
             var attr = method.GetCustomAttribute<FuncNodeAttribute>();
@@ -310,7 +398,7 @@ namespace BlueGraph.Editor
             var path = attr?.module ?? moduleAttr.path;
             
             // FuncNode.classType can override default class type
-            var classType = attr?.classType ?? typeof(FuncNode);
+            var classType = attr?.classType; // ?? typeof(FuncNode);
             
             var node = new NodeReflectionData()
             {
@@ -352,7 +440,7 @@ namespace BlueGraph.Editor
             node.AddPortsFromClass(classType);
 
             return node;
-        }
+        }*/
 
         /// <summary>
         /// Extract NodeField information from class reflection + attributes
