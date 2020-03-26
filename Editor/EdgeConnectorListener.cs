@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
+using GraphViewEdge = UnityEditor.Experimental.GraphView.Edge;
 
 namespace BlueGraph.Editor
 {
@@ -17,12 +18,12 @@ namespace BlueGraph.Editor
             m_Canvas = canvas;
         }
     
-        public void OnDrop(GraphView graphView, Edge edge)
+        public void OnDrop(GraphView graphView, GraphViewEdge edge)
         {
             m_Canvas.AddEdge(edge, true);
         }
 
-        public void OnDropOutsidePort(Edge edge, Vector2 position)
+        public void OnDropOutsidePort(GraphViewEdge edge, Vector2 position)
         {
             var screenPosition = GUIUtility.GUIToScreenPoint(
                 Event.current.mousePosition

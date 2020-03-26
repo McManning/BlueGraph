@@ -39,7 +39,7 @@ namespace BlueGraph.Editor
         Graph m_Graph;
         SerializedObject m_SerializedGraph;
         
-        SearchProvider m_SearchProvider;
+        SearchWindow m_Search;
         EditorWindow m_EditorWindow;
 
         EdgeConnectorListener m_EdgeListener;
@@ -56,8 +56,9 @@ namespace BlueGraph.Editor
             AddToClassList("canvasView");
             
             m_EdgeListener = new EdgeConnectorListener(this);
-            m_SearchProvider = ScriptableObject.CreateInstance<SearchProvider>();
-            m_SearchProvider.target = this;
+            m_Search = ScriptableObject.CreateInstance<SearchWindow>();
+            m_Search.AddSearchProvider(new DefaultSearchProvider());
+            m_Search.target = this;
 
             SetupZoom(0.05f, ContentZoomer.DefaultMaxScale);
         
@@ -174,7 +175,7 @@ namespace BlueGraph.Editor
             AddCommentViews(graph.comments);
 
             // Reset the lookup to a new set of whitelisted modules
-            m_SearchProvider.modules.Clear();
+            m_Search.ClearModules();
 
             var attrs = graph.GetType().GetCustomAttributes(true);
             foreach (var attr in attrs)
@@ -183,7 +184,7 @@ namespace BlueGraph.Editor
                 {
                     foreach (var module in modulesAttr.modules)
                     {
-                        m_SearchProvider.modules.Add(module.Split('/'));
+                        m_Search.AddModule(module);
                     }
                 }
             }
@@ -451,8 +452,8 @@ namespace BlueGraph.Editor
 
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)
         {
-            m_SearchProvider.sourcePort = connectedPort;
-            SearchWindow.Open(new SearchWindowContext(screenPosition), m_SearchProvider);
+            m_Search.sourcePort = connectedPort;
+            GraphViewSearchWindow.Open(new SearchWindowContext(screenPosition), m_Search);
         }
         
         /// <summary>
@@ -642,7 +643,7 @@ namespace BlueGraph.Editor
             bounds.height += padding * 3; 
 
             var comment = new Comment();
-            comment.title = "New Comment";
+            comment.text = "New Comment";
             comment.graphRect = bounds;
 
             var commentView = new CommentView(comment);
@@ -667,7 +668,7 @@ namespace BlueGraph.Editor
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, "Delete Comment");
             
-            Debug.Log($"-comment {comment.target.title}");
+            Debug.Log($"-comment {comment.target.text}");
 
             // Remove from the model
             m_Graph.comments.Remove(comment.target);
