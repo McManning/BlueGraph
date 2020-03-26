@@ -11,32 +11,36 @@ namespace BlueGraph
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
         public List<Comment> comments = new List<Comment>();
-
+        
         public void Awake()
         {
-            Debug.Log("Graph Awake");
+            Debug.Log($"[Graph] Awake");
         }
 
         public void OnEnable()
         {
-            Debug.Log("Graph Enable");
+            Debug.Log($"[Graph] Enable");
         }
 
         private void OnDisable()
         {
-            Debug.Log("Graph Disable");
+            Debug.Log($"[Graph] Disable");
         }
 
         public void OnAfterDeserialize()
         {
-
+            Debug.Log($"[Graph] OnAfterDeserialize");
         }
 
         public void OnBeforeSerialize()
         {
+            // This runs OFTEN (basically every frame) in the editor.
+            // TODO: Don't do the upgrade check during this. Only on a reimport of scripts
+
             // Automatically upgrade anything that has been marked as 
             // deprecated before trying to persist this graph.
-            UpgradeDeprecatedNodes();
+            // UpgradeDeprecatedNodes();
+            // Debug.Log("[Graph] OnBeforeSerialize");
         }
 
         void UpgradeDeprecatedNodes()
@@ -107,34 +111,6 @@ namespace BlueGraph
 
             node.graph = null;
             node.OnRemovedFromGraph();
-        }
-
-        /// <summary>
-        /// Return a list of tuples representing all edges on the graph
-        /// </summary>
-        /// <returns></returns>
-        public List<(Port input, Port output)> GetEdges()
-        {
-            List<(Port, Port)> edges = new List<(Port, Port)>();
-
-            // TODO: Better algorithm.
-            // The way the data structure works now - it's not easy to get
-            // an independent edge list - since it's not optimized for that.
-            foreach (AbstractNode node in nodes)
-            {
-                foreach (Port port in node.ports)
-                {
-                    if (port.isInput)
-                    {
-                        foreach (Port output in port.ConnectedPorts)
-                        {
-                            edges.Add((port, output));
-                        }
-                    }
-                }
-            }
-
-            return edges;
         }
     }
 }
