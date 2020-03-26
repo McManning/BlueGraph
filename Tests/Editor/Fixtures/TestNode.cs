@@ -11,12 +11,10 @@ namespace BlueGraph.EditorTests
             name = "Test Node";
         }
 
-        public override void OnAddedToGraph()
+        public override void OnRequestPorts()
         {
-            base.OnAddedToGraph();
-        
-            AddPort(new Port { name = "Input" });
-            AddPort(new Port { name = "Output" });
+            AddPort(new Port { Type = typeof(int), name = "Input", isInput = true });
+            AddPort(new Port { Type = typeof(int), name = "Output" });
         }
     }
 }

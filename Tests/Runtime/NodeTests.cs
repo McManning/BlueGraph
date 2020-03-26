@@ -16,29 +16,33 @@ namespace BlueGraph.Tests
         public void CanAddPorts()
         {
             var node = new TestNodeA(); 
-            var port1 = new Port { name = "Test 1" };
-            var port2 = new Port { name = "Test 2" };
+            var port1 = new OutputPort<float> { name = "Test 1" };
+            var port2 = new OutputPort<float> { name = "Test 2" };
 
             node.AddPort(port1);
             node.AddPort(port2);
-
-            Assert.AreEqual(2, node.ports.Count);
+            
+            // Test Node A comes with 2 ports by default
+            Assert.AreEqual(4, node.Ports.Count);
+            Assert.AreSame(port1, node.GetPort("Test 1"));
+            Assert.AreSame(port2, node.GetPort("Test 2"));
         }
         
         [Test]
         public void CanRemovePorts()
         {
             var node = new TestNodeA();
-            var port1 = new Port { name = "Test 1" };
-            var port2 = new Port { name = "Test 2" };
+            var port1 = new OutputPort<float> { name = "Test 1" };
+            var port2 = new OutputPort<float> { name = "Test 2" };
 
             node.AddPort(port1);
             node.AddPort(port2);
 
             node.RemovePort(port1);
             
-            Assert.AreEqual(1, node.ports.Count);
-            Assert.AreSame(port2, node.ports[0]);
+            // Test Node A comes with 2 ports by default
+            Assert.AreEqual(3, node.Ports.Count);
+            Assert.AreSame(port2, node.GetPort("Test 2"));
         }
         
         /// <summary>
@@ -73,17 +77,17 @@ namespace BlueGraph.Tests
             
             node2.RemovePort(portToRemove);
 
-            Assert.AreEqual(0, node1.GetPort("Output").connections.Count);
-            Assert.AreEqual(1, node2.GetPort("Output").connections.Count);
-            Assert.AreEqual(1, node3.GetPort("Input").connections.Count);
+            Assert.AreEqual(0, node1.GetPort("Output").Connections.Count);
+            Assert.AreEqual(1, node2.GetPort("Output").Connections.Count);
+            Assert.AreEqual(1, node3.GetPort("Input").Connections.Count);
         }
         
         [Test]
         public void CanGetPorts()
         {
             var node = new TestNodeA(); 
-            node.AddPort(new Port { name = "Test 1" });
-            node.AddPort(new Port { name = "Test 2" });
+            node.AddPort(new OutputPort<float> { name = "Test 1" });
+            node.AddPort(new OutputPort<float> { name = "Test 2" });
             
             var actual = node.GetPort("Test 2");
             
@@ -95,15 +99,15 @@ namespace BlueGraph.Tests
         public void AddDuplicatePortNameThrowsError()
         {
             var node = new TestNodeA();
-            node.AddPort(new Port { name = "Test" });
+            node.AddPort(new OutputPort<float> { name = "Test" });
             
             Assert.Throws<ArgumentException>(
-                () => node.AddPort(new Port { name = "Test" })
+                () => node.AddPort(new OutputPort<float> { name = "Test" })
             );
         }
         
         [Test]
-        public void GetUnknownPortReturnsNull()
+        public void ReturnsNullOnInvalidPortName()
         {
             var node = new TestNodeA();
             

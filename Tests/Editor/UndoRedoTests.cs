@@ -53,8 +53,8 @@ namespace BlueGraph.EditorTests
             Assert.AreEqual(graph.nodes[0].id, node1.id);
             Assert.AreEqual(graph.nodes[1].id, node2.id);
 
-            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").connections.Count);
-            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").connections.Count);
+            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").Connections.Count);
+            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").Connections.Count);
         }
 
         /// <summary>
@@ -90,12 +90,12 @@ namespace BlueGraph.EditorTests
             
             // Make sure an undo operation did not destroy unrelated connections and
             // cleanly reset connections to their previous state (no dangling edges)
-            var outputs = graph.nodes[0].GetPort("Output").ConnectedPorts;
-            var inputs = graph.nodes[1].GetPort("Input").ConnectedPorts;
+            var outputs = graph.nodes[0].GetPort("Output").Connections;
+            var inputs = graph.nodes[1].GetPort("Input").Connections;
             
             Assert.AreEqual(2, graph.nodes.Count);
-            Assert.AreEqual(1, outputs.Length);
-            Assert.AreEqual(1, inputs.Length);
+            Assert.AreEqual(1, outputs.Count);
+            Assert.AreEqual(1, inputs.Count);
             
             Assert.AreSame(graph.nodes[0], inputs[0].node);
             Assert.AreSame(graph.nodes[1], outputs[0].node);

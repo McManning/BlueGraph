@@ -35,27 +35,25 @@ namespace BlueGraph.Tests
             name = "Type Test Node";
         }
 
-        public override void OnAddedToGraph()
+        public override void OnRequestPorts()
         {
-            base.OnAddedToGraph();
-            
             // Input (any)
-            AddPort(new Port { name = "Input" });
+            AddPort(new Port { isInput = true, name = "Input" });
 
             // Output types
-            AddPort(new Port { name = "intval" });
-            AddPort(new Port { name = "boolval" });
-            AddPort(new Port { name = "stringval" });
-            AddPort(new Port { name = "floatval" });
-            AddPort(new Port { name = "vector3val" });
-            AddPort(new Port { name = "curveval" });
-            AddPort(new Port { name = "classval" });
-            AddPort(new Port { name = "structval" });
+            AddPort(new OutputPort<int> { name = "intval" });
+            AddPort(new OutputPort<bool> { name = "boolval" });
+            AddPort(new OutputPort<int> { name = "stringval" });
+            AddPort(new OutputPort<float> { name = "floatval" });
+            AddPort(new OutputPort<Vector3> { name = "vector3val" });
+            AddPort(new OutputPort<AnimationCurve> { name = "curveval" });
+            AddPort(new OutputPort<TestClass> { name = "classval" });
+            AddPort(new OutputPort<TestStruct> { name = "structval" });
         }
 
-        public override object GetOutputValue(string portName)
+        public override object OnRequestValue(Port port)
         {
-            switch (portName)
+            switch (port.name)
             {
                 case "intval": return intValue;
                 case "boolval": return boolValue;
@@ -65,8 +63,7 @@ namespace BlueGraph.Tests
                 case "classval": return testClassValue;
                 case "structval": return testStructValue;
             }
-
-            return base.GetOutputValue(portName);
+            return base.OnRequestValue(port);
         }
     }
 }
