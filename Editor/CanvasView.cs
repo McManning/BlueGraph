@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+
 using UnityEditor.Experimental.GraphView;
-using Edge = UnityEditor.Experimental.GraphView.Edge;
+using GraphViewPort = UnityEditor.Experimental.GraphView.Port;
+using GraphViewEdge = UnityEditor.Experimental.GraphView.Edge;
+using GraphViewSearchWindow = UnityEditor.Experimental.GraphView.SearchWindow;
 
 namespace BlueGraph.Editor
 {
-    using Port = UnityEditor.Experimental.GraphView.Port;
-
     /// <summary>
     /// Graph view that contains the nodes, edges, etc. 
     /// </summary>
@@ -115,6 +116,11 @@ namespace BlueGraph.Editor
 
         GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
+            if (m_SerializedGraph == null)
+            {
+                return change;
+            }
+
             if (change.movedElements != null)
             {
                 foreach (var element in change.movedElements)
@@ -138,7 +144,7 @@ namespace BlueGraph.Editor
                     {
                         RemoveNode(node);
                     }
-                    else if (element is Edge edge)
+                    else if (element is GraphViewEdge edge)
                     {
                         RemoveEdge(edge, true);
                     }
@@ -193,8 +199,8 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Create a new node from reflection data and insert into the Graph.
         /// </summary>
-        internal void AddNodeFromReflectionData(
-            NodeReflectionData data,
+        internal void AddNodeFromSearch(
+            AbstractNode node,
             Vector2 screenPosition, 
             PortView connectedPort = null
         ) {
@@ -207,12 +213,10 @@ namespace BlueGraph.Editor
 
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
-            // Create a new node instance and set initial data (ports, etc) 
-            Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {data.name}");
+            // Track undo and add to the graph
+            Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {node.name}");
+            Debug.Log($"+node {node.name}");
             
-            Debug.Log($"+node {data.name}");
-
-            var node = data.CreateInstance();
             node.graphPosition = graphMousePosition;
 
             m_Graph.AddNode(node);
@@ -225,7 +229,7 @@ namespace BlueGraph.Editor
             var serializedNode = serializedNodesArr.GetArrayElementAtIndex(nodeIdx);
             
             // Add a node to the visual graph
-            var editorType = NodeReflection.GetNodeEditorType(data.type);
+            var editorType = NodeReflection.GetNodeEditorType(node.GetType());
             var element = Activator.CreateInstance(editorType) as NodeView;
             element.Initialize(node, serializedNode, m_EdgeListener);
             
@@ -235,7 +239,7 @@ namespace BlueGraph.Editor
             // candidate port on the new node and connect. 
             if (connectedPort != null)
             {
-                var edge = new Edge();
+                var edge = new GraphViewEdge();
 
                 if (connectedPort.direction == Direction.Input)
                 {
@@ -279,7 +283,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Add a new edge to both the canvas view and the underlying graph model
         /// </summary>
-        public void AddEdge(Edge edge, bool registerAsNewUndo)
+        public void AddEdge(GraphViewEdge edge, bool registerAsNewUndo)
         {
             if (edge.input == null || edge.output == null) return;
             
@@ -289,8 +293,8 @@ namespace BlueGraph.Editor
             }
             
             // Handle single connection ports on either end. 
-            var edgesToRemove = new List<Edge>();
-            if (edge.input.capacity == Port.Capacity.Single)
+            var edgesToRemove = new List<GraphViewEdge>();
+            if (edge.input.capacity == GraphViewPort.Capacity.Single)
             {
                 foreach (var conn in edge.input.connections)
                 {
@@ -298,7 +302,7 @@ namespace BlueGraph.Editor
                 }
             }
 
-            if (edge.output.capacity == Port.Capacity.Single)
+            if (edge.output.capacity == GraphViewPort.Capacity.Single)
             {
                 foreach (var conn in edge.output.connections)
                 {
@@ -333,7 +337,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Remove an edge from both the canvas view and the underlying graph model
         /// </summary>
-        public void RemoveEdge(Edge edge, bool registerAsNewUndo)
+        public void RemoveEdge(GraphViewEdge edge, bool registerAsNewUndo)
         {
             var input = edge.input as PortView;
             var output = edge.output as PortView;
@@ -369,9 +373,14 @@ namespace BlueGraph.Editor
         {
             // TODO: Smart diff - if we start seeing performance issues. 
             // It gets complicated due to how we bind serialized objects though.
-
+            
             // For now, we just nuke everything and start over.
+
+            // Clear serialized graph first so that change events aren't undo tracked
+            m_SerializedGraph = null;
+
             DeleteElements(graphElements.ToList());
+
             Load(m_Graph);
         }
         
@@ -382,6 +391,9 @@ namespace BlueGraph.Editor
         public void Dirty(ICanDirty element)
         {
             m_Dirty.Add(element);
+            
+            // TODO: Not the best place for this.
+            EditorUtility.SetDirty(m_Graph);
 
             // Also dirty outputs if a NodeView
             if (element is NodeView)
@@ -464,7 +476,7 @@ namespace BlueGraph.Editor
             var serializedNodesArr = m_SerializedGraph.FindProperty("nodes");
             
             // Add views of each node from the graph
-            Dictionary<AbstractNode, NodeView> nodeMap = new Dictionary<AbstractNode, NodeView>();
+            var nodeMap = new Dictionary<AbstractNode, NodeView>();
             // TODO: Could just be a list with index checking. 
 
             for (int i = 0; i < nodes.Count; i++)
@@ -498,9 +510,9 @@ namespace BlueGraph.Editor
             
             if (centerOnMouse)
             {
-                Rect bounds = GetBounds(nodeMap.Values);
-                Vector2 worldPosition = contentViewContainer.WorldToLocal(m_LastMousePosition);
-                Vector2 delta = worldPosition - bounds.center;
+                var bounds = GetBounds(nodeMap.Values);
+                var worldPosition = contentViewContainer.WorldToLocal(m_LastMousePosition);
+                var delta = worldPosition - bounds.center;
                 
                 foreach (var node in nodeMap)
                 {
@@ -513,17 +525,17 @@ namespace BlueGraph.Editor
             // and try to just refactor this whole thing tbh
             foreach (var node in nodeMap)
             {
-                foreach (var port in node.Key.ports)
+                foreach (var port in node.Key.Ports)
                 {
                     if (!port.isInput)
                     {
                         continue;
                     }
-
-                    var connections = port.ConnectedPorts;
-                    foreach (var conn in connections)
+                    
+                    foreach (var conn in port.SerializedConnections)
                     {
-                        if (conn.node == null)
+                        var connectedNode = conn.port.node;
+                        if (connectedNode == null)
                         {
                             Debug.LogError(
                                  $"Could not connect `{node.Value.title}:{port.name}`: " +
@@ -533,30 +545,37 @@ namespace BlueGraph.Editor
                         }
 
                         // Only add if the linked node is in the collection
-                        if (nodeMap.ContainsKey(conn.node))
+                        // TODO: This shouldn't be a problem
+                        if (!nodeMap.ContainsKey(connectedNode))
                         {
-                            var inPort = node.Value.GetInputPort(port.name);
-                            var outPort = nodeMap[conn.node].GetOutputPort(conn.name);
+                            Debug.LogError(
+                                 $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.portName}`. " +
+                                 $"Target node does not exist in the NodeView map"
+                            );
+                            continue;
+                        }
+
+                        var inPort = node.Value.GetInputPort(port.name);
+                        var outPort = nodeMap[connectedNode].GetOutputPort(conn.portName);
                         
-                            if (inPort == null)
-                            {
-                                Debug.LogError(
-                                    $"Could not connect `{node.Value.title}:{port.name}` -> `{conn.node.name}:{conn.name}`. " +
-                                    $"Input port `{port.name}` no longer exists."
-                                );
-                            }
-                            else if (outPort == null)
-                            {
-                                Debug.LogError(
-                                    $"Could not connect `{conn.node.name}:{conn.name}` to `{node.Value.name}:{port.name}`. " +
-                                    $"Output port `{conn.name}` no longer exists."
-                                );
-                            }
-                            else
-                            {
-                                var edge = inPort.ConnectTo(outPort);
-                                AddElement(edge);
-                            }
+                        if (inPort == null)
+                        {
+                            Debug.LogError(
+                                $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.portName}`. " +
+                                $"Input port `{port.name}` no longer exists."
+                            );
+                        }
+                        else if (outPort == null)
+                        {
+                            Debug.LogError(
+                                $"Could not connect `{connectedNode.name}:{conn.portName}` to `{node.Value.name}:{port.name}`. " +
+                                $"Output port `{conn.portName}` no longer exists."
+                            );
+                        }
+                        else
+                        {
+                            var edge = inPort.ConnectTo(outPort);
+                            AddElement(edge);
                         }
                     }
                 }
@@ -582,7 +601,7 @@ namespace BlueGraph.Editor
         /// </summary>
         Rect GetBounds(IEnumerable<ISelectable> items)
         {
-            Rect contentRect = Rect.zero;
+            var contentRect = Rect.zero;
                
             foreach (var item in items)
             {
@@ -621,9 +640,9 @@ namespace BlueGraph.Editor
             Debug.Log("+comment");
 
             // Pad out the bounding box a bit more on the selection
-            float padding = 30; // TODO: Remove hardcoding
+            var padding = 30f; // TODO: Remove hardcoding
 
-            Rect bounds = GetBounds(selection);
+            var bounds = GetBounds(selection);
             
             if (bounds.width < 1 || bounds.height < 1)
             {
@@ -724,9 +743,9 @@ namespace BlueGraph.Editor
             return CopyPasteGraph.Serialize(elements);
         }
         
-        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+        public override List<GraphViewPort> GetCompatiblePorts(GraphViewPort startPort, NodeAdapter nodeAdapter)
         {
-            var compatiblePorts = new List<Port>();
+            var compatiblePorts = new List<GraphViewPort>();
             var startPortView = startPort as PortView;
 
             ports.ForEach((port) => {
