@@ -10,6 +10,7 @@ A generic visual scripting framework built on top of Unity's experimental GraphV
 
 This framework is being built to support features of an upcoming title and is not yet ready for prime time. But if you are interested in taking it for a test run yourself, let's talk.
 
+The master branch is unstable and still in active development. A release will be tagged once it's considered usable. 
 
 ## Features
 
