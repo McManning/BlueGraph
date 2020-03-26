@@ -9,7 +9,7 @@ namespace BlueGraph
     [Serializable]
     public class Comment
     {
-        public string title;
+        public string text;
         public string theme;
         public Rect graphRect;
     }

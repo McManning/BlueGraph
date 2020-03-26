@@ -49,7 +49,7 @@ namespace BlueGraph.Editor
             m_TitleContainer.Add(m_TitleEditor);
             
             m_TitleLabel = new Label();
-            m_TitleLabel.text = comment.title;
+            m_TitleLabel.text = comment.text;
             
             m_TitleContainer.Add(m_TitleLabel);
 
@@ -150,7 +150,7 @@ namespace BlueGraph.Editor
 
         public virtual void OnRenamed(string oldName, string newName)
         {
-            target.title = newName;
+            target.text = newName;
         }
 
         private void OnMouseDown(MouseDownEvent evt)
@@ -168,7 +168,7 @@ namespace BlueGraph.Editor
         {
             m_TitleLabel.visible = false;
 
-            m_TitleEditor.SetValueWithoutNotify(target.title);
+            m_TitleEditor.SetValueWithoutNotify(target.text);
             m_TitleEditor.style.display = DisplayStyle.Flex;
             m_TitleEditor.Q(TextField.textInputUssName).Focus();
         }
