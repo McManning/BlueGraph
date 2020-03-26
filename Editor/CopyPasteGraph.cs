@@ -14,11 +14,11 @@ namespace BlueGraph.Editor
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
         public List<Comment> comments = new List<Comment>();
-
+        
         public static string Serialize(IEnumerable<GraphElement> elements)
         {
             var graph = CreateInstance<CopyPasteGraph>();
-            
+
             foreach (var element in elements)
             {
                 if (element is NodeView node)
@@ -30,7 +30,7 @@ namespace BlueGraph.Editor
                     graph.comments.Add(comment.target);
                 }
             }
-            
+
             string json = JsonUtility.ToJson(graph, true);
             DestroyImmediate(graph);
 
@@ -48,6 +48,7 @@ namespace BlueGraph.Editor
                 var graph = CreateInstance<CopyPasteGraph>();
                 JsonUtility.FromJsonOverwrite(data, graph);
                 DestroyImmediate(graph);
+
                 return true;
             } 
             catch { }
@@ -60,33 +61,39 @@ namespace BlueGraph.Editor
             var graph = CreateInstance<CopyPasteGraph>();
             JsonUtility.FromJsonOverwrite(data, graph);
             
-            // Generate unique IDs for each node and de-reference ports.
-
-            Dictionary<string, string> remap = new Dictionary<string, string>();
-            
             // Generate new unique IDs for each node in the list
-            foreach (AbstractNode node in graph.nodes)
+            var idMap = new Dictionary<string, string>();
+            foreach (var node in graph.nodes)
             {
-                string id = node.id;
-                node.id = Guid.NewGuid().ToString();
-                remap[id] = node.id;
+                var newId = Guid.NewGuid().ToString();
+                idMap[node.id] = newId;
+                node.id = newId;
             }
 
-            // Remap connection IDs and prune connections to nodes outside the subset
-            foreach (AbstractNode node in graph.nodes)
+            // Remap connections to new node IDs, and drop any connections
+            // that were to nodes outside of the subset of pasted nodes
+            foreach (var node in graph.nodes)
             {
-                foreach (Port port in node.ports)
+                foreach (var port in node.Ports)
                 {
-                    port.connections.RemoveAll(
-                        (conn) => !remap.ContainsKey(conn.nodeId)
-                    );
+                    var edges = new List<Connection>(port.SerializedConnections);
+                    port.SerializedConnections.Clear();
 
-                    port.connections.ForEach(
-                        (conn) => conn.nodeId = remap[conn.nodeId]
-                    );
+                    // Only re-add connections that are in the new pasted subset
+                    foreach (var edge in edges)
+                    {
+                        if (idMap.ContainsKey(edge.nodeId))
+                        {
+                            port.SerializedConnections.Add(new Connection
+                            {
+                                nodeId = idMap[edge.nodeId],
+                                portName = edge.portName
+                            });
+                        }
+                    }
                 }
             }
-
+            
             return graph;
         }
     }
