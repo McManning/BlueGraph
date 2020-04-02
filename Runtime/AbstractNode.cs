@@ -77,16 +77,6 @@ namespace BlueGraph
             return m_Ports.Find((port) => port.name == portName);
         }
         
-        public T GetOutputValue<T>(string portName)
-        {
-            return GetPort(portName).GetValue<T>();
-        }
-        
-        public T GetInputValue<T>(string portName, T defaultValue = default)
-        {
-            return GetPort(portName).GetValue(defaultValue);
-        }
-
         public void AddPort(Port port)
         {
             var existing = GetPort(port.name);
@@ -116,7 +106,46 @@ namespace BlueGraph
                 port.DisconnectAll();
             }
         }
+        
+        public T GetInputValue<T>(string portName, T defaultValue = default)
+        {
+            var port = GetPort(portName);
+            if (port == null || !port.isInput)
+            {
+                throw new ArgumentException(
+                    $"[{name}] No input port named `{portName}`"
+                );
+            }
+            
+            return port.GetValue(defaultValue);
+        }
 
+        public IEnumerable<T> GetInputValues<T>(string portName)
+        {
+            var port = GetPort(portName);
+            if (port == null || !port.isInput)
+            {
+                throw new ArgumentException(
+                    $"[{name}] No input port named `{portName}`"
+                );
+            }
+            
+            return port.GetValues<T>();
+        }
+
+        public T GetOutputValue<T>(string portName)
+        {
+            var port = GetPort(portName);
+            if (port == null || port.isInput)
+            {
+                throw new ArgumentException(
+                    $"[{name}] No output port named `{portName}`"
+                );
+            }
+
+            return port.GetValue(default(T));
+        }
+        
         public override string ToString()
         {
             return $"{GetType()}({name}, {id})";
