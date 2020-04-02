@@ -52,5 +52,10 @@ namespace BlueGraph.Tests
             onAfterDeserializeCount++;
             base.OnAfterDeserialize();
         }
+
+        public override object OnRequestValue(Port port)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

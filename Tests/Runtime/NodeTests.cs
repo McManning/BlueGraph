@@ -77,9 +77,9 @@ namespace BlueGraph.Tests
             
             node2.RemovePort(portToRemove);
 
-            Assert.AreEqual(0, node1.GetPort("Output").Connections.Count);
-            Assert.AreEqual(1, node2.GetPort("Output").Connections.Count);
-            Assert.AreEqual(1, node3.GetPort("Input").Connections.Count);
+            Assert.AreEqual(0, node1.GetPort("Output").TotalConnections);
+            Assert.AreEqual(1, node2.GetPort("Output").TotalConnections);
+            Assert.AreEqual(1, node3.GetPort("Input").TotalConnections);
         }
         
         [Test]
@@ -96,7 +96,7 @@ namespace BlueGraph.Tests
         }
         
         [Test]
-        public void AddDuplicatePortNameThrowsError()
+        public void AddPortThrowsOnDuplicateName()
         {
             var node = new TestNodeA();
             node.AddPort(new OutputPort<float> { name = "Test" });
@@ -114,6 +114,143 @@ namespace BlueGraph.Tests
             var actual = node.GetPort("Bad Port");
 
             Assert.IsNull(actual);
+        }
+        
+        [Test]
+        public void GetOutputPortThrowsOnInputPort()
+        {
+            var node = new TestNodeA();
+
+            Assert.Throws<ArgumentException>(
+                () => node.GetOutputValue<int>("Input")
+            );
+        }
+
+        [Test]
+        public void GetOutputPortThrowsOnUnknownPort()
+        {
+            var node = new TestNodeA();
+
+            Assert.Throws<ArgumentException>(
+                () => node.GetOutputValue<int>("Bad Port")
+            );
+        }
+
+        [Test]
+        public void GetInputValueDefaultsWithoutConnections()
+        {
+            var node = new TestNodeA();
+            var actual = node.GetInputValue("Input", 2);
+
+            Assert.AreEqual(2, actual);
+        }
+        
+        [Test]
+        public void GetInputValueReadsInputConnection()
+        {
+            var graph = ScriptableObject.CreateInstance<Graph>();
+            var node1 = new TestNodeA();
+            var node2 = new TestNodeA();
+            
+            graph.AddNode(node1);
+            graph.AddNode(node2);
+
+            graph.AddEdge(
+                node1.GetPort("Output"),
+                node2.GetPort("Input")
+            );
+            
+            var actual = node2.GetInputValue("Input", 2);
+            var expected = 5 + 1; // node1's OnRequestValue() result
+
+            Assert.AreEqual(expected, actual);
+        }
+        
+        [Test]
+        public void GetInputValueAggregatesMultipleOutputs()
+        {
+            var graph = ScriptableObject.CreateInstance<Graph>();
+            var node1 = new TestNodeA { aValue1 = 1 };
+            var node2 = new TestNodeA { aValue1 = 2 };
+            var node3 = new TestNodeA();
+            
+            graph.AddNode(node1);
+            graph.AddNode(node2);
+            graph.AddNode(node3);
+
+            graph.AddEdge(
+                node1.GetPort("Output"),
+                node3.GetPort("Input")
+            );
+            
+            graph.AddEdge(
+                node2.GetPort("Output"),
+                node3.GetPort("Input")
+            );
+
+            var expected = new int[] { 2, 3 };
+            var actual = node3.GetInputValues<int>("Input");
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void GetOutputValueDefaultsToInstanceField()
+        {
+            var node = new TestNodeA();
+            var actual = node.GetOutputValue<int>("Output");
+
+            Assert.AreEqual(6, actual);
+        }
+
+        [Test]
+        public void GetOutputValueReadsInputPortValues()
+        {
+            var graph = ScriptableObject.CreateInstance<Graph>();
+            var node1 = new TestNodeA();
+            var node2 = new TestNodeA();
+            
+            graph.AddNode(node1);
+            graph.AddNode(node2);
+
+            graph.AddEdge(
+                node1.GetPort("Output"),
+                node2.GetPort("Input")
+            );
+            
+            var actual = node2.GetOutputValue<int>("Output");
+
+            // node1.OnRequestValue() + node2.OnRequestValue()
+            var expected = (5 + 1) + 1; 
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void GetOutputValueCastsValueType()
+        {
+            var node = new TestNodeA();
+            var actual = node.GetOutputValue<float>("Output");
+
+            Assert.AreEqual(6f, actual);
+        }
+
+        [Test]
+        public void GetOutputValueReturnsReferenceType()
+        {
+            var node = new TypeTestNode();
+            var actual = node.GetOutputValue<TestClass>("classval");
+
+            Assert.AreSame(node.testClassValue, actual);
+        }
+
+        [Test]
+        public void GetOutputValueCastsReferenceTypeToInterface()
+        {
+            var node = new TypeTestNode();
+            var actual = node.GetOutputValue<ITestClass>("classval");
+
+            Assert.IsInstanceOf(typeof(ITestClass), actual);
         }
     }
 }

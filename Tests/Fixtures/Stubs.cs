@@ -20,5 +20,10 @@ namespace BlueGraph.Tests
         {
 
         }
+
+        public override object OnRequestValue(Port port)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

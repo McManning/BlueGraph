@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -63,7 +64,7 @@ namespace BlueGraph.Tests
         }
 
         [Test]
-        public void CanFindNodeAssignableFromType()
+        public void CanFindNodeByBaseType()
         {
             var graph = ScriptableObject.CreateInstance<Graph>();
             
@@ -73,6 +74,7 @@ namespace BlueGraph.Tests
             graph.AddNode(node1);
             graph.AddNode(expected);
             
+            // Search using a base type (TestNodeA)
             var actual = graph.FindNode<TestNodeA>();
 
             Assert.AreSame(expected, actual);
@@ -124,11 +126,11 @@ namespace BlueGraph.Tests
             var outputsFromNode1 = node1.GetPort("Output").Connections;
             var inputsToNode2 = node2.GetPort("Input").Connections;
 
-            Assert.AreEqual(1, outputsFromNode1.Count);
-            Assert.AreEqual(1, inputsToNode2.Count);
+            Assert.AreEqual(1, outputsFromNode1.Count());
+            Assert.AreEqual(1, inputsToNode2.Count());
             
-            Assert.AreSame(node2, outputsFromNode1[0].node);
-            Assert.AreSame(node1, inputsToNode2[0].node);
+            Assert.AreSame(node2, outputsFromNode1.First().node);
+            Assert.AreSame(node1, inputsToNode2.First().node);
         }
 
         [Test]
@@ -192,10 +194,10 @@ namespace BlueGraph.Tests
             
             graph.RemoveNode(nodeToRemove);
 
-            Assert.AreEqual(0, node1.GetPort("Output").Connections.Count);
-            Assert.AreEqual(0, node2.GetPort("Output").Connections.Count);
+            Assert.AreEqual(0, node1.GetPort("Output").TotalConnections);
+            Assert.AreEqual(0, node2.GetPort("Output").TotalConnections);
             
-            Assert.AreEqual(0, nodeToRemove.GetPort("Input").Connections.Count);
+            Assert.AreEqual(0, nodeToRemove.GetPort("Input").TotalConnections);
         }
 
         [Test]
@@ -226,8 +228,8 @@ namespace BlueGraph.Tests
                 node3.GetPort("Input")
             );
 
-            Assert.AreEqual(1, node1.GetPort("Output").Connections.Count);
-            Assert.AreEqual(0, node3.GetPort("Input").Connections.Count);
+            Assert.AreEqual(1, node1.GetPort("Output").TotalConnections);
+            Assert.AreEqual(0, node3.GetPort("Input").TotalConnections);
         }
     }
 }

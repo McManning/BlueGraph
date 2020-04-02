@@ -3,10 +3,20 @@ using UnityEngine;
 
 namespace BlueGraph.Tests
 {
-    public class TestClass
+    public interface ITestClass
+    {
+
+    }
+
+    public class BaseTestClass : ITestClass
     {
         public float value1;
         public float value2;
+    }
+
+    public class TestClass : BaseTestClass
+    {
+        public float value3;
     }
 
     public struct TestStruct
@@ -41,19 +51,19 @@ namespace BlueGraph.Tests
             AddPort(new Port { isInput = true, name = "Input" });
 
             // Output types
-            AddPort(new OutputPort<int> { name = "intval" });
-            AddPort(new OutputPort<bool> { name = "boolval" });
-            AddPort(new OutputPort<int> { name = "stringval" });
-            AddPort(new OutputPort<float> { name = "floatval" });
-            AddPort(new OutputPort<Vector3> { name = "vector3val" });
-            AddPort(new OutputPort<AnimationCurve> { name = "curveval" });
-            AddPort(new OutputPort<TestClass> { name = "classval" });
-            AddPort(new OutputPort<TestStruct> { name = "structval" });
+            AddPort(new Port { name = "intval" });
+            AddPort(new Port { name = "boolval" });
+            AddPort(new Port { name = "stringval" });
+            AddPort(new Port { name = "floatval" });
+            AddPort(new Port { name = "vector3val" });
+            AddPort(new Port { name = "curveval" });
+            AddPort(new Port { name = "classval" });
+            AddPort(new Port { name = "structval" });
         }
 
         public override object OnRequestValue(Port port)
         {
-            switch (port.name)
+            switch (port.name) 
             {
                 case "intval": return intValue;
                 case "boolval": return boolValue;
@@ -62,8 +72,8 @@ namespace BlueGraph.Tests
                 case "curveval": return curveValue;
                 case "classval": return testClassValue;
                 case "structval": return testStructValue;
+                default: return null;
             }
-            return base.OnRequestValue(port);
         }
     }
 }

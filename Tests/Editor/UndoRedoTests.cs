@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace BlueGraph.EditorTests
+namespace BlueGraph.Tests
 {
     public class UndoRedoTests
     {
@@ -13,8 +14,8 @@ namespace BlueGraph.EditorTests
         public void CanUndoAddNode()
         {
             var graph = ScriptableObject.CreateInstance<Graph>();
-            var node1 = new TestNode();
-            var node2 = new TestNode();
+            var node1 = new TestNodeA();
+            var node2 = new TestNodeA();
             
             graph.AddNode(node1);
             
@@ -34,8 +35,8 @@ namespace BlueGraph.EditorTests
         public void CanUndoAddEdge()
         {
             var graph = ScriptableObject.CreateInstance<Graph>();
-            var node1 = new TestNode();
-            var node2 = new TestNode();
+            var node1 = new TestNodeA();
+            var node2 = new TestNodeA();
             
             graph.AddNode(node1);
             graph.AddNode(node2);
@@ -53,8 +54,8 @@ namespace BlueGraph.EditorTests
             Assert.AreEqual(graph.nodes[0].id, node1.id);
             Assert.AreEqual(graph.nodes[1].id, node2.id);
 
-            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").Connections.Count);
-            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").Connections.Count);
+            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").TotalConnections);
+            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").TotalConnections);
         }
 
         /// <summary>
@@ -66,9 +67,9 @@ namespace BlueGraph.EditorTests
         public void UndoAddNodeDoesNotAffectUnrelatedConnections()
         {
             var graph = ScriptableObject.CreateInstance<Graph>();
-            var node1 = new TestNode();
-            var node2 = new TestNode();
-            var node3 = new TestNode();
+            var node1 = new TestNodeA();
+            var node2 = new TestNodeA();
+            var node3 = new TestNodeA();
             
             graph.AddNode(node1);
             graph.AddNode(node2);
@@ -94,11 +95,11 @@ namespace BlueGraph.EditorTests
             var inputs = graph.nodes[1].GetPort("Input").Connections;
             
             Assert.AreEqual(2, graph.nodes.Count);
-            Assert.AreEqual(1, outputs.Count);
-            Assert.AreEqual(1, inputs.Count);
+            Assert.AreEqual(1, outputs.Count());
+            Assert.AreEqual(1, inputs.Count());
             
-            Assert.AreSame(graph.nodes[0], inputs[0].node);
-            Assert.AreSame(graph.nodes[1], outputs[0].node);
+            Assert.AreSame(graph.nodes[0], inputs.First().node);
+            Assert.AreSame(graph.nodes[1], outputs.First().node);
         }
     }
 }
