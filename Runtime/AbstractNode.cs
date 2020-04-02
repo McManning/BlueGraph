@@ -47,35 +47,30 @@ namespace BlueGraph
             OnRequestPorts();
         }
 
-        public virtual void OnBeforeSerialize()
-        {
+        public virtual void OnBeforeSerialize() { }
 
-        }
+        /// <summary>
+        /// Called after deserializing ports and when the node 
+        /// is added to a Graph for the first time in the editor.
+        /// 
+        /// Override to dynamically add ports without field attributes.
+        /// </summary>
+        public virtual void OnRequestPorts() { } 
 
-        public virtual void OnRequestPorts()
-        {
-            // Override to add new ports to the node dynamically.
-            // Happens during deserialization and when it initially
-            // gets added to the graph via the editor.
-        }
-    
-        public virtual void OnAddedToGraph()
-        {
+        /// <summary>
+        /// Called when the node is added to a Graph via <c>Graph.AddNode</c>
+        /// </summary>
+        public virtual void OnAddedToGraph() { }
 
-        }
-
-        public virtual void OnRemovedFromGraph()
-        {
-
-        }
+        /// <summary>
+        /// Called when the node is removed from a Graph via <c>Graph.RemoveNode</c>
+        /// </summary>
+        public virtual void OnRemovedFromGraph() { }
     
         /// <summary>
         /// Resolve the return value associated with the given port. 
         /// </summary>
-        public virtual object OnRequestValue(Port port)
-        {
-            return null;
-        }
+        public abstract object OnRequestValue(Port port);
         
         public Port GetPort(string portName)
         {
