@@ -186,8 +186,7 @@ namespace BlueGraph
                 portName = name
             });
         }
-
-        // TODO: Only ever called by Graph - remove? 
+        
         internal void Disconnect(Port port)
         {
             m_Connections.RemoveAll((edge) => edge.port == port);

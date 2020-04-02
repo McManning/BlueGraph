@@ -8,7 +8,6 @@ namespace BlueGraph.Tests
     /// </summary>
     public class EventTestNode : AbstractNode
     {
-        public int onRequestPortsCount = 0;
         public int onAddedToGraphCount = 0;
         public int onRemovedFromGraphCount = 0;
         public int onBeforeSerializeCount = 0;
@@ -17,16 +16,9 @@ namespace BlueGraph.Tests
         public EventTestNode() : base()
         {
             name = "Test Node B";
-        }
-
-        public override void OnRequestPorts()
-        {
-            onRequestPortsCount++;
-
+            
             AddPort(new InputPort<float> { name = "Input" });
             AddPort(new OutputPort<float> { name = "Output" });
-
-            base.OnRequestPorts();
         }
 
         public override void OnAddedToGraph()

@@ -43,10 +43,7 @@ namespace BlueGraph.Tests
         public TypeTestNode() : base()
         {
             name = "Type Test Node";
-        }
-
-        public override void OnRequestPorts()
-        {
+            
             // Input (any)
             AddPort(new Port { isInput = true, name = "Input" });
 

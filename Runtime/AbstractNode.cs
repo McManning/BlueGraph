@@ -23,8 +23,6 @@ namespace BlueGraph
         {
             id = Guid.NewGuid().ToString();
             m_Ports = new List<Port>();
-
-            OnRequestPorts();
         }
 
         public virtual void OnAfterDeserialize()
@@ -42,20 +40,9 @@ namespace BlueGraph
             {
                 m_Ports[i].node = this;
             }
-
-            // Add any additional ports the user wants
-            OnRequestPorts();
         }
 
         public virtual void OnBeforeSerialize() { }
-
-        /// <summary>
-        /// Called after deserializing ports and when the node 
-        /// is added to a Graph for the first time in the editor.
-        /// 
-        /// Override to dynamically add ports without field attributes.
-        /// </summary>
-        public virtual void OnRequestPorts() { } 
 
         /// <summary>
         /// Called when the node is added to a Graph via <c>Graph.AddNode</c>
