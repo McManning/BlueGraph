@@ -395,10 +395,11 @@ namespace BlueGraph.Editor
             // TODO: Not the best place for this.
             EditorUtility.SetDirty(m_Graph);
 
+            element.OnDirty();
+
             // Also dirty outputs if a NodeView
-            if (element is NodeView)
+            if (element is NodeView node)
             {
-                var node = element as NodeView;
                 foreach (var port in node.outputs)
                 {
                     foreach (var conn in port.connections)
@@ -418,6 +419,7 @@ namespace BlueGraph.Editor
             {
                 if (element is ICanDirty cd)
                 {
+                    cd.OnDirty();
                     m_Dirty.Add(cd);
                 }
             });
