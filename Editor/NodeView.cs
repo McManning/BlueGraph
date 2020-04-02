@@ -127,7 +127,7 @@ namespace BlueGraph.Editor
 
             // If we want to display an inline editable field as part 
             // of the port, instantiate a new inline editor control 
-            if (port.fieldName != null)
+            if (port.fieldName != null && port.fieldName.Length > 0)
             {
                 // Literally same performance problem. 
                 // Because it's trying to serialize the entire graph PER PORT
