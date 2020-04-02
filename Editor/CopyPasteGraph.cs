@@ -76,15 +76,15 @@ namespace BlueGraph.Editor
             {
                 foreach (var port in node.Ports)
                 {
-                    var edges = new List<Connection>(port.SerializedConnections);
-                    port.SerializedConnections.Clear();
+                    var edges = new List<Connection>(port.m_Connections);
+                    port.m_Connections.Clear();
 
                     // Only re-add connections that are in the new pasted subset
                     foreach (var edge in edges)
                     {
                         if (idMap.ContainsKey(edge.nodeId))
                         {
-                            port.SerializedConnections.Add(new Connection
+                            port.m_Connections.Add(new Connection
                             {
                                 nodeId = idMap[edge.nodeId],
                                 portName = edge.portName

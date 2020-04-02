@@ -40,62 +40,146 @@ namespace BlueGraph
         public bool acceptsMultipleConnections;
         public bool isInput;
 
-        public IReadOnlyList<Port> Connections { 
+        /// <summary>
+        /// Enumerate all ports connected by edges to this port
+        /// </summary>
+        public IEnumerable<Port> Connections { 
             get {
-                // TODO: HEAVILY optimize. Unnecessary allocations here
-                LoadConnectedPorts();
-                List<Port> ports = new List<Port>();
-                for (var i = 0; i < m_SerializedConnections.Count; i++)
+                HydratePorts();
+                for (var i = 0; i < m_Connections.Count; i++)
                 {
-                    ports.Add(m_SerializedConnections[i].port);
+                    yield return m_Connections[i].port;
                 }
+            }
+        }
 
-                return ports.AsReadOnly();
+        public int TotalConnections
+        {
+            get
+            {
+                return m_Connections.Count;
             }
         }
         
-        public List<Connection> SerializedConnections { 
-            get {
-                return m_SerializedConnections;
-            }
-        }
-        
-        [SerializeField] List<Connection> m_SerializedConnections;
+        [SerializeField] internal List<Connection> m_Connections;
         [SerializeField] string m_SerializedType;
         
         Type m_Type;
 
         public Port()
         {
-            m_SerializedConnections = new List<Connection>();
+            m_Connections = new List<Connection>();
         }
         
+        /// <summary>
+        /// Resolve the value on this port.
+        /// 
+        /// If this is an input port that accepts multiple connections,
+        /// only the first connection's output value will be returned.
+        /// 
+        /// If this is an output port, then the node's `OnRequestValue()`
+        /// will be executed and best effort will be made to convert
+        /// to the requested type. 
+        /// </summary>
         public virtual T GetValue<T>(T defaultValue = default)
         {
-            return defaultValue;
+            // If this is an input port, consume the  
+            // value from connected port. 
+            if (isInput)
+            {
+                HydratePorts();
+                if (m_Connections.Count > 0)
+                {
+                    return m_Connections[0].port.GetValue<T>();
+                }
+
+                return defaultValue;
+            }
+            
+            // Otherwise, attempt resolution from the parent node.
+            object value = node.OnRequestValue(this);
+
+            // Make sure we don't try to cast to a value type from null
+            if (value == null && typeof(T).IsValueType)
+            {
+                throw new InvalidCastException(
+                    $"Cannot cast null to value type `{typeof(T).FullName}`"
+                );
+            }
+
+            // Short circuit Convert.ChangeType if we can cast quicker
+            if (value == null || typeof(T).IsAssignableFrom(value.GetType()))
+            {
+                return (T)value;
+            }
+
+            // Try for IConvertible support
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch (Exception e)
+            {
+                throw new InvalidCastException(
+                    $"Cannot cast `{value.GetType()}` to `{typeof(T)}`. Error: {e}."
+                );
+            }
+        }
+
+        /// <summary>
+        /// Return an enumerable list of values for this port.
+        /// 
+        /// If this is an input port, the output value of each connected
+        /// port is aggregated into a new list of values.
+        /// 
+        /// If this is an output port, then the node's `OnRequestValue()`
+        /// will be executed with the expectation of returning IEnumerable<T>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public virtual IEnumerable<T> GetValues<T>()
+        {
+            if (isInput)
+            {
+                HydratePorts();
+
+                var values = new T[m_Connections.Count];
+                if (m_Connections.Count > 0)
+                {
+                    for (var i = 0; i < m_Connections.Count; i++)
+                    {
+                        values[i] = m_Connections[i].port.GetValue<T>();
+                    }
+                }
+
+                return values;
+            }
+            
+            // Otherwise, resolve from the node.
+            return (IEnumerable<T>)node.OnRequestValue(this);
         }
         
         internal void DisconnectAll()
         {
             // Remove ourselves from all other connected ports
-            for (var i = 0; i < m_SerializedConnections.Count; i++)
+            for (var i = 0; i < m_Connections.Count; i++)
             {
-                var port = m_SerializedConnections[i].port;
-                port?.m_SerializedConnections.RemoveAll((edge) => edge.port == this);
+                var port = m_Connections[i].port;
+                port?.m_Connections.RemoveAll((edge) => edge.port == this);
             }
             
-            m_SerializedConnections.Clear();
+            m_Connections.Clear();
         }
         
         internal void Connect(Port port)
         {
-            m_SerializedConnections.Add(new Connection() {
+            m_Connections.Add(new Connection() {
                 port = port,
                 nodeId = port.node.id,
                 portName = port.name
             });
 
-            port.m_SerializedConnections.Add(new Connection()
+            port.m_Connections.Add(new Connection()
             {
                 port = this,
                 nodeId = node.id,
@@ -106,20 +190,27 @@ namespace BlueGraph
         // TODO: Only ever called by Graph - remove? 
         internal void Disconnect(Port port)
         {
-            m_SerializedConnections.RemoveAll((edge) => edge.port == port);
-            port.m_SerializedConnections.RemoveAll((edge) => edge.port == this);
+            m_Connections.RemoveAll((edge) => edge.port == port);
+            port.m_Connections.RemoveAll((edge) => edge.port == this);
         }
         
-        public void LoadConnectedPorts()
+        /// <summary>
+        /// Load Port class instances from the Graph for each connection.
+        /// </summary>
+        /// <remarks>
+        /// This is implemented as an on-demand post-deserialize
+        /// operation in order to avoid serializing cyclic references
+        /// </remarks>
+        internal void HydratePorts()
         {
             var graph = node.graph;
 
-            for (var i = 0; i < m_SerializedConnections.Count; i++)
+            for (var i = 0; i < m_Connections.Count; i++)
             {
-                var edge = m_SerializedConnections[i];
+                var edge = m_Connections[i];
                 var connected = graph.FindNodeById(edge.nodeId);
                 edge.port = connected.GetPort(edge.portName);
-                m_SerializedConnections[i] = edge;
+                m_Connections[i] = edge;
             }
         }
     }

@@ -532,9 +532,9 @@ namespace BlueGraph.Editor
                         continue;
                     }
                     
-                    foreach (var conn in port.SerializedConnections)
+                    foreach (var conn in port.Connections)
                     {
-                        var connectedNode = conn.port.node;
+                        var connectedNode = conn.node;
                         if (connectedNode == null)
                         {
                             Debug.LogError(
@@ -549,27 +549,27 @@ namespace BlueGraph.Editor
                         if (!nodeMap.ContainsKey(connectedNode))
                         {
                             Debug.LogError(
-                                 $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.portName}`. " +
+                                 $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.name}`. " +
                                  $"Target node does not exist in the NodeView map"
                             );
                             continue;
                         }
 
                         var inPort = node.Value.GetInputPort(port.name);
-                        var outPort = nodeMap[connectedNode].GetOutputPort(conn.portName);
+                        var outPort = nodeMap[connectedNode].GetOutputPort(conn.name);
                         
                         if (inPort == null)
                         {
                             Debug.LogError(
-                                $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.portName}`. " +
+                                $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.name}`. " +
                                 $"Input port `{port.name}` no longer exists."
                             );
                         }
                         else if (outPort == null)
                         {
                             Debug.LogError(
-                                $"Could not connect `{connectedNode.name}:{conn.portName}` to `{node.Value.name}:{port.name}`. " +
-                                $"Output port `{conn.portName}` no longer exists."
+                                $"Could not connect `{connectedNode.name}:{conn.name}` to `{node.Value.name}:{port.name}`. " +
+                                $"Output port `{conn.name}` no longer exists."
                             );
                         }
                         else
