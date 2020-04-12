@@ -153,9 +153,9 @@ namespace BlueGraph.Editor
 
                         group = group.subgroups[path[i]];
                     }
+                
+                    group.results.Add(result);
                 }
-
-                group.results.Add(result);
             }
             
             groups.AddToTree(tree);
