@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using GraphViewPort = UnityEditor.Experimental.GraphView.Port;
+using System.Collections;
 
 namespace BlueGraph.Editor
 {
@@ -28,8 +29,10 @@ namespace BlueGraph.Editor
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/PortView"));
             AddToClassList("portView");
-            
-            visualClass = GetTypeVisualClass(type);
+            AddTypeClasses(type);
+
+            visualClass = "";
+            //visualClass = GetTypeVisualClass(type);
             tooltip = type.FullName;
         }
     
@@ -90,18 +93,33 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Convert a Type to a USS class name
+        /// Add USS class names for the given type
         /// </summary>
-        public string GetTypeVisualClass(Type type)
+        void AddTypeClasses(Type type)
         {
             // TODO: Better variant that handles lists and such.
+            // E.g. lists end up something like:
+            // type-System-Collections-Generic-List`1[[System-Single, mscorlib, Ver... etc
+
+            if (type.IsCastableTo(typeof(IEnumerable)))
+            {
+                AddToClassList("type-is-enumerable");
+            }
+            
+            if (type.IsGenericType)
+            {
+                AddToClassList("type-is-generic");
+                type = type.GenericTypeArguments[0];
+            }
 
             if (type.IsEnum)
             {
-                return "type-System-Enum";
+                AddToClassList("type-System-Enum");
+            } 
+            else
+            {
+                AddToClassList("type-" + type.FullName.Replace(".", "-"));
             }
-
-            return "type-" + type.FullName.Replace(".", "-");
         }
 
         /// <summary>
