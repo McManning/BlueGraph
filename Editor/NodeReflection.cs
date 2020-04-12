@@ -210,6 +210,7 @@ namespace BlueGraph.Editor
             }
             
             // TODO: Rip this out from this point and put somewhere else that's pretty + extendable.
+            // FieldFactory or something.
 
             // This mess is similar to what Unity is doing for ShaderGraph. It's not great.
             // But the automatic alternatives depend on SerializableObject which is a performance bottleneck.
@@ -258,8 +259,20 @@ namespace BlueGraph.Editor
             // TODO: EnumFlags/Masks
 
             if (typeof(Object).IsAssignableFrom(fieldInfo.FieldType))
-                return CreateControlElement<ObjectField, Object>(view, fieldInfo);
-
+            {
+                // Specialized construct so I can set .objectType to restrict ObjectField further.
+                // TODO: refactor/clean up
+                var field = new ObjectField();
+                field.objectType = fieldInfo.FieldType;
+                field.SetValueWithoutNotify(fieldInfo.GetValue(view.target) as Object);
+                field.RegisterValueChangedCallback((change) =>
+                {
+                    fieldInfo.SetValue(view.target, change.newValue);
+                    view.OnPropertyChange();
+                });
+                return field;
+            }
+                
             // TODO: Specialized common types. Transform, Rotation, Texture2D, etc.
 
             return null;
