@@ -194,7 +194,7 @@ namespace BlueGraph.Editor
 
             return node;
         }
-        
+
         /// <summary>
         /// Create a VisualElement for a port's inline editor based on the field data type
         /// </summary>
@@ -208,94 +208,10 @@ namespace BlueGraph.Editor
             {
                 return null;
             }
-            
-            // TODO: Rip this out from this point and put somewhere else that's pretty + extendable.
-            // FieldFactory or something.
 
-            // This mess is similar to what Unity is doing for ShaderGraph. It's not great.
-            // But the automatic alternatives depend on SerializableObject which is a performance bottleneck.
-            // Ref: https://github.com/Unity-Technologies/ScriptableRenderPipeline/blob/master/com.unity.shadergraph/Editor/Drawing/Controls/DefaultControl.cs
-            
-            // Builtin unity type editors
-            if (fieldInfo.FieldType == typeof(bool))
-                return CreateControlElement<Toggle, bool>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(int))
-                return CreateControlElement<IntegerField, int>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(float))
-                return CreateControlElement<FloatField, float>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(string))
-                return CreateControlElement<TextField, string>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Rect))
-                return CreateControlElement<RectField, Rect>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Color))
-                return CreateControlElement<ColorField, Color>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Vector2))
-                return CreateControlElement<Vector2Field, Vector2>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Vector3))
-                return CreateControlElement<Vector3Field, Vector3>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Vector4))
-                return CreateControlElement<Vector4Field, Vector4>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Matrix4x4))
-                return CreateControlElement<Vector4Field, Vector4>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(Gradient))
-                return CreateControlElement<GradientField, Gradient>(view, fieldInfo);
-            
-            if (fieldInfo.FieldType == typeof(AnimationCurve))
-                return CreateControlElement<CurveField, AnimationCurve>(view, fieldInfo);
-            
-            if (typeof(Enum).IsAssignableFrom(fieldInfo.FieldType))
-                return CreateControlElement<EnumField, Enum>(view, fieldInfo); 
-    
-            // TODO: EnumFlags/Masks
-
-            if (typeof(Object).IsAssignableFrom(fieldInfo.FieldType))
-            {
-                // Specialized construct so I can set .objectType to restrict ObjectField further.
-                // TODO: refactor/clean up
-                var field = new ObjectField();
-                field.objectType = fieldInfo.FieldType;
-                field.SetValueWithoutNotify(fieldInfo.GetValue(view.target) as Object);
-                field.RegisterValueChangedCallback((change) =>
-                {
-                    fieldInfo.SetValue(view.target, change.newValue);
-                    view.OnPropertyChange();
-                });
-                return field;
-            }
-                
-            // TODO: Specialized common types. Transform, Rotation, Texture2D, etc.
-
-            return null;
+            return ControlElementFactory.CreateControl(fieldInfo, view);
         }
-        
-        /// <summary>
-        /// Generic factory for instantiating and configuring builtin Unity controls for value types.
-        /// 
-        /// The control will be created and bound to the given NodeView and its associated target node. 
-        /// </summary>
-        VisualElement CreateControlElement<TField, TType>(NodeView view, FieldInfo fieldInfo) where TField: BaseField<TType>, new()
-        {
-            var field = new TField();
-            field.SetValueWithoutNotify((TType)fieldInfo.GetValue(view.target));
-            field.RegisterValueChangedCallback((change) =>
-            {
-                fieldInfo.SetValue(view.target, change.newValue);
-                view.OnPropertyChange();
-            });
 
-            return field;
-        }
-        
         public override string ToString()
         {
             var inputs = new List<string>();
