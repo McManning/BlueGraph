@@ -8,26 +8,29 @@ A generic visual scripting framework built on top of Unity's experimental GraphV
 
 ## Work in Progress
 
-This framework is being built to support features of an upcoming title and is not yet ready for prime time. But if you are interested in taking it for a test run yourself, let's talk.
+The master branch is unstable and API still in active development.
 
-The master branch is unstable and still in active development. A release will be tagged once it's considered usable. 
+If you are still interested for trying it for yourself, feel free to provide feedback. 
+
+Documentation is coming... eventually...
+
 
 ## Features
 
-Most of what's advertised for xNode, sans supporting older versions of Unity. Still in progress of trying to come up with a proper feature list that isn't just lifted from theirs. Bear with me. 
-
-* Lightweight runtime graph data
-* Editor built on top of UIElements and GraphView
-* Easily extendable for different use cases, including UE4-style flow control
-* Multiline comment blocks for grouping nodes
+* Node-based visual editor built on top of Unity's modern UI framework
+* Simple node development process through C# attributes on fields 
 * Modularization of nodes and grouping related nodes into searchable subcategories
-* Support for exposing pure static functions to the graph, without the need of wrapping each in a class (*AOT platforms not supported - see Examples/ExecGraph for a possible solution*) 
-* Typed ports with automatic type conversions where appropriate. `IConvertible` classes supported. 
+* Easily extendable for different use cases
+
+
+## Requirements
+
+Requires Unity version 2019.3 or above. 
+
+>The framework makes use of Unity's [[SerializeReference]](https://docs.unity3d.com/ScriptReference/SerializeReference.html) attribute for native polymorphic serialization support introduced in 2019.3.
 
 
 # Installing with Unity Package Manager
-
-_(Requires Unity version 2019.1 or above)_
 
 To install this project as a Git dependency using the Unity Package Manager, add the following line to your project's manifest.json:
 
@@ -36,30 +39,24 @@ To install this project as a Git dependency using the Unity Package Manager, add
 ```
 
 
-# Examples
+# Samples
 
-The core framework is built to be lightweight and support different workflows and requirements. The Examples folder includes various use cases and some advanced implementations. 
+The core framework is built to be lightweight and support different workflows and requirements for projects that require a node-based editor. 
 
+The package samples contains various use cases and more complex implementations that you can use as a starter for your own project.
 
-## ExecGraph
-
-Examples of how to add UE4 Blueprints style flow control to graphs via a custom execution port. 
-
-ExecGraph also includes a *basic* example of converting a graph into C# methods to improve runtime performance and support AOT platforms. 
+## Basic
 
 <img align="right" src="Documentation~/MeshPreview.png">
 
+Examples showing the basic features of BlueGraph and different strategies for implementing different types of nodes for your own project.
 
-## DynamicVector
+## Advanced
 
-Demonstrates how to implement an IConvertible data type. DynamicVector ports can be connected to and from any Unity VectorN port.
+Examples of how to add UE4 Blueprints style flow control to graphs via a custom execution port. 
 
+## Subgraph
 
-## FuncNodes
+Example of creating a subgraph asset with specific IO ports (as defined by IO nodes within the graph) and executing that subgraph from within another graph asset.
 
-Examples of how to create modules of `FuncNode` nodes that wrap basic Unity functions. 
-
-
-## Misc
-
-Other miscellaneous examples, including how to include IMGUI content (such as a mesh preview viewport) and customizing node styles.
+*Requires the Advanced sample to be imported alongside it*
