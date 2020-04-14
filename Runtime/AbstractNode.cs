@@ -27,7 +27,6 @@ namespace BlueGraph
 
         public virtual void OnAfterDeserialize()
         {
-            Debug.Log($"[{name} - {id}] OnAfterDeserialize");
             if (graph == null)
             {
                 throw new Exception(

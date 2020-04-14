@@ -12,24 +12,9 @@ namespace BlueGraph
 
         public List<Comment> comments = new List<Comment>();
         
-        public void Awake()
-        {
-            Debug.Log($"[Graph] Awake");
-        }
-
-        public void OnEnable()
-        {
-            Debug.Log($"[Graph] Enable");
-        }
-
-        private void OnDisable()
-        {
-            Debug.Log($"[Graph] Disable");
-        }
-
         public void OnAfterDeserialize()
         {
-            Debug.Log($"[Graph] OnAfterDeserialize");
+            
         }
 
         public void OnBeforeSerialize()
