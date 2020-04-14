@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -54,9 +55,56 @@ namespace BlueGraph.Editor
             if (type == typeof(AnimationCurve))
                 return BuildVal<CurveField, AnimationCurve>(view, fieldInfo, label);
 
+            if (type == typeof(LayerMask))
+            {
+                var value = ((LayerMask)fieldInfo.GetValue(view.target)).value;
+                var field = new LayerMaskField(label, value);
+                
+                field.RegisterValueChangedCallback((change) =>
+                {
+                    fieldInfo.SetValue(view.target, (LayerMask)change.newValue);
+                    view.OnPropertyChange();
+                });
+
+                return field;
+                // return BuildVal<LayerMaskField, int>(view, fieldInfo, label);
+            }
+                
+            
+            // Implementation (rather than just using EnumField) comes from:
+            // https://github.com/Unity-Technologies/UnityCsReference/blob/1e8347ec4cbda9e8a4929e42a20f39df9bbab9d9/Editor/Mono/UIElements/Controls/PropertyField.cs#L306-L323
+
             if (typeof(Enum).IsAssignableFrom(type))
-                return BuildVal<EnumField, Enum>(view, fieldInfo, label); 
-    
+            {
+                var choices = new List<string>(type.GetEnumNames());
+                var defaultIndex = (int)fieldInfo.GetValue(view.target);
+
+                if (type.IsDefined(typeof(FlagsAttribute), false))
+                {
+                    var field = new EnumFlagsField(label, (Enum)fieldInfo.GetValue(view.target));
+                    
+                    field.RegisterValueChangedCallback((change) =>
+                    {
+                        fieldInfo.SetValue(view.target, change.newValue);
+                        view.OnPropertyChange();
+                    });
+
+                    return field;
+                }
+                else
+                {
+                    var field = new PopupField<string>(label, choices, defaultIndex);
+                
+                    field.RegisterValueChangedCallback((change) =>
+                    {
+                        fieldInfo.SetValue(view.target, field.index);
+                        view.OnPropertyChange();
+                    });
+
+                    return field;
+                }
+            }
+            
             // Specialized construct so I can set .objectType on the ObjectField
             if (typeof(Object).IsAssignableFrom(type))
             {
