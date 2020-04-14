@@ -53,12 +53,6 @@ namespace BlueGraph.Editor
             UpdatePorts();
 
             OnInitialize();
-
-            // TODO: Don't do it this way. Move to an OnInitialize somewhere else.
-            /*if (node is FuncNode func)
-            {
-                func.Awake();
-            }*/
         }
 
         /// <summary>
@@ -99,8 +93,7 @@ namespace BlueGraph.Editor
             {
                 foreach (var editable in reflectionData.editables)
                 {
-                    // TODO: Reimplement
-                    //AddEditableField(m_SerializedNode.FindPropertyRelative(editable.fieldName));
+                    AddEditableField(editable);
                 }
             }
             
@@ -112,12 +105,14 @@ namespace BlueGraph.Editor
             EnableInClassList("hasOutputs", outputs.Count > 0);
         }
 
-        protected void AddEditableField(SerializedProperty prop)
+        protected void AddEditableField(EditableReflectionData editable)
         {
-            var field = new PropertyField(prop);
-            field.Bind(m_SerializedNode.serializedObject);
-            field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
-            
+            var field = ControlElementFactory.CreateControl(
+                editable.field, 
+                this, 
+                editable.displayName
+            );
+
             extensionContainer.Add(field);
         }
 
@@ -129,40 +124,18 @@ namespace BlueGraph.Editor
             // of the port, instantiate a new inline editor control 
             if (port.fieldName != null && port.fieldName.Length > 0)
             {
-                // Literally same performance problem. 
-                // Because it's trying to serialize the entire graph PER PORT
-                // every frame, because the binds will do a .Update() and a .ApplyModifiedProperties()
-
-                // Even if [SerializeReference] wasn't used and instead some custom
-                // object loader - it'd still be a problem since it'd still try to 
-                // re-serialize the entire graph multiple times per frame. 
-
-                //var field = new FloatField();
-                //field.bindingPath = prop.propertyPath;
-                //field.Bind(m_SerializedNode.serializedObject);
-                    
-                //var field = new PropertyField(prop, " ");
-                //field.Bind(m_SerializedNode.serializedObject);
-
-                    
-                // ScriptableObject method sucks. Let's just go with reflection.
-                // Unity is already doing it themselves with their custom view
-                // control components in ShaderGraph (ColorControl, etc).
-
                 var reflection = NodeReflection.GetNodeType(target.GetType());
                 var field = reflection.GetControlElement(this, port.fieldName);
 
                 if (field != null)
                 {
-                    field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
+                    // field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
 
                     var container = new VisualElement();
                     container.AddToClassList("property-field-container");
                     container.Add(field);
 
                     view.SetEditorField(container);
-                } else {
-                    Debug.LogWarning($"Unsupported {port.fieldName} of type {port.Type}");
                 }
             }
             
@@ -203,8 +176,6 @@ namespace BlueGraph.Editor
         /// </summary>
         public virtual void OnPropertyChange()
         {
-            Debug.Log($"{name} propchange");
-            
             // TODO: Cache. This lookup will be slow.
             var canvas = GetFirstAncestorOfType<CanvasView>();
             canvas?.Dirty(this);
