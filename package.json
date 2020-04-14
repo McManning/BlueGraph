@@ -1,39 +1,40 @@
 {
-    "name": "com.github.mcmanning.bluegraph",
-    "displayName": "BlueGraph",
-    "version": "0.1.0",
-    "unity": "2018.1",
-    "description": "Visual Scripting Framework for Unity",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/McManning/BlueGraph",
-        "revision": ""
+  "name": "com.github.mcmanning.bluegraph",
+  "displayName": "BlueGraph",
+  "version": "0.2.0",
+  "unity": "2019.3",
+  "description": "Visual Scripting Framework for Unity",
+  "type": "tool",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/McManning/BlueGraph",
+    "revision": ""
+  },
+  "author": {
+    "name": "Chase McManning",
+    "email": "cmcmanning@gmail.com",
+    "url": "https://github.com/McManning"
+  },
+  "samples": [
+    {
+      "displayName": "Basic",
+      "description": "Basic usage examples",
+      "path": "Samples~/Basic"
     },
-    "author": {
-        "name": "Chase McManning",
-        "email": "cmcmanning@gmail.com",
-        "url": "https://github.com/McManning"
+    {
+      "displayName": "Advanced",
+      "description": "Advanced usage examples",
+      "path": "Samples~/Advanced"
     },
-    "samples": [
-        {
-            "displayName": "DynamicVector",
-            "description": "Description for DynamicVector",
-            "path": "Samples~/DynamicVector"
-        },
-        {
-            "displayName": "ExecGraph",
-            "description": "Description for ExecGraph",
-            "path": "Samples~/ExecGraph"
-        },
-        {
-            "displayName": "FuncNodes",
-            "description": "Description for FuncNodes",
-            "path": "Samples~/FuncNodes"
-        },
-        {
-            "displayName": "Misc",
-            "description": "Description for Misc",
-            "path": "Samples~/Misc"
-        } 
-    ]
+    {
+      "displayName": "Subgraph",
+      "description": "It's graphs all the way down. Requires the Advanced Samples to be installed.",
+      "path": "Samples~/Subgraph"
+    },
+    {
+      "displayName": "Experimental",
+      "description": "Various experiments and potential use cases",
+      "path": "Samples~/Experimental"
+    }
+  ]
 }
