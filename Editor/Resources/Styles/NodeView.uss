@@ -1,7 +1,7 @@
 ﻿
 .nodeView #title {
 	background-color: #3B4C64;
-	height: 30px;
+	height: 26px;
 }
 
 .nodeView #contents > #top > #input {

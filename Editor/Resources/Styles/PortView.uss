@@ -11,7 +11,7 @@
 }
 
 .portView .unity-base-field__input {
-	min-width: 60px;
+	min-width: 30px;
 }
 
 /* 
