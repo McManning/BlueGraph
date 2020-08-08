@@ -374,8 +374,8 @@ namespace BlueGraph.Editor
                 try
                 {
                     types.AddRange(assembly.GetTypes().Where(
-                        (t) => !t.IsAbstract && baseType.IsAssignableFrom(t)).ToArray()
-                    );
+                        (t) => !t.IsAbstract && baseType.IsAssignableFrom(t)
+                    ).ToArray());
                 } 
                 catch (ReflectionTypeLoadException) { }
             }
@@ -383,13 +383,15 @@ namespace BlueGraph.Editor
             var nodeEditors = new Dictionary<Type, Type>();
             foreach (var t in types) 
             {
-                var attrs = t.GetCustomAttributes<CustomNodeViewAttribute>();
+                // We only look at direct attributes here for associations.
+                // GetNodeEditorType() handles walking up the inheritance tree.
+                var attrs = t.GetCustomAttributes<CustomNodeViewAttribute>(false);
                 foreach (var attr in attrs)
                 {
                     nodeEditors[attr.nodeType] = t;
                 }
             }
-            
+
             k_NodeEditors = nodeEditors;
         }
     }
