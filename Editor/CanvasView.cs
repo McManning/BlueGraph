@@ -96,7 +96,6 @@ namespace BlueGraph.Editor
 
         void OnUndoRedo()
         {
-            Debug.Log("Undo/Redo");
             Refresh();
         }
         
@@ -215,7 +214,6 @@ namespace BlueGraph.Editor
         
             // Track undo and add to the graph
             Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {node.name}");
-            Debug.Log($"+node {node.name}");
             
             node.graphPosition = graphMousePosition;
 
@@ -266,8 +264,6 @@ namespace BlueGraph.Editor
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, $"Delete Node {node.name}");
             
-            Debug.Log($"-node {node.name}");
-
             if (node.comment != null)
             {
                 node.comment.RemoveElement(node);
@@ -318,8 +314,6 @@ namespace BlueGraph.Editor
             var input = edge.input as PortView;
             var output = edge.output as PortView;
             
-            Debug.Log($"+edge {input.portName} to {output.portName}");
-
             // Connect the ports in the model
             m_Graph.AddEdge(input.target, output.target);
             m_SerializedGraph.Update();
@@ -347,8 +341,6 @@ namespace BlueGraph.Editor
                 Undo.RegisterCompleteObjectUndo(m_Graph, "Remove Edge");
             }
             
-            Debug.Log($"-edge {input.portName} to {output.portName}");
-
             // Disconnect the ports in the model
             m_Graph.RemoveEdge(input.target, output.target);
             m_SerializedGraph.Update();
@@ -479,7 +471,6 @@ namespace BlueGraph.Editor
             
             // Add views of each node from the graph
             var nodeMap = new Dictionary<AbstractNode, NodeView>();
-            // TODO: Could just be a list with index checking. 
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -639,8 +630,6 @@ namespace BlueGraph.Editor
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, "Add Comment");
             
-            Debug.Log("+comment");
-
             // Pad out the bounding box a bit more on the selection
             var padding = 30f; // TODO: Remove hardcoding
 
@@ -689,13 +678,12 @@ namespace BlueGraph.Editor
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, "Delete Comment");
             
-            Debug.Log($"-comment {comment.target.text}");
-
-            // Remove from the model
+            // Remove the model
             m_Graph.comments.Remove(comment.target);
             m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
             
+            // Remove the view
             RemoveElement(comment);
             m_CommentViews.Remove(comment);
         }

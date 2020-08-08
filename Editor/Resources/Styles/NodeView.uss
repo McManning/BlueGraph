@@ -5,7 +5,7 @@
 }
 
 .nodeView #contents > #top > #input {
-	flex: 100 0 auto; /* TODO: I don't like this grow 100 prop */
+	flex: 100 0 auto;
 	background-color: #393A40;
 	opacity: 0.95;
 }

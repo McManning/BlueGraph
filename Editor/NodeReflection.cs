@@ -14,10 +14,16 @@ using Object = UnityEngine.Object;
 /// </summary>
 namespace BlueGraph.Editor
 {
+    /// <summary>
+    /// Reflection data for a field with an [Input] or [Output] attribute
+    /// </summary>
     public class PortReflectionData
     {
         public Type Type => field.FieldType;
 
+        /// <summary>
+        /// Associated class field if generated via Input/Output attributes
+        /// </summary>
         public FieldInfo field;
 
         public string portName;
@@ -27,6 +33,9 @@ namespace BlueGraph.Editor
         public bool isEditable; // TODO: Rename?
     }
 
+    /// <summary>
+    /// Reflection data for a field with an [Editable] attribute.
+    /// </summary>
     public class EditableReflectionData
     {
         public Type Type => field.FieldType;
@@ -35,17 +44,15 @@ namespace BlueGraph.Editor
         public FieldInfo field;
     }
 
+    /// <summary>
+    /// Reflection data for a class with a [Node] attribute
+    /// </summary>
     public class NodeReflectionData
     {
         /// <summary>
         /// Class type to instantiate for the node 
         /// </summary>
         public Type type;
-
-        /// <summary>
-        /// The bind method for FuncNodes
-        /// </summary>
-        public MethodInfo method;
 
         /// <summary>
         /// Module path for grouping nodes together
@@ -59,13 +66,16 @@ namespace BlueGraph.Editor
         public string name;
 
         /// <summary>
-        /// Tooltip content for node usage instructions
+        /// Content for node usage instructions
         /// </summary>
         public string tooltip;
 
         public List<PortReflectionData> ports = new List<PortReflectionData>();
         public List<EditableReflectionData> editables = new List<EditableReflectionData>();
     
+        /// <summary>
+        /// Cache of FieldInfo entries on the node class
+        /// </summary>
         public List<FieldInfo> fields = new List<FieldInfo>();
 
         public bool HasSingleOutput()
@@ -106,9 +116,11 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Add ports based on attributes on the class fields 
+        /// Add ports based on attributes on the class fields.
+        /// 
+        /// This iterates through fields of a class and adds ports, editables, etc
+        /// based on the attributes attached to each field. 
         /// </summary>
-        /// <param name="type"></param>
         public void AddPortsFromClass(Type type)
         {
             fields.AddRange(type.GetFields(
@@ -273,10 +285,7 @@ namespace BlueGraph.Editor
             }
 
             var baseType = typeof(AbstractNode);
-            var moduleTypes = new List<Type>();
-
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            
             var nodes = new Dictionary<string, NodeReflectionData>();
 
             foreach (var assembly in assemblies)
@@ -292,87 +301,15 @@ namespace BlueGraph.Editor
                             nodes[t.FullName] = LoadClassReflection(t, attr);
                         }
                     }
-                    else if (t.GetCustomAttribute<FuncNodeModuleAttribute>() != null)
-                    {
-                        // Aggregate classes that are [FuncNodeModule]
-                        moduleTypes.Add(t);
-                    }
                 }
             }
         
-            // Run through modules and add tagged methods as FuncNodes
-            /*foreach (var type in moduleTypes) 
-            {
-                var attr = type.GetCustomAttribute<FuncNodeModuleAttribute>();
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
-
-                foreach (var method in methods)
-                {
-                    nodes[$"{type.FullName}|{method.Name}"] = LoadMethodReflection(method, attr);
-                }
-            }*/
-            
             k_NodeTypes = nodes;
             return k_NodeTypes;
         }
 
-        /*
-        static NodeReflectionData LoadMethodReflection(MethodInfo method, FuncNodeModuleAttribute moduleAttr)
-        {    
-            var attr = method.GetCustomAttribute<FuncNodeAttribute>();
-            var name = attr?.name ?? ObjectNames.NicifyVariableName(method.Name);
-            var returnPortName = attr?.returnName ?? "Result";
-            
-            // FuncNode.module can override FuncNodeModule.path. 
-            var path = attr?.module ?? moduleAttr.path;
-            
-            // FuncNode.classType can override default class type
-            var classType = attr?.classType; // ?? typeof(FuncNode);
-            
-            var node = new NodeReflectionData()
-            {
-                type = classType,
-                path = path?.Split('/'),
-                name = name,
-                tooltip = "TODO!",
-                method = method
-            };
-            
-            var parameters = method.GetParameters();
-            foreach (var parameter in parameters)
-            {
-                node.ports.Add(new PortReflectionData() {
-                    type = parameter.IsOut ? 
-                        parameter.ParameterType.GetElementType() :
-                        parameter.ParameterType,
-                    portName = ObjectNames.NicifyVariableName(parameter.Name),
-                    fieldName = parameter.Name,
-                    acceptsMultipleConnections = parameter.IsOut,
-                    isInput = !parameter.IsOut
-                });
-            }
-            
-            // Add an output port for the return value if non-void
-            if (method.ReturnType != typeof(void))
-            {
-                node.ports.Add(new PortReflectionData() {
-                    type = method.ReturnType,
-                    portName = returnPortName,
-                    fieldName = null,
-                    acceptsMultipleConnections = true,
-                    isInput = false
-                });
-            }
-
-            // Merge in any reflection data from the wrapper class itself
-            // Specifically if it contains additional ports to include
-            node.AddPortsFromClass(classType);
-
-            return node;
-        }*/
-
         /// <summary>
-        /// Extract NodeField information from class reflection + attributes
+        /// Extract <c>NodeReflectionData</c> from class reflection, attributes, and fields.
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
@@ -406,7 +343,7 @@ namespace BlueGraph.Editor
                 return editorType;
             }
 
-            // If it's not found, go down the inheritance tree until we find one
+            // If it's not found, go up the inheritance tree until we find one
             while (type != typeof(AbstractNode))
             {
                 type = type.BaseType;
@@ -432,9 +369,6 @@ namespace BlueGraph.Editor
             var types = new List<Type>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             
-            // TODO: Move or collapse.
-            // If node reflection data is needed outside the editor, maybe hold onto this. 
-
             foreach (var assembly in assemblies)
             {
                 try

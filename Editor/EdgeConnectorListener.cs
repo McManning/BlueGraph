@@ -18,11 +18,17 @@ namespace BlueGraph.Editor
             m_Canvas = canvas;
         }
     
+        /// <summary>
+        /// Handle connecting nodes when an edge is dropped between two ports
+        /// </summary>
         public void OnDrop(GraphView graphView, GraphViewEdge edge)
         {
             m_Canvas.AddEdge(edge, true);
         }
 
+        /// <summary>
+        /// Activate the search dialog when an edge is dropped on an arbitrary location
+        /// </summary>
         public void OnDropOutsidePort(GraphViewEdge edge, Vector2 position)
         {
             var screenPosition = GUIUtility.GUIToScreenPoint(

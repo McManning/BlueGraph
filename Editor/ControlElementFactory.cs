@@ -67,9 +67,7 @@ namespace BlueGraph.Editor
                 });
 
                 return field;
-                // return BuildVal<LayerMaskField, int>(view, fieldInfo, label);
             }
-                
             
             // Implementation (rather than just using EnumField) comes from:
             // https://github.com/Unity-Technologies/UnityCsReference/blob/1e8347ec4cbda9e8a4929e42a20f39df9bbab9d9/Editor/Mono/UIElements/Controls/PropertyField.cs#L306-L323

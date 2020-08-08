@@ -4,6 +4,11 @@ using System.Collections.Generic;
 
 namespace BlueGraph.Editor
 {
+    /// <summary>
+    /// Default implementation of a SearchProvider for nodes. 
+    /// 
+    /// This provider provides all nodes found via NodeReflection.
+    /// </summary>
     class DefaultSearchProvider : ISearchProvider
     {
         public IEnumerable<SearchResult> GetSearchResults(SearchFilter filter)

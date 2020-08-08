@@ -52,13 +52,6 @@ namespace BlueGraph.Editor
                 target = port
             };
 
-            // Override default connector text with the human-readable port name
-            // TODO: Apparently the edge connector (Edge.output.portName) is based on whatever
-            // is in this label. So re-labeling it will inadvertedly change the port name. 
-            // (or it might be a two way binding). So natively, we won't be able to have multiple
-            // ports with the same name. 
-            // view.m_ConnectorText.text = refPort.displayName;
-
             view.AddManipulator(view.m_EdgeConnector);
             return view;
         }

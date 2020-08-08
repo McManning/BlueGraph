@@ -3,13 +3,15 @@
 namespace BlueGraph
 {
     /// <summary>
-    /// Metadata for a Node available to Graphs
+    /// A node that can be added to a Graph
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class NodeAttribute : Attribute
     {
         /// <summary>
-        /// Display name of the node
+        /// Display name of the node. 
+        /// 
+        /// If not supplied, this will be inferred based on the class name.
         /// </summary>
         public string name;
 
@@ -19,7 +21,8 @@ namespace BlueGraph
         public string help;
 
         /// <summary>
-        /// Slash-delimited module path to categorize this node under
+        /// Slash-delimited module path to categorize this node for searches 
+        /// and restrict what Graphs it can be instantiated onto.
         /// </summary>
         public string module;
 
@@ -30,13 +33,15 @@ namespace BlueGraph
     }
     
     /// <summary>
-    /// Metadata for an input slot on a Node
+    /// An input port exposed on a Node
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class InputAttribute : Attribute
     {
         /// <summary>
-        /// Display name of the input slot
+        /// Display name of the input slot.
+        /// 
+        /// If not supplied, this will be inferred based on the field name.
         /// </summary>
         public string name;
 
@@ -57,13 +62,15 @@ namespace BlueGraph
     }
     
     /// <summary>
-    /// Metadata for an output slot on a Node
+    /// An output port exposed on a Node
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class OutputAttribute : Attribute
     {
         /// <summary>
-        /// Display name of the output slot
+        /// Display name of the output slot.
+        /// 
+        /// If not supplied, this will be inferred based on the field name.
         /// </summary>
         public string name;
         
@@ -79,13 +86,15 @@ namespace BlueGraph
     }
 
     /// <summary>
-    /// Display an inline editor for this field on the Node
+    /// A field that can be edited directly from within the Canvas on a Node
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class EditableAttribute : Attribute
     {
         /// <summary>
-        /// Display name of the editable field
+        /// Display name of the editable field. 
+        /// 
+        /// If not supplied, this will be inferred based on the field name.
         /// </summary>
         public string name;
         
@@ -95,59 +104,6 @@ namespace BlueGraph
         }
     }
     
-    /// <summary>
-    /// Mark a static class as containing a suite of FuncNode methods
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class FuncNodeModuleAttribute : Attribute
-    {
-        /// <summary>
-        /// Default module path for all contained FuncNode methods.
-        /// Can be slash-delimited to denote submodules. 
-        /// </summary>
-        public string path;
-        
-        public FuncNodeModuleAttribute(string path = null)
-        {
-            this.path = path;    
-        }
-    }
-
-    /// <summary>
-    /// Override default settings from inherited FuncNodeModule
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class FuncNodeAttribute : Attribute
-    {
-        /// <summary>
-        /// Custom display name of the FuncNode
-        /// </summary>
-        public string name;
-
-        /// <summary>
-        /// Optional module path to override FuncNodeModule.
-        /// Can be slash-delimited to denote submodules.
-        /// </summary>
-        public string module;
-
-        /// <summary>
-        /// Display name of the return value. Defaults to "Result"
-        /// </summary>
-        public string returnName;
-
-        /// <summary>
-        /// Class to instantiate while wrapping each function
-        /// as a node on the graph. Must be a type that inherits
-        /// from `FuncNode`. 
-        /// </summary>
-        public Type classType;
-
-        public FuncNodeAttribute(string name = null)
-        {
-            this.name = name;
-        }
-    }
-
     /// <summary>
     /// Supported module paths for a given Graph. 
     /// </summary>

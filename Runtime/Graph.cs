@@ -5,29 +5,27 @@ using UnityEngine;
 
 namespace BlueGraph
 {
-    public class Graph : ScriptableObject, ISerializationCallbackReceiver
+    public class Graph : ScriptableObject
     {
+        /// <summary>
+        /// All nodes contained within this Graph
+        /// </summary>
         [SerializeReference]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
+        /// <summary>
+        /// All comments to display in the editor for this Graph
+        /// </summary>
         public List<Comment> comments = new List<Comment>();
-        
-        public void OnAfterDeserialize()
-        {
-            
-        }
 
-        public void OnBeforeSerialize()
-        {
-            // This runs OFTEN (basically every frame) in the editor.
-            // TODO: Don't do the upgrade check during this. Only on a reimport of scripts
+        /// <summary>
+        /// Graph serialization version for safely handling automatic upgrades.
+        /// </summary>
+        /*[SerializeField] int version = 1;*/
 
-            // Automatically upgrade anything that has been marked as 
-            // deprecated before trying to persist this graph.
-            // UpgradeDeprecatedNodes();
-            // Debug.Log("[Graph] OnBeforeSerialize");
-        }
-
+        /// <summary>
+        /// Automatically convert nodes with a [Deprecated] attribute to their replacement.
+        /// </summary>
         void UpgradeDeprecatedNodes()
         {
             for (int i = 0; i < nodes.Count; i++)
@@ -46,21 +44,28 @@ namespace BlueGraph
             }
         }
 
+        /// <summary>
+        /// Find a node on the Graph by unique ID 
+        /// </summary>
         public AbstractNode FindNodeById(string id)
         {
             return nodes.Find((node) => node.id == id);
         }
 
+        /// <summary>
+        /// Find the first node on the Graph of, or inherited from, the given type. 
+        /// </summary>
         public T FindNode<T>() where T : AbstractNode
         {
             return nodes.Find((node) => typeof(T).IsAssignableFrom(node.GetType())) as T;
         }
 
+        /// <summary>
+        /// Find all nodes on the Graph of, or inherited from, the given type. 
+        /// </summary>
         public List<T> FindNodes<T>() where T : AbstractNode
         {
-            // TODO: More performant solution?
             var matches = new List<T>();
-
             for (int i = 0; i < nodes.Count; i++)
             {
                 if (typeof(T).IsAssignableFrom(nodes[i].GetType()))
@@ -72,23 +77,25 @@ namespace BlueGraph
             return matches;
         }
         
+        /// <summary>
+        /// Add a new node to the Graph.
+        /// 
+        /// Once added, the node's <c>OnAddedToGraph()</c> method will be called.
+        /// </summary>
+        /// <param name="node"></param>
         public void AddNode(AbstractNode node)
         {
             node.graph = this;
             nodes.Add(node);
             node.OnAddedToGraph();
         }
-
-        public void AddEdge(Port output, Port input)
-        {
-            output.Connect(input);
-        }
-
-        public void RemoveEdge(Port output, Port input)
-        {
-            output.Disconnect(input);
-        }
-
+        
+        /// <summary>
+        /// Remove a node from the Graph.
+        /// 
+        /// Once removed, the node's <c>OnRemovedFromGraph()</c> method will be called.
+        /// </summary>
+        /// <param name="node"></param>
         public void RemoveNode(AbstractNode node)
         {
             node.DisconnectAllPorts();
@@ -96,6 +103,24 @@ namespace BlueGraph
 
             node.graph = null;
             node.OnRemovedFromGraph();
+        }
+
+        /// <summary>
+        /// Add a new edge between two Ports.
+        /// </summary>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        public void AddEdge(Port output, Port input)
+        {
+            output.Connect(input);
+        }
+
+        /// <summary>
+        /// Remove an edge between two Ports. 
+        /// </summary>
+        public void RemoveEdge(Port output, Port input)
+        {
+            output.Disconnect(input);
         }
     }
 }

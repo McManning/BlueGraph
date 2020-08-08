@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace BlueGraph
 {
+    /// <summary>
+    /// Serializable edge information for a Port
+    /// </summary>
     [Serializable]
     public class Connection
     {
@@ -159,6 +162,9 @@ namespace BlueGraph
             return (IEnumerable<T>)node.OnRequestValue(this);
         }
         
+        /// <summary>
+        /// Remove all edges connected connected to this port.
+        /// </summary>
         internal void DisconnectAll()
         {
             // Remove ourselves from all other connected ports
@@ -171,6 +177,9 @@ namespace BlueGraph
             m_Connections.Clear();
         }
         
+        /// <summary>
+        /// Add an edge between this and the given Port
+        /// </summary>
         internal void Connect(Port port)
         {
             m_Connections.Add(new Connection() {
@@ -187,6 +196,9 @@ namespace BlueGraph
             });
         }
         
+        /// <summary>
+        /// Remove any edges between this and the given Port
+        /// </summary>
         internal void Disconnect(Port port)
         {
             m_Connections.RemoveAll((edge) => edge.port == port);

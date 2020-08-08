@@ -34,7 +34,6 @@ namespace BlueGraph.Editor
             string json = JsonUtility.ToJson(graph, true);
             DestroyImmediate(graph);
 
-            Debug.Log(json);
             return json;
         }
 
