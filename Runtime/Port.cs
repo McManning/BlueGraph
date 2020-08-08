@@ -17,7 +17,7 @@ namespace BlueGraph
     }
 
     [Serializable]
-    public class Port
+    public class Port : ISerializationCallbackReceiver
     {
         [NonSerialized]
         public AbstractNode node;
@@ -36,23 +36,12 @@ namespace BlueGraph
         /// <summary>
         /// Whether to treat this as an input or output port.
         /// </summary>
-        public bool isInput;
+        public PortDirection direction = PortDirection.Input;
 
-        public Type ConnectionType {
-            get {
-                if (m_Type == null)
-                {
-                    m_Type = Type.GetType(m_SerializedType);
-                }
-
-                return m_Type;
-            }
-            set
-            {
-                m_Type = value;
-                m_SerializedType = value?.AssemblyQualifiedName;
-            }
-        }
+        /// <summary>
+        /// Allowable connection types made to this port.
+        /// </summary>
+        public Type type;
         
         public int ConnectionCount
         {
@@ -76,14 +65,23 @@ namespace BlueGraph
         }
 
         [SerializeField] internal List<Connection> m_Connections;
-        [SerializeField] string m_SerializedType;
-        Type m_Type;
+        [SerializeField] string m_Type;
 
         public Port()
         {
             m_Connections = new List<Connection>();
         }
         
+        public void OnBeforeSerialize()
+        {
+            m_Type = type.AssemblyQualifiedName;
+        }
+
+        public void OnAfterDeserialize()
+        {
+            type = Type.GetType(m_Type);
+        }
+
         /// <summary>
         /// Resolve the value on this port.
         /// 
