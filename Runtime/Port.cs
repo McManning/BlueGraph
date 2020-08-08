@@ -28,11 +28,6 @@ namespace BlueGraph
         public string name;
 
         /// <summary>
-        /// Underlying field name associated with this port
-        /// </summary>
-        public string fieldName;
-
-        /// <summary>
         /// Whether or not multiple edges can be connected 
         /// between this port and other ports.
         /// </summary>

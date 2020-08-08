@@ -197,25 +197,16 @@ namespace BlueGraph.Editor
             var node = Activator.CreateInstance(type) as AbstractNode;
             node.name = name;
             
-            // Setup ports
+            // Create runtime ports from reflection data
             foreach (var port in ports)
             {
-                var nodePort = new Port {
+                node.AddPort(new Port {
                     ConnectionType = port.ConnectionType,
                     node = node,
                     name = port.name,
                     isMulti = port.isMulti,
                     isInput = port.isInput
-                };
-
-                // Only pass the field name along if we allow
-                // inline editing of the port
-                if (port.isEditable)
-                {
-                    nodePort.fieldName = port.field.Name;
-                }
-
-                node.AddPort(nodePort);
+                });
             }
 
             return node;
