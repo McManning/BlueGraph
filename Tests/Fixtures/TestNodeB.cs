@@ -18,15 +18,15 @@ namespace BlueGraph.Tests
             AddPort(new Port
             { 
                 name = "Input",
-                isInput = true,
-                ConnectionType = typeof(Vector3) 
+                direction = PortDirection.Input,
+                type = typeof(Vector3) 
             });
 
             AddPort(new Port
             { 
                 name = "Output",
-                isInput = false,
-                ConnectionType = typeof(string) 
+                direction = PortDirection.Output,
+                type = typeof(string) 
             });
         }
         

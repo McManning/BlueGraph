@@ -126,7 +126,7 @@ namespace BlueGraph
         public T GetInputValue<T>(string portName, T defaultValue = default)
         {
             var port = GetPort(portName);
-            if (port == null || !port.isInput)
+            if (port == null || port.direction == PortDirection.Output)
             {
                 throw new ArgumentException(
                     $"[{name}] No input port named `{portName}`"
@@ -145,7 +145,7 @@ namespace BlueGraph
         public IEnumerable<T> GetInputValues<T>(string portName)
         {
             var port = GetPort(portName);
-            if (port == null || !port.isInput)
+            if (port == null || port.direction == PortDirection.Output)
             {
                 throw new ArgumentException(
                     $"[{name}] No input port named `{portName}`"
@@ -161,7 +161,7 @@ namespace BlueGraph
         public T GetOutputValue<T>(string portName)
         {
             var port = GetPort(portName);
-            if (port == null || port.isInput)
+            if (port == null || port.direction == PortDirection.Input)
             {
                 throw new ArgumentException(
                     $"[{name}] No output port named `{portName}`"

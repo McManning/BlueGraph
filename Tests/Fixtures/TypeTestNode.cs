@@ -45,17 +45,17 @@ namespace BlueGraph.Tests
             name = "Type Test Node";
             
             // Input (any)
-            AddPort(new Port { isInput = true, name = "Input" });
+            AddPort(new Port { name = "Input", direction = PortDirection.Input });
 
             // Output types
-            AddPort(new Port { name = "intval" });
-            AddPort(new Port { name = "boolval" });
-            AddPort(new Port { name = "stringval" });
-            AddPort(new Port { name = "floatval" });
-            AddPort(new Port { name = "vector3val" });
-            AddPort(new Port { name = "curveval" });
-            AddPort(new Port { name = "classval" });
-            AddPort(new Port { name = "structval" });
+            AddPort(new Port { name = "intval", direction = PortDirection.Output });
+            AddPort(new Port { name = "boolval", direction = PortDirection.Output });
+            AddPort(new Port { name = "stringval", direction = PortDirection.Output });
+            AddPort(new Port { name = "floatval", direction = PortDirection.Output });
+            AddPort(new Port { name = "vector3val", direction = PortDirection.Output });
+            AddPort(new Port { name = "curveval", direction = PortDirection.Output });
+            AddPort(new Port { name = "classval", direction = PortDirection.Output });
+            AddPort(new Port { name = "structval", direction = PortDirection.Output });
         }
 
         public override object OnRequestValue(Port port)

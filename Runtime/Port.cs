@@ -16,6 +16,24 @@ namespace BlueGraph
         [NonSerialized] public Port port;
     }
 
+    /// <summary>
+    /// Direction of the port
+    /// </summary>
+    public enum PortDirection
+    {
+        Input = 0,
+        Output = 1
+    }
+
+    /// <summary>
+    /// Number of connections that can be made to the port
+    /// </summary>
+    public enum PortCapacity
+    {
+        Single = 0,
+        Multiple = 1
+    }
+
     [Serializable]
     public class Port : ISerializationCallbackReceiver
     {
@@ -31,7 +49,7 @@ namespace BlueGraph
         /// Whether or not multiple edges can be connected 
         /// between this port and other ports.
         /// </summary>
-        public bool isMulti;
+        public PortCapacity capacity = PortCapacity.Single;
 
         /// <summary>
         /// Whether to treat this as an input or output port.
@@ -96,7 +114,7 @@ namespace BlueGraph
         {
             // If this is an input port, consume the  
             // value from connected port. 
-            if (isInput)
+            if (direction == PortDirection.Input)
             {
                 HydratePorts();
                 if (m_Connections.Count > 0)
@@ -148,7 +166,7 @@ namespace BlueGraph
         /// </summary>
         public virtual IEnumerable<T> GetValues<T>()
         {
-            if (isInput)
+            if (direction == PortDirection.Input)
             {
                 HydratePorts();
 

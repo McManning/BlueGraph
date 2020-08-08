@@ -30,9 +30,10 @@ namespace BlueGraph.Editor
         /// Display name for this port
         /// </summary>
         public string name;
+        
+        public PortDirection direction;
+        public PortCapacity capacity;
 
-        public bool isMulti;
-        public bool isInput;
         public bool isEditable; // TODO: Rename?
         
         /// <summary>
@@ -109,7 +110,7 @@ namespace BlueGraph.Editor
         {
             foreach (var port in ports)
             {
-                if (!port.isInput) continue;
+                if (port.direction == PortDirection.Output) continue;
        
                 // Cast direction type -> port input
                 if (type.IsCastableTo(port.ConnectionType, true))
@@ -125,7 +126,7 @@ namespace BlueGraph.Editor
         {
             foreach (var port in ports)
             {
-                if (port.isInput) continue;
+                if (port.direction == PortDirection.Input) continue;
        
                 // Cast direction port output -> type
                 if (port.ConnectionType.IsCastableTo(type, true))
@@ -161,8 +162,8 @@ namespace BlueGraph.Editor
                         {
                             name = input.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i],
-                            isInput = true,
-                            isMulti = input.multiple,
+                            direction = PortDirection.Input,
+                            capacity = input.multiple ? PortCapacity.Multiple : PortCapacity.Single,
                             isEditable = input.editable
                         });
                     }
@@ -172,8 +173,8 @@ namespace BlueGraph.Editor
                         {
                             name = output.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i],
-                            isInput = false,
-                            isMulti = output.multiple,
+                            direction = PortDirection.Output,
+                            capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
                             isEditable = false
                         });
                     }
@@ -201,11 +202,11 @@ namespace BlueGraph.Editor
             foreach (var port in ports)
             {
                 node.AddPort(new Port {
-                    ConnectionType = port.ConnectionType,
+                    type = port.ConnectionType,
                     node = node,
                     name = port.name,
-                    isMulti = port.isMulti,
-                    isInput = port.isInput
+                    capacity = port.capacity,
+                    direction = port.direction
                 });
             }
 
@@ -224,8 +225,14 @@ namespace BlueGraph.Editor
 
             foreach (var port in ports)
             {
-                if (port.isInput) inputs.Add(port.name);
-                else if (!port.isEditable) outputs.Add(port.name);
+                if (port.direction == PortDirection.Input)
+                {
+                    inputs.Add(port.name);
+                }
+                else if (!port.isEditable)
+                {
+                    outputs.Add(port.name);
+                }
             }
 
             return $"<{name}, IN: {string.Join(", ", inputs)}, OUT: {string.Join(", ", outputs)}>";

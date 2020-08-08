@@ -75,7 +75,7 @@ namespace BlueGraph.Editor
         {
             foreach (var port in target.Ports)
             {
-                if (port.isInput)
+                if (port.direction == PortDirection.Input)
                 {
                     AddInputPort(port);
                 }
@@ -110,7 +110,7 @@ namespace BlueGraph.Editor
 
         protected virtual void AddInputPort(Port port)
         {
-            var view = PortView.Create(port, port.ConnectionType, m_ConnectorListener);
+            var view = PortView.Create(port, port.type, m_ConnectorListener);
             
             // If we're exposing a control element via reflection: include it in the view
             var reflection = NodeReflection.GetNodeType(target.GetType());
@@ -131,7 +131,7 @@ namespace BlueGraph.Editor
 
         protected virtual void AddOutputPort(Port port)
         {
-            var view = PortView.Create(port, port.ConnectionType, m_ConnectorListener);
+            var view = PortView.Create(port, port.type, m_ConnectorListener);
             
             outputs.Add(view);
             outputContainer.Add(view);

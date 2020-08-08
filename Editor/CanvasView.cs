@@ -478,11 +478,8 @@ namespace BlueGraph.Editor
             {
                 foreach (var port in node.Key.Ports)
                 {
-                    if (!port.isInput)
-                    {
-                        continue;
-                    }
-                    
+                    if (port.direction == PortDirection.Output) continue;
+
                     foreach (var conn in port.Connections)
                     {
                         var connectedNode = conn.node;
