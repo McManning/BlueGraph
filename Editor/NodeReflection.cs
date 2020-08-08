@@ -19,18 +19,37 @@ namespace BlueGraph.Editor
     /// </summary>
     public class PortReflectionData
     {
-        public Type Type => field.FieldType;
+        public Type ConnectionType => field.FieldType;
 
         /// <summary>
         /// Associated class field if generated via Input/Output attributes
         /// </summary>
         public FieldInfo field;
 
-        public string portName;
+        /// <summary>
+        /// Display name for this port
+        /// </summary>
+        public string name;
 
-        public bool acceptsMultipleConnections;
+        public bool isMulti;
         public bool isInput;
         public bool isEditable; // TODO: Rename?
+        
+        /// <summary>
+        /// Create a VisualElement for this port's inline editor based on the field data type.
+        /// 
+        /// This returns null if the port is not marked as <c>isEditable</c> or the type
+        /// could not be resolved to a supported control element.
+        /// </summary>
+        public VisualElement GetControlElement(NodeView view)
+        {
+            if (!isEditable)
+            {
+                return null;
+            }
+
+            return ControlElementFactory.CreateControl(field, view);
+        }
     }
 
     /// <summary>
@@ -38,10 +57,18 @@ namespace BlueGraph.Editor
     /// </summary>
     public class EditableReflectionData
     {
-        public Type Type => field.FieldType;
-
-        public string displayName;
+        public string name;
         public FieldInfo field;
+        
+        /// <summary>
+        /// Create a VisualElement for this editable's inline editor based on the field data type.
+        /// 
+        /// This returns null if the type could not be resolved to a supported control element.
+        /// </summary>
+        public VisualElement GetControlElement(NodeView view)
+        {
+            return ControlElementFactory.CreateControl(field, view);
+        }
     }
 
     /// <summary>
@@ -68,7 +95,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Content for node usage instructions
         /// </summary>
-        public string tooltip;
+        public string help;
 
         public List<PortReflectionData> ports = new List<PortReflectionData>();
         public List<EditableReflectionData> editables = new List<EditableReflectionData>();
@@ -78,11 +105,6 @@ namespace BlueGraph.Editor
         /// </summary>
         public List<FieldInfo> fields = new List<FieldInfo>();
 
-        public bool HasSingleOutput()
-        {
-            return ports.Count((port) => !port.isInput) < 2;
-        }
-
         public bool HasInputOfType(Type type)
         {
             foreach (var port in ports)
@@ -90,7 +112,7 @@ namespace BlueGraph.Editor
                 if (!port.isInput) continue;
        
                 // Cast direction type -> port input
-                if (type.IsCastableTo(port.Type, true))
+                if (type.IsCastableTo(port.ConnectionType, true))
                 {
                     return true;
                 }
@@ -106,7 +128,7 @@ namespace BlueGraph.Editor
                 if (port.isInput) continue;
        
                 // Cast direction port output -> type
-                if (port.Type.IsCastableTo(type, true))
+                if (port.ConnectionType.IsCastableTo(type, true))
                 {
                     return true;
                 }
@@ -121,7 +143,7 @@ namespace BlueGraph.Editor
         /// This iterates through fields of a class and adds ports, editables, etc
         /// based on the attributes attached to each field. 
         /// </summary>
-        public void AddPortsFromClass(Type type)
+        public void AddFieldsFromClass(Type type)
         {
             fields.AddRange(type.GetFields(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
@@ -133,39 +155,33 @@ namespace BlueGraph.Editor
                 var attribs = fields[i].GetCustomAttributes(true);
                 for (int j = 0; j < attribs.Length; j++)
                 {
-                    if (attribs[j] is InputAttribute)
+                    if (attribs[j] is InputAttribute input)
                     {
-                        var attr = attribs[j] as InputAttribute;
-
                         ports.Add(new PortReflectionData()
                         {
-                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            name = input.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i],
                             isInput = true,
-                            acceptsMultipleConnections = attr.multiple,
-                            isEditable = attr.editable
+                            isMulti = input.multiple,
+                            isEditable = input.editable
                         });
                     }
-                    else if (attribs[j] is OutputAttribute)
+                    else if (attribs[j] is OutputAttribute output)
                     {
-                        var attr = attribs[j] as OutputAttribute;
-                        
                         ports.Add(new PortReflectionData()
                         {
-                            portName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            name = output.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i],
                             isInput = false,
-                            acceptsMultipleConnections = attr.multiple,
+                            isMulti = output.multiple,
                             isEditable = false
                         });
                     }
-                    else if (attribs[j] is EditableAttribute)
+                    else if (attribs[j] is EditableAttribute editable)
                     {
-                        var attr = attribs[j] as EditableAttribute;
-                        
                         editables.Add(new EditableReflectionData()
                         {
-                            displayName = attr.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            name = editable.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i]
                         });
                     }
@@ -184,13 +200,11 @@ namespace BlueGraph.Editor
             // Setup ports
             foreach (var port in ports)
             {
-                // Now it's basically everything from reflection.
-                // TODO Get rid of reflection?
                 var nodePort = new Port {
-                    Type = port.Type,
+                    ConnectionType = port.ConnectionType,
                     node = node,
-                    name = port.portName,
-                    acceptsMultipleConnections = port.acceptsMultipleConnections,
+                    name = port.name,
+                    isMulti = port.isMulti,
                     isInput = port.isInput
                 };
 
@@ -207,21 +221,9 @@ namespace BlueGraph.Editor
             return node;
         }
 
-        /// <summary>
-        /// Create a VisualElement for a port's inline editor based on the field data type
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="fieldName"></param>
-        /// <returns></returns>
-        public VisualElement GetControlElement(NodeView view, string fieldName)
+        public PortReflectionData GetPortByName(string name)
         {
-            var fieldInfo = fields.Find((field) => field.Name == fieldName);
-            if (fieldInfo == null)
-            {
-                return null;
-            }
-
-            return ControlElementFactory.CreateControl(fieldInfo, view);
+            return ports.Find((port) => port.name == name);
         }
 
         public override string ToString()
@@ -231,8 +233,8 @@ namespace BlueGraph.Editor
 
             foreach (var port in ports)
             {
-                if (port.isInput) inputs.Add(port.portName);
-                else if (!port.isEditable) outputs.Add(port.portName);
+                if (port.isInput) inputs.Add(port.name);
+                else if (!port.isEditable) outputs.Add(port.name);
             }
 
             return $"<{name}, IN: {string.Join(", ", inputs)}, OUT: {string.Join(", ", outputs)}>";
@@ -323,10 +325,10 @@ namespace BlueGraph.Editor
                 type = type,
                 path = path?.Split('/'),
                 name = name,
-                tooltip = nodeAttr.help
+                help = nodeAttr.help
             };
 
-            node.AddPortsFromClass(type);
+            node.AddFieldsFromClass(type);
             return node;
         }
         

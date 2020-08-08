@@ -44,7 +44,7 @@ namespace BlueGraph.Editor
             var view = new PortView(
                 Orientation.Horizontal, 
                 port.isInput ? Direction.Input : Direction.Output, 
-                port.acceptsMultipleConnections ? Capacity.Multi : Capacity.Single, 
+                port.isMulti ? Capacity.Multi : Capacity.Single, 
                 type
             ) {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),

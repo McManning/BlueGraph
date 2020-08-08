@@ -194,10 +194,10 @@ namespace BlueGraph.Tests
             
             graph.RemoveNode(nodeToRemove);
 
-            Assert.AreEqual(0, node1.GetPort("Output").TotalConnections);
-            Assert.AreEqual(0, node2.GetPort("Output").TotalConnections);
+            Assert.AreEqual(0, node1.GetPort("Output").ConnectionCount);
+            Assert.AreEqual(0, node2.GetPort("Output").ConnectionCount);
             
-            Assert.AreEqual(0, nodeToRemove.GetPort("Input").TotalConnections);
+            Assert.AreEqual(0, nodeToRemove.GetPort("Input").ConnectionCount);
         }
 
         [Test]
@@ -228,8 +228,8 @@ namespace BlueGraph.Tests
                 node3.GetPort("Input")
             );
 
-            Assert.AreEqual(1, node1.GetPort("Output").TotalConnections);
-            Assert.AreEqual(0, node3.GetPort("Input").TotalConnections);
+            Assert.AreEqual(1, node1.GetPort("Output").ConnectionCount);
+            Assert.AreEqual(0, node3.GetPort("Input").ConnectionCount);
         }
     }
 }

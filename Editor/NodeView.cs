@@ -40,7 +40,7 @@ namespace BlueGraph.Editor
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
-            SetPosition(new Rect(node.graphPosition, Vector2.one));
+            SetPosition(new Rect(node.position, Vector2.one));
             title = node.name;
             
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
@@ -104,45 +104,34 @@ namespace BlueGraph.Editor
 
         protected void AddEditableField(EditableReflectionData editable)
         {
-            var field = ControlElementFactory.CreateControl(
-                editable.field, 
-                this, 
-                editable.displayName
-            );
-
+            var field = editable.GetControlElement(this);
             extensionContainer.Add(field);
         }
 
         protected virtual void AddInputPort(Port port)
         {
-            var view = PortView.Create(port, port.Type, m_ConnectorListener);
-
-            // If we want to display an inline editable field as part 
-            // of the port, instantiate a new inline editor control 
-            if (port.fieldName != null && port.fieldName.Length > 0)
-            {
-                var reflection = NodeReflection.GetNodeType(target.GetType());
-                var field = reflection.GetControlElement(this, port.fieldName);
-
-                if (field != null)
-                {
-                    // field.RegisterCallback((FocusOutEvent e) => OnPropertyChange());
-
-                    var container = new VisualElement();
-                    container.AddToClassList("property-field-container");
-                    container.Add(field);
-
-                    view.SetEditorField(container);
-                }
-            }
+            var view = PortView.Create(port, port.ConnectionType, m_ConnectorListener);
             
+            // If we're exposing a control element via reflection: include it in the view
+            var reflection = NodeReflection.GetNodeType(target.GetType());
+            var element = reflection.GetPortByName(port.name)?.GetControlElement(this);
+
+            if (element != null)
+            {
+                var container = new VisualElement();
+                container.AddToClassList("property-field-container");
+                container.Add(element);
+
+                view.SetEditorField(container);
+            }
+
             inputs.Add(view);
             inputContainer.Add(view);
         }
 
         protected virtual void AddOutputPort(Port port)
         {
-            var view = PortView.Create(port, port.Type, m_ConnectorListener);
+            var view = PortView.Create(port, port.ConnectionType, m_ConnectorListener);
             
             outputs.Add(view);
             outputContainer.Add(view);
@@ -209,13 +198,13 @@ namespace BlueGraph.Editor
                 return position;
             }
             
-            return new Rect(target.graphPosition, Vector2.one);
+            return new Rect(target.position, Vector2.one);
         }
 
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            target.graphPosition = newPos.position;
+            target.position = newPos.position;
         }
         
         protected void OnTooltip(TooltipEvent evt)
@@ -224,7 +213,7 @@ namespace BlueGraph.Editor
             if (evt.target == titleContainer.Q("title-label"))
             {
                 var typeData = NodeReflection.GetNodeType(target.GetType());
-                evt.tooltip = typeData?.tooltip;
+                evt.tooltip = typeData?.help;
                 
                 // Float the tooltip above the node title bar
                 var bound = titleContainer.worldBound;

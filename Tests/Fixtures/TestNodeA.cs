@@ -18,7 +18,7 @@ namespace BlueGraph.Tests
                 name = "Input",
                 fieldName = "aValue1",
                 isInput = true,
-                Type = typeof(int) 
+                ConnectionType = typeof(int) 
             });
             
             AddPort(new Port
@@ -26,7 +26,7 @@ namespace BlueGraph.Tests
                 name = "Output",
                 fieldName = "aValue2",
                 isInput = false,
-                Type = typeof(int) 
+                ConnectionType = typeof(int) 
             });
         }
 

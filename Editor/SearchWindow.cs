@@ -81,17 +81,14 @@ namespace BlueGraph.Editor
 
         IEnumerable<SearchResult> FilterSearchProviders(SearchFilter filter)
         {
-            List<SearchResult> results = new List<SearchResult>();
             foreach (var provider in m_Providers)
             {
                 foreach (var result in provider.GetSearchResults(filter))
                 {
                     result.provider = provider;
-                    results.Add(result);
+                    yield return result;
                 }
             }
-
-            return results;
         }
         
         /// <summary>
@@ -123,23 +120,23 @@ namespace BlueGraph.Editor
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
-            SearchFilter filter = new SearchFilter
+            var filter = new SearchFilter
             {
                 sourcePort = sourcePort?.target
             };
 
             // First item is the title of the window
-            List<SearchTreeEntry> tree = new List<SearchTreeEntry>();
+            var tree = new List<SearchTreeEntry>();
             tree.Add(new SearchTreeGroupEntry(new GUIContent("Add Node"), 0));
             
             // Construct a tree of available nodes by module path
-            SearchGroup groups = new SearchGroup(1);
+            var groups = new SearchGroup(1);
             
             // Aggregate search providers and get nodes matching the filter
-            foreach (SearchResult result in FilterSearchProviders(filter))
+            foreach (var result in FilterSearchProviders(filter))
             {
                 var path = result.path;
-                SearchGroup group = groups;
+                var group = groups;
                 if (path != null && IsInSupportedModules(path))
                 {
                     // If a module path is defined, drill down into nested
@@ -165,8 +162,8 @@ namespace BlueGraph.Editor
 
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
-            SearchResult result = entry.userData as SearchResult;
-            AbstractNode node = result.provider.Instantiate(result);
+            var result = entry.userData as SearchResult;
+            var node = result.provider.Instantiate(result);
 
             target.AddNodeFromSearch(
                 node,

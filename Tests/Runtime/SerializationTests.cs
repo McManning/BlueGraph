@@ -21,8 +21,8 @@ namespace BlueGraph.Tests
             var node1 = new EmptyNode();
             var node2 = new EmptyNode();
 
-            node1.AddPort(new Port { Type = typeof(float), name = "Output" });
-            node2.AddPort(new Port { Type = typeof(float), name = "Input", isInput = true });
+            node1.AddPort(new Port { ConnectionType = typeof(float), name = "Output" });
+            node2.AddPort(new Port { ConnectionType = typeof(float), name = "Input", isInput = true });
             
             original.AddNode(node1);
             original.AddNode(node2);
@@ -81,8 +81,8 @@ namespace BlueGraph.Tests
             var node1 = new EmptyNode();
             var node2 = new EmptyNode();
 
-            node1.AddPort(new Port { Type = typeof(float), name = "Output" });
-            node2.AddPort(new Port { Type = typeof(float), name = "Input", isInput = true });
+            node1.AddPort(new Port { ConnectionType = typeof(float), name = "Output" });
+            node2.AddPort(new Port { ConnectionType = typeof(float), name = "Input", isInput = true });
             
             original.AddNode(node1);
             original.AddNode(node2);

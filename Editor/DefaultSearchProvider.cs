@@ -43,10 +43,10 @@ namespace BlueGraph.Editor
 
             if (sourcePort.isInput)
             {
-                return node.HasOutputOfType(sourcePort.Type);
+                return node.HasOutputOfType(sourcePort.ConnectionType);
             }
 
-            return node.HasInputOfType(sourcePort.Type);
+            return node.HasInputOfType(sourcePort.ConnectionType);
         }
     }
 }

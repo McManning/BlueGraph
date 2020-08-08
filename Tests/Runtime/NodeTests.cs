@@ -77,9 +77,9 @@ namespace BlueGraph.Tests
             
             node2.RemovePort(portToRemove);
 
-            Assert.AreEqual(0, node1.GetPort("Output").TotalConnections);
-            Assert.AreEqual(1, node2.GetPort("Output").TotalConnections);
-            Assert.AreEqual(1, node3.GetPort("Input").TotalConnections);
+            Assert.AreEqual(0, node1.GetPort("Output").ConnectionCount);
+            Assert.AreEqual(1, node2.GetPort("Output").ConnectionCount);
+            Assert.AreEqual(1, node3.GetPort("Input").ConnectionCount);
         }
         
         [Test]

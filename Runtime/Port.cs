@@ -22,7 +22,28 @@ namespace BlueGraph
         [NonSerialized]
         public AbstractNode node;
         
-        public Type Type {
+        /// <summary>
+        /// Display name for this port
+        /// </summary>
+        public string name;
+
+        /// <summary>
+        /// Underlying field name associated with this port
+        /// </summary>
+        public string fieldName;
+
+        /// <summary>
+        /// Whether or not multiple edges can be connected 
+        /// between this port and other ports.
+        /// </summary>
+        public bool isMulti;
+
+        /// <summary>
+        /// Whether to treat this as an input or output port.
+        /// </summary>
+        public bool isInput;
+
+        public Type ConnectionType {
             get {
                 if (m_Type == null)
                 {
@@ -38,11 +59,14 @@ namespace BlueGraph
             }
         }
         
-        public string name;
-        public string fieldName;
-        public bool acceptsMultipleConnections;
-        public bool isInput;
-
+        public int ConnectionCount
+        {
+            get
+            {
+                return m_Connections.Count;
+            }
+        }
+        
         /// <summary>
         /// Enumerate all ports connected by edges to this port
         /// </summary>
@@ -56,17 +80,8 @@ namespace BlueGraph
             }
         }
 
-        public int TotalConnections
-        {
-            get
-            {
-                return m_Connections.Count;
-            }
-        }
-        
         [SerializeField] internal List<Connection> m_Connections;
         [SerializeField] string m_SerializedType;
-        
         Type m_Type;
 
         public Port()

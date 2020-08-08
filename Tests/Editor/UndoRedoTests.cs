@@ -54,8 +54,8 @@ namespace BlueGraph.Tests
             Assert.AreEqual(graph.nodes[0].id, node1.id);
             Assert.AreEqual(graph.nodes[1].id, node2.id);
 
-            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").TotalConnections);
-            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").TotalConnections);
+            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").ConnectionCount);
+            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").ConnectionCount);
         }
 
         /// <summary>

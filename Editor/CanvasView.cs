@@ -206,7 +206,7 @@ namespace BlueGraph.Editor
             // Track undo and add to the graph
             Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {node.name}");
             
-            node.graphPosition = graphMousePosition;
+            node.position = graphMousePosition;
 
             m_Graph.AddNode(node);
             m_SerializedGraph.Update();
@@ -467,7 +467,7 @@ namespace BlueGraph.Editor
                 
                 foreach (var node in nodeMap)
                 {
-                    node.Value.SetPosition(new Rect(node.Key.graphPosition + delta, Vector2.one));
+                    node.Value.SetPosition(new Rect(node.Key.position + delta, Vector2.one));
                 }
             }
 
