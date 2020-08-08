@@ -252,5 +252,27 @@ namespace BlueGraph.Tests
 
             Assert.IsInstanceOf(typeof(ITestClass), actual);
         }
+
+        [Test]
+        public void CannotAddDuplicateEdges()
+        {
+            var graph = ScriptableObject.CreateInstance<Graph>();
+            var node1 = new TestNodeA();
+            var node2 = new TestNodeA();
+            var output = node1.GetPort("Output");
+            var input = node2.GetPort("Input");
+            
+            graph.AddNode(node1);
+            graph.AddNode(node2);
+
+            graph.AddEdge(output, input);
+            
+            // Add duplicate
+            graph.AddEdge(output, input);
+
+            // Make sure there's only one edge between the nodes
+            Assert.AreEqual(1, output.ConnectionCount);
+            Assert.AreEqual(1, input.ConnectionCount);
+        }
     }
 }

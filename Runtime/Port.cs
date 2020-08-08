@@ -202,10 +202,15 @@ namespace BlueGraph
         }
         
         /// <summary>
-        /// Add an edge between this and the given Port
+        /// Add an edge between this and the given Port.
+        /// 
+        /// Use <c>Graph.AddEdge()</c> over this.
         /// </summary>
         internal void Connect(Port port)
         {
+            // Skip if we're already connected
+            if (GetConnection(port) != null) return;
+
             m_Connections.Add(new Connection() {
                 port = port,
                 nodeId = port.node.id,
@@ -219,9 +224,19 @@ namespace BlueGraph
                 portName = name
             });
         }
+
+        /// <summary>
+        /// Find a <c>Connection</c> to the given port if one exists.
+        /// </summary>
+        internal Connection GetConnection(Port port)
+        {
+            return m_Connections.Find((conn) => conn.port == port);
+        }
         
         /// <summary>
-        /// Remove any edges between this and the given Port
+        /// Remove any edges between this and the given Port.
+        /// 
+        /// Use <c>Graph.RemoveEdge()</c> over this.
         /// </summary>
         internal void Disconnect(Port port)
         {
