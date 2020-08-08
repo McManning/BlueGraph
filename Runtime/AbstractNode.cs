@@ -11,14 +11,25 @@ namespace BlueGraph
         public string name;
     
         public Graph graph;
-    
-        public Vector2 graphPosition;
-        
-        [SerializeField]
-        List<Port> m_Ports;
-        
-        public IReadOnlyCollection<Port> Ports { get { return m_Ports.AsReadOnly(); } }
+   
+        /// <summary>
+        /// Where this node is located on the Graph in CanvasView
+        /// </summary>
+        public Vector2 position;
+       
+        /// <summary>
+        /// Accessor for ports and their connections to/from this node.
+        /// </summary>
+        public IReadOnlyCollection<Port> Ports 
+        { 
+            get
+            { 
+                return m_Ports.AsReadOnly(); 
+            } 
+        }
 
+        [SerializeField] List<Port> m_Ports;
+        
         public AbstractNode()
         {
             id = Guid.NewGuid().ToString();
@@ -35,6 +46,8 @@ namespace BlueGraph
                 );
             }
             
+            // Add a backref to each child port of this node.
+            // We don't store this in the serialized copy to avoid cyclic refs.
             for (int i = 0; i < m_Ports.Count; i++)
             {
                 m_Ports[i].node = this;
@@ -58,11 +71,17 @@ namespace BlueGraph
         /// </summary>
         public abstract object OnRequestValue(Port port);
         
-        public Port GetPort(string portName)
+        /// <summary>
+        /// Get either an input or output port by name.
+        /// </summary>
+        public Port GetPort(string name)
         {
-            return m_Ports.Find((port) => port.name == portName);
+            return m_Ports.Find((port) => port.name == name);
         }
         
+        /// <summary>
+        /// Add a new port to this node.
+        /// </summary>
         public void AddPort(Port port)
         {
             var existing = GetPort(port.name);
@@ -76,7 +95,10 @@ namespace BlueGraph
             m_Ports.Add(port);
             port.node = this;
         }
-
+        
+        /// <summary>
+        /// Remove an existing port from this node.
+        /// </summary>
         public void RemovePort(Port port)
         {
             port.DisconnectAll();
@@ -85,6 +107,9 @@ namespace BlueGraph
             m_Ports.Remove(port);
         }
         
+        /// <summary>
+        /// Safely remove every edge going in and out of this node.
+        /// </summary>
         public void DisconnectAllPorts()
         {
             foreach (var port in m_Ports)
@@ -93,6 +118,11 @@ namespace BlueGraph
             }
         }
         
+        /// <summary>
+        /// Get the value returned by an output port connected to the given port.
+        /// 
+        /// This will return <c>defaultValue</c> if the port is disconnected.
+        /// </summary>
         public T GetInputValue<T>(string portName, T defaultValue = default)
         {
             var port = GetPort(portName);
@@ -106,6 +136,12 @@ namespace BlueGraph
             return port.GetValue(defaultValue);
         }
 
+        /// <summary>
+        /// Get a list of output values for all output ports connected
+        /// to the given input port. 
+        /// 
+        /// This will return an empty list if the port is disconnected.
+        /// </summary>
         public IEnumerable<T> GetInputValues<T>(string portName)
         {
             var port = GetPort(portName);
@@ -119,6 +155,9 @@ namespace BlueGraph
             return port.GetValues<T>();
         }
 
+        /// <summary>
+        /// Get the calculated value of a given output port.
+        /// </summary>
         public T GetOutputValue<T>(string portName)
         {
             var port = GetPort(portName);

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -27,8 +26,6 @@ namespace BlueGraph.Editor
         public List<PortView> inputs = new List<PortView>();
         public List<PortView> outputs = new List<PortView>();
         
-        public CommentView comment;
-
         protected EdgeConnectorListener m_ConnectorListener;
         protected SerializedProperty m_SerializedNode;
         

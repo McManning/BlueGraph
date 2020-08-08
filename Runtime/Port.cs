@@ -80,7 +80,7 @@ namespace BlueGraph
         /// If this is an input port that accepts multiple connections,
         /// only the first connection's output value will be returned.
         /// 
-        /// If this is an output port, then the node's `OnRequestValue()`
+        /// If this is an output port, then the node's <c>OnRequestValue()</c>
         /// will be executed and best effort will be made to convert
         /// to the requested type. 
         /// </summary>
@@ -138,8 +138,6 @@ namespace BlueGraph
         /// If this is an output port, then the node's `OnRequestValue()`
         /// will be executed with the expectation of returning IEnumerable<T>.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         public virtual IEnumerable<T> GetValues<T>()
         {
             if (isInput)

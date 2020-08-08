@@ -9,22 +9,9 @@ namespace BlueGraph.Editor
 {
     public class CommentView : GraphElement, ICanDirty
     {
-        public enum Theme
-        {
-            Yellow,
-            Grey,
-            Red,
-            Green,
-            Blue
-        }
-        
         public Comment target;
-        public List<NodeView> containedNodes = new List<NodeView>();
-        
-        public Action<CommentView> onResize;
 
-        Theme m_Theme;
-        VisualElement m_MainContainer;
+        CommentTheme m_Theme;
         VisualElement m_TitleContainer;
         TextField m_TitleEditor;
         Label m_TitleLabel;
@@ -33,7 +20,7 @@ namespace BlueGraph.Editor
         public CommentView(Comment comment)
         {
             target = comment;
-            SetPosition(comment.graphRect);
+            SetPosition(comment.region);
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CommentView"));
             
@@ -63,14 +50,10 @@ namespace BlueGraph.Editor
             capabilities |= Capabilities.Selectable | Capabilities.Movable | 
                             Capabilities.Deletable | Capabilities.Resizable;
 
-            RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
             RegisterCallback<MouseDownEvent>(OnMouseDown);
-            RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
-
             this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
             
-            Enum.TryParse(target.theme, out m_Theme);
-            SetTheme(m_Theme);
+            SetTheme(target.theme);
         }
         
         public virtual void BuildContextualMenu(ContextualMenuPopulateEvent evt)
@@ -78,7 +61,7 @@ namespace BlueGraph.Editor
             if (evt.target is CommentView)
             {
                 // Add options to change theme
-                foreach (var theme in (Theme[])Enum.GetValues(typeof(Theme)))
+                foreach (var theme in (CommentTheme[])Enum.GetValues(typeof(CommentTheme)))
                 {
                     evt.menu.AppendAction(
                         theme + " Theme", 
@@ -92,26 +75,15 @@ namespace BlueGraph.Editor
             }
         }
         
-        public void SetTheme(Theme theme)
+        /// <summary>
+        /// Change the color theme used on the canvas
+        /// </summary>
+        public void SetTheme(CommentTheme theme)
         {
             RemoveFromClassList("theme-" + m_Theme);
             AddToClassList("theme-" + theme);
             m_Theme = theme;
-            target.theme = Enum.GetName(typeof(Theme), theme);
-        }
-        
-        /// <summary>
-        /// Executed when we're about to detach this element from the graph. 
-        /// </summary>
-        protected virtual void OnDestroy()
-        {
-            // Dereference ourselves from contained nodes
-            foreach (var node in containedNodes)
-            {
-                node.comment = null;
-            }
-
-            containedNodes.Clear();
+            target.theme = theme;
         }
         
         private void OnTitleKeyDown(KeyDownEvent evt)
@@ -147,7 +119,16 @@ namespace BlueGraph.Editor
                 
             m_EditingCancelled = false;
         }
+        
+        private void EditTitle()
+        {
+            m_TitleLabel.visible = false;
 
+            m_TitleEditor.SetValueWithoutNotify(target.text);
+            m_TitleEditor.style.display = DisplayStyle.Flex;
+            m_TitleEditor.Q(TextField.textInputUssName).Focus();
+        }
+        
         public virtual void OnRenamed(string oldName, string newName)
         {
             target.text = newName;
@@ -164,127 +145,29 @@ namespace BlueGraph.Editor
             }
         }
         
-        private void EditTitle()
-        {
-            m_TitleLabel.visible = false;
-
-            m_TitleEditor.SetValueWithoutNotify(target.text);
-            m_TitleEditor.style.display = DisplayStyle.Flex;
-            m_TitleEditor.Q(TextField.textInputUssName).Focus();
-        }
-        
+        /// <summary>
+        /// Override HitTest to only trigger when they click the title
+        /// </summary>
         public override bool HitTest(Vector2 localPoint)
         {
             Vector2 mappedPoint = this.ChangeCoordinatesTo(m_TitleContainer, localPoint);
             return m_TitleContainer.ContainsPoint(mappedPoint);
         }
         
-        private void MoveElements(Vector2 delta)
-        {
-            Debug.Log("move delta: " + delta);
-            foreach (GraphElement element in containedNodes)
-            {
-                Rect r = element.GetPosition();
-
-                r.position += delta;
-                element.SetPosition(r);
-            }
-        }
-
         public override void SetPosition(Rect newPos)
         {
-            Vector2 delta = newPos.position - GetPosition().position;
-            MoveElements(delta);
-
-            target.graphRect = newPos;
-
             base.SetPosition(newPos);
+            target.region = newPos;
         }
 
-        private void OnGeometryChanged(GeometryChangedEvent evt)
-        {
-            Debug.Log("geo change");
-
-            // OnResize listening is bit of a workaround because we don't get resize
-            // events on the GraphView. But I need to monitor for it for dirtying. 
-            if (evt.newRect.width != evt.oldRect.width || evt.newRect.height != evt.oldRect.height)
-            {
-                OnResize();
-            }
-        }
-        
         public void OnDirty()
         {
-            Debug.Log("dirtied");
+
         }
 
         public void OnUpdate()
         {
-            Debug.Log("updated");
 
-            UpdateContained();
-        }
-
-        public void OnResize()
-        {
-            onResize?.Invoke(this);
-        }
-
-        public bool OverlapsElement(GraphElement element)
-        {
-            return worldBound.Overlaps(element.worldBound);
-        }
-        
-        /// <summary>
-        /// Scour the graph for new elements to add to the comment 
-        /// after we've moved the comment or resized the bounds
-        /// </summary>
-        public void UpdateContained()
-        {
-            // Drop all nodes that are outside the bounds after a resize. 
-            // TODO: This code is crap. 
-            var removed = new List<NodeView>();
-            containedNodes.ForEach((node) =>
-            {
-                if (!OverlapsElement(node))
-                {
-                    removed.Add(node);
-                }
-            });
-            
-            foreach (var node in removed)
-            {
-                node.comment = null;
-                containedNodes.Remove(node);
-            }
-            
-            // TODO: Optimal version, since this'll be slow af on large graphs
-            GraphView gv = GetFirstAncestorOfType<GraphView>();
-
-            gv.nodes.ForEach((node) =>
-            {
-                var nv = node as NodeView;
-                if (nv != null && OverlapsElement(nv) && !containedNodes.Contains(nv))
-                {
-                    AddElement(nv);
-                }
-            });
-        }
-
-        public void RemoveElement(NodeView node)
-        {
-            if (node.comment == this)
-            {
-                node.comment = null;
-            }
-
-            containedNodes.Remove(node);
-        }
-
-        public void AddElement(NodeView node)
-        {
-            node.comment = this;
-            containedNodes.Add(node);
         }
     }
 }

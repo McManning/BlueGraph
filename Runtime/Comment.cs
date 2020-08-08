@@ -3,6 +3,15 @@ using UnityEngine;
 
 namespace BlueGraph
 {
+    public enum CommentTheme
+    {
+        Yellow = 0,
+        Grey = 1,
+        Red = 2,
+        Green = 3,
+        Blue = 4
+    }
+       
     /// <summary>
     /// Comments placed within the CanvasView to document and group placed nodes.
     /// 
@@ -15,7 +24,15 @@ namespace BlueGraph
         /// Comment content
         /// </summary>
         public string text;
-        public string theme;
-        public Rect graphRect;
+
+        /// <summary>
+        /// Theme used to display the comment in CanvasView
+        /// </summary>
+        public CommentTheme theme;
+
+        /// <summary>
+        /// Region covered by this comment in the CanvasView
+        /// </summary>
+        public Rect region;
     }
 }

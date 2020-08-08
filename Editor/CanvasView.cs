@@ -122,15 +122,6 @@ namespace BlueGraph.Editor
 
             if (change.movedElements != null)
             {
-                foreach (var element in change.movedElements)
-                {
-                    // TODO: Move/optimize
-                    if (element is NodeView node)
-                    {
-                        UpdateCommentLink(node);
-                    }
-                }
-                
                 // Moved nodes will update their underlying models automatically.
                 EditorUtility.SetDirty(m_Graph);
             }
@@ -264,11 +255,6 @@ namespace BlueGraph.Editor
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, $"Delete Node {node.name}");
             
-            if (node.comment != null)
-            {
-                node.comment.RemoveElement(node);
-            }
-
             m_Graph.RemoveNode(node.target);
             m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
@@ -426,34 +412,6 @@ namespace BlueGraph.Editor
             }
             
             m_Dirty.Clear();
-        }
-
-        public void UpdateCommentLink(NodeView node)
-        {
-            if (node.comment != null)
-            {
-                // Keep existing connection
-                if (node.comment.OverlapsElement(node))
-                {
-                    Debug.Log("keep conn");
-                    return;
-                }
-
-                Debug.Log("Remove old");
-                node.comment.RemoveElement(node);
-            }
-
-            // Find new comment associations
-            foreach (var comment in m_CommentViews)
-            {
-                Debug.Log("Try overlap");
-                if (comment.OverlapsElement(node))
-                {
-                    Debug.Log("Found");
-                    comment.AddElement(node);
-                    return;
-                }
-            }
         }
 
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)
@@ -651,19 +609,18 @@ namespace BlueGraph.Editor
             bounds.y -= padding * 2;
             bounds.width += padding * 2;
             bounds.height += padding * 3; 
-
+            
+            // Add the model
             var comment = new Comment();
             comment.text = "New Comment";
-            comment.graphRect = bounds;
+            comment.region = bounds;
 
-            var commentView = new CommentView(comment);
-            commentView.onResize += Dirty;
-            
-            // Add to the model
             m_Graph.comments.Add(comment);
             m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
-
+            
+            // Add the view
+            var commentView = new CommentView(comment);
             m_CommentViews.Add(commentView);
             AddElement(commentView);
             
