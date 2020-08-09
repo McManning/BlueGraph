@@ -85,3 +85,16 @@
 	--port-color: #18abf2;
 }
 */
+
+.portView.type-is-collection > #connector {
+	background-image: resource("port-collection");
+	-unity-background-image-tint-color: var(--port-color);
+	border-width: 0;
+	border-radius: 0;
+}
+
+.portView.type-is-collection > #connector > #cap {
+	width: 2px;
+	height: 2px;
+	border-radius: 0;
+}
