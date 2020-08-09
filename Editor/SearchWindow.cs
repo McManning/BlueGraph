@@ -14,18 +14,13 @@ namespace BlueGraph.Editor
         /// <summary>
         /// If non-empty, only nodes with these tags may be included in search results.
         /// </summary>
-        List<string> m_Tags = new List<string>();
+        public List<string> includeTags = new List<string>();
 
         HashSet<ISearchProvider> m_Providers = new HashSet<ISearchProvider>();
         
         public void ClearTags()
         {
-            m_Tags.Clear();
-        }
-
-        public void IncludeTag(string tag)
-        {
-            m_Tags.Add(tag);
+            includeTags.Clear();
         }
 
         public void ClearSearchProviders()
@@ -98,10 +93,10 @@ namespace BlueGraph.Editor
         bool IsInSupportedTags(IEnumerable<string> tags)
         {
             // If we have no include list, allow anything.
-            if (m_Tags.Count < 1) return true;
+            if (includeTags.Count < 1) return true;
             
             // Otherwise - only allow if at least one tag intersects. 
-            return m_Tags.Intersect(tags).Count() > 0;
+            return includeTags.Intersect(tags).Count() > 0;
         }
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)

@@ -178,10 +178,7 @@ namespace BlueGraph.Editor
             {
                 if (attr is IncludeTagsAttribute include)
                 {
-                    foreach (var tag in include.tags)
-                    {
-                        m_Search.IncludeTag(tag);
-                    }
+                    m_Search.includeTags.AddRange(include.tags);
                 }
             }
         }
@@ -651,7 +648,7 @@ namespace BlueGraph.Editor
         {
             Undo.RegisterCompleteObjectUndo(m_Graph, "Paste Subgraph");
 
-            var cpg = CopyPasteGraph.Deserialize(data);
+            var cpg = CopyPasteGraph.Deserialize(data, m_Search.includeTags);
             
             foreach (var node in cpg.nodes)
             {

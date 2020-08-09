@@ -258,23 +258,9 @@ namespace BlueGraph.Editor
         /// </summary>
         public static NodeReflectionData GetNodeType(Type type)
         {
-            return GetReflectionData(type.FullName);
-        }
-
-        public static NodeReflectionData GetReflectionData(string classFullName, string method)
-        {
-            return GetReflectionData($"{classFullName}|{method}");
-        }
-
-        static NodeReflectionData GetReflectionData(string key)
-        {
             var types = GetNodeTypes();
-            if (types.ContainsKey(key))
-            {
-                return types[key];
-            }
-
-            return null;
+            types.TryGetValue(type.FullName, out NodeReflectionData result);
+            return result;
         }
 
         /// <summary>
