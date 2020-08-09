@@ -17,21 +17,58 @@ namespace BlueGraph.Editor
         {
             if (GUILayout.Button("Edit Graph"))
             {
-                ShowGraphEditor();    
+                CreateOrFocusEditorWindow();    
             }
         
             base.OnInspectorGUI();
         }
-        
-        private void ShowGraphEditor()
-        {
-            // Open an editor for this graph
-            GraphEditorWindow window = CreateInstance<GraphEditorWindow>();
 
-            // TODO: Ensure only one window instance per-graph is open 
-        
+        /// <summary>
+        /// Find an existing GraphEditorWindow for the target Graph.
+        /// </summary>
+        /// <returns></returns>
+        public GraphEditorWindow GetExistingEditorWindow()
+        {
+            var graph = target as Graph;
+
+            var windows = Resources.FindObjectsOfTypeAll<GraphEditorWindow>();
+            foreach (var window in windows)
+            {
+                if (window.graph == graph)
+                {
+                    return window;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Create a new editor window
+        /// </summary>
+        /// <returns></returns>
+        public virtual GraphEditorWindow CreateEditorWindow()
+        {
+            var window = CreateInstance<GraphEditorWindow>();
             window.Show();
             window.Load(target as Graph);
+            return window;
+        }
+        
+        /// <summary>
+        /// Focus the existing editor or create a new one for the target Graph
+        /// </summary>
+        /// <returns></returns>
+        public GraphEditorWindow CreateOrFocusEditorWindow()
+        {
+            var window = GetExistingEditorWindow();
+            if (!window)
+            {
+                window = CreateEditorWindow();
+            }
+            
+            window.Focus();
+            return window;
         }
     }
 }

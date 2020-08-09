@@ -9,7 +9,7 @@ namespace BlueGraph.Editor
     /// </summary>
     public class GraphEditorWindow : EditorWindow
     {
-        Graph m_Graph;
+        public Graph graph;
         CanvasView m_Canvas;
     
         /// <summary>
@@ -17,7 +17,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public void Load(Graph graph)
         {
-            m_Graph  = graph;
+            this.graph = graph;
             
             m_Canvas = new CanvasView(this);
             m_Canvas.Load(graph);
@@ -38,9 +38,9 @@ namespace BlueGraph.Editor
         /// </summary>
         private void OnEnable()
         {
-            if (m_Graph)
+            if (graph)
             {
-                Load(m_Graph);
+                Load(graph);
             }
         }
     }
