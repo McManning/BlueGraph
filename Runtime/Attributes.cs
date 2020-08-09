@@ -76,9 +76,11 @@ namespace BlueGraph
     }
     
     /// <summary>
-    /// An output port exposed on a Node
+    /// An output port exposed on a Node.
+    /// 
+    /// This can either be defined on the class or associated with a specific field. 
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class, AllowMultiple = true)]
     public class OutputAttribute : Attribute
     {
         /// <summary>
@@ -93,9 +95,17 @@ namespace BlueGraph
         /// </summary>
         public bool multiple = true;
 
-        public OutputAttribute(string name = null)
+        /// <summary>
+        /// If defined as a class attribute, this is the output type.
+        /// 
+        /// When defined on a field, the output will automatically be inferred by the field.
+        /// </summary>
+        public Type type;
+
+        public OutputAttribute(string name = null, Type type = null)
         {
             this.name = name;
+            this.type = type;
         }
     }
 

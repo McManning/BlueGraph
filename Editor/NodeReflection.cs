@@ -19,8 +19,6 @@ namespace BlueGraph.Editor
     /// </summary>
     public class PortReflectionData
     {
-        public Type ConnectionType => field.FieldType;
-
         /// <summary>
         /// Associated class field if generated via Input/Output attributes
         /// </summary>
@@ -31,6 +29,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public string name;
         
+        public Type type;
         public PortDirection direction;
         public PortCapacity capacity;
 
@@ -90,7 +89,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// List of tags associated with a Node
         /// </summary>
-        public IEnumerable<string> tags;
+        public List<string> tags = new List<string>();
 
         /// <summary>
         /// Human-readable display name of the node. Will come from the last
@@ -111,6 +110,39 @@ namespace BlueGraph.Editor
         /// </summary>
         public List<FieldInfo> fields = new List<FieldInfo>();
 
+        public NodeReflectionData(Type type, NodeAttribute nodeAttr)
+        {
+            this.type = type;
+            name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
+            path = nodeAttr.path?.Split('/');
+            help = nodeAttr.help;
+
+            var attrs = type.GetCustomAttributes(true);
+            foreach (var attr in attrs)
+            {
+                if (attr is TagsAttribute tagAttr)
+                {
+                    // Load any tags associated with the node
+                    tags.AddRange(tagAttr.tags);
+                }
+                else if (attr is OutputAttribute output)
+                {
+                    // Load any Outputs defined at the class level
+                    ports.Add(new PortReflectionData()
+                    {
+                        name = output.name,
+                        type = output.type,
+                        direction = PortDirection.Output,
+                        capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
+                        isEditable = false
+                    });
+                }
+            }
+
+            // Load additional data from class fields
+            AddFieldsFromClass(type);
+        }
+
         public bool HasInputOfType(Type type)
         {
             foreach (var port in ports)
@@ -118,7 +150,7 @@ namespace BlueGraph.Editor
                 if (port.direction == PortDirection.Output) continue;
        
                 // Cast direction type -> port input
-                if (type.IsCastableTo(port.ConnectionType, true))
+                if (type.IsCastableTo(port.type, true))
                 {
                     return true;
                 }
@@ -134,7 +166,7 @@ namespace BlueGraph.Editor
                 if (port.direction == PortDirection.Input) continue;
        
                 // Cast direction port output -> type
-                if (port.ConnectionType.IsCastableTo(type, true))
+                if (port.type.IsCastableTo(type, true))
                 {
                     return true;
                 }
@@ -167,6 +199,7 @@ namespace BlueGraph.Editor
                         {
                             name = input.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i],
+                            type = fields[i].FieldType,
                             direction = PortDirection.Input,
                             capacity = input.multiple ? PortCapacity.Multiple : PortCapacity.Single,
                             isEditable = input.editable
@@ -178,6 +211,7 @@ namespace BlueGraph.Editor
                         {
                             name = output.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
                             field = fields[i],
+                            type = fields[i].FieldType,
                             direction = PortDirection.Output,
                             capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
                             isEditable = false
@@ -207,7 +241,7 @@ namespace BlueGraph.Editor
             foreach (var port in ports)
             {
                 node.AddPort(new Port {
-                    type = port.ConnectionType,
+                    type = port.type,
                     node = node,
                     name = port.name,
                     capacity = port.capacity,
@@ -289,7 +323,7 @@ namespace BlueGraph.Editor
                         var attr = t.GetCustomAttribute<NodeAttribute>();
                         if (attr != null)
                         {
-                            nodes[t.FullName] = LoadClassReflection(t, attr);
+                            nodes[t.FullName] = new NodeReflectionData(t, attr);
                         }
                     }
                 }
@@ -299,37 +333,6 @@ namespace BlueGraph.Editor
             return k_NodeTypes;
         }
 
-        /// <summary>
-        /// Extract <c>NodeReflectionData</c> from class reflection, attributes, and fields.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
-        {
-            var name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
-            var path = nodeAttr.path;
-            var tags = new List<string>();
-
-            // Load any tags associated with the node
-            var attrs = type.GetCustomAttributes<TagsAttribute>(true);
-            foreach (var attr in attrs)
-            {
-                tags.AddRange(attr.tags);
-            }
-
-            var node = new NodeReflectionData()
-            {
-                type = type,
-                path = path?.Split('/'),
-                tags = tags,
-                name = name,
-                help = nodeAttr.help
-            };
-
-            node.AddFieldsFromClass(type);
-            return node;
-        }
-        
         public static Type GetNodeEditorType(Type type)
         {
             if (k_NodeEditors == null)
