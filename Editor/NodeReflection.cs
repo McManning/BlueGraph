@@ -83,9 +83,14 @@ namespace BlueGraph.Editor
         public Type type;
 
         /// <summary>
-        /// Module path for grouping nodes together
+        /// Module path for grouping nodes together in the search
         /// </summary>
-        public string[] path;
+        public IEnumerable<string> path;
+
+        /// <summary>
+        /// List of tags associated with a Node
+        /// </summary>
+        public IEnumerable<string> tags;
 
         /// <summary>
         /// Human-readable display name of the node. Will come from the last
@@ -315,13 +320,22 @@ namespace BlueGraph.Editor
         /// <returns></returns>
         static NodeReflectionData LoadClassReflection(Type type, NodeAttribute nodeAttr)
         {
-            string name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
-            string path = nodeAttr.module;
-            
+            var name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
+            var path = nodeAttr.path;
+            var tags = new List<string>();
+
+            // Load any tags associated with the node
+            var attrs = type.GetCustomAttributes<TagsAttribute>(true);
+            foreach (var attr in attrs)
+            {
+                tags.AddRange(attr.tags);
+            }
+
             var node = new NodeReflectionData()
             {
                 type = type,
                 path = path?.Split('/'),
+                tags = tags,
                 name = name,
                 help = nodeAttr.help
             };

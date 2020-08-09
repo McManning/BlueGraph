@@ -6,7 +6,8 @@ namespace BlueGraph.Editor
     public class SearchResult
     {
         public string name;
-        public string[] path;
+        public IEnumerable<string> path;
+        public IEnumerable<string> tags;
         public object userData;
 
         public ISearchProvider provider;

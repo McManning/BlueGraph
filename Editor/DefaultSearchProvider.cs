@@ -22,6 +22,7 @@ namespace BlueGraph.Editor
                     {
                         name = node.name,
                         path = node.path,
+                        tags = node.tags,
                         userData = node,
                     };
                 }

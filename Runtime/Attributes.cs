@@ -21,14 +21,28 @@ namespace BlueGraph
         public string help;
 
         /// <summary>
-        /// Slash-delimited module path to categorize this node for searches 
-        /// and restrict what Graphs it can be instantiated onto.
+        /// Slash-delimited directory path to categorize this node in the search window.
         /// </summary>
-        public string module;
-
+        public string path;
+        
         public NodeAttribute(string name = null)
         {
             this.name = name;
+        }
+    }
+    
+    /// <summary>
+    /// Tags associated with a Node. Can be used by a Graph's <c>[IncludeTags]</c>
+    /// attribute to restrict what nodes can be added to the graph. 
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class TagsAttribute : Attribute
+    {
+        public string[] tags;
+
+        public TagsAttribute(params string[] tags)
+        {
+            this.tags = tags;
         }
     }
     
@@ -105,16 +119,19 @@ namespace BlueGraph
     }
     
     /// <summary>
-    /// Supported module paths for a given Graph. 
+    /// Supported node tags for a given Graph. 
+    /// 
+    /// If defined, only nodes with a <c>[Tags]</c> attribute including 
+    /// one or more of these tags may be added to the Graph. 
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public class IncludeModulesAttribute : Attribute
+    public class IncludeTagsAttribute : Attribute
     {
-        public string[] modules;
+        public string[] tags;
 
-        public IncludeModulesAttribute(params string[] modules)
+        public IncludeTagsAttribute(params string[] tags)
         {
-            this.modules = modules;
+            this.tags = tags;
         }
     }
     

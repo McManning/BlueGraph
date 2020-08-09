@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
+using System.Linq;
 
 namespace BlueGraph.Editor
 {
@@ -11,21 +12,20 @@ namespace BlueGraph.Editor
         public PortView sourcePort;
 
         /// <summary>
-        /// Whitelist of node modules to include in search results.
-        /// All submodules will be included (e.g. "Foo" will include "Foo/Bar", "Foo/Fizz/Buzz", etc).
+        /// If non-empty, only nodes with these tags may be included in search results.
         /// </summary>
-        List<string[]> m_Modules = new List<string[]>();
+        List<string> m_Tags = new List<string>();
 
         HashSet<ISearchProvider> m_Providers = new HashSet<ISearchProvider>();
         
-        public void ClearModules()
+        public void ClearTags()
         {
-            m_Modules.Clear();
+            m_Tags.Clear();
         }
 
-        public void AddModule(string module)
+        public void IncludeTag(string tag)
         {
-            m_Modules.Add(module.Split('/'));
+            m_Tags.Add(tag);
         }
 
         public void ClearSearchProviders()
@@ -92,30 +92,16 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Returns true if the input path is prefixed by one or more registered module paths.
+        /// Returns true if the intersection between the tags and our allow
+        /// list has more than one tag, OR if our allow list is empty.
         /// </summary>
-        bool IsInSupportedModules(string[] path)
+        bool IsInSupportedTags(IEnumerable<string> tags)
         {
-            // Everything in global namespace is allowed.
-            if (path == null) return true;
-    
-            foreach (var module in m_Modules)
-            {
-                if (path.Length < module.Length) continue;
-        
-                bool match = true;
-                for (int i = 0; i < module.Length && match; i++)
-                {
-                    match = path[i] == module[i];
-                }
-
-                if (match)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            // If we have no include list, allow anything.
+            if (m_Tags.Count < 1) return true;
+            
+            // Otherwise - only allow if at least one tag intersects. 
+            return m_Tags.Intersect(tags).Count() > 0;
         }
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
@@ -135,24 +121,28 @@ namespace BlueGraph.Editor
             // Aggregate search providers and get nodes matching the filter
             foreach (var result in FilterSearchProviders(filter))
             {
+                // Skip any results not in our allow list
+                if (!IsInSupportedTags(result.tags)) continue;
+
                 var path = result.path;
                 var group = groups;
-                if (path != null && IsInSupportedModules(path))
+
+                if (path != null)
                 {
-                    // If a module path is defined, drill down into nested
+                    // If a path is defined, drill down into nested
                     // SearchGroup entries until we find the matching directory
-                    for (int i = 0; i < path.Length; i++)
+                    foreach (var directory in path)
                     {
-                        if (!group.subgroups.ContainsKey(path[i]))
+                        if (!group.subgroups.ContainsKey(directory))
                         {
-                            group.subgroups.Add(path[i], new SearchGroup(group.depth + 1));
+                            group.subgroups.Add(directory, new SearchGroup(group.depth + 1));
                         }
 
-                        group = group.subgroups[path[i]];
+                        group = group.subgroups[directory];
                     }
-                
-                    group.results.Add(result);
                 }
+
+                group.results.Add(result);
             }
             
             groups.AddToTree(tree);

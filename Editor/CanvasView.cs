@@ -171,16 +171,16 @@ namespace BlueGraph.Editor
             AddCommentViews(graph.comments);
 
             // Reset the lookup to a new set of whitelisted modules
-            m_Search.ClearModules();
+            m_Search.ClearTags();
 
             var attrs = graph.GetType().GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
-                if (attr is IncludeModulesAttribute modulesAttr)
+                if (attr is IncludeTagsAttribute include)
                 {
-                    foreach (var module in modulesAttr.modules)
+                    foreach (var tag in include.tags)
                     {
-                        m_Search.AddModule(module);
+                        m_Search.IncludeTag(tag);
                     }
                 }
             }
