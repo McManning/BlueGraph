@@ -33,7 +33,7 @@ namespace BlueGraph.Editor
 
             visualClass = "";
             //visualClass = GetTypeVisualClass(type);
-            tooltip = type.FullName;
+            tooltip = type.ToPrettyName();
         }
     
         public static PortView Create(
@@ -88,28 +88,9 @@ namespace BlueGraph.Editor
         /// </summary>
         void AddTypeClasses(Type type)
         {
-            // TODO: Better variant that handles lists and such.
-            // E.g. lists end up something like:
-            // type-System-Collections-Generic-List`1[[System-Single, mscorlib, Ver... etc
-
-            if (type.IsCastableTo(typeof(IEnumerable)))
-            {
-                AddToClassList("type-is-enumerable");
-            }
-            
-            if (type.IsGenericType)
-            {
-                AddToClassList("type-is-generic");
-                type = type.GenericTypeArguments[0];
-            }
-
-            if (type.IsEnum)
-            {
-                AddToClassList("type-System-Enum");
-            } 
-            else
-            {
-                AddToClassList("type-" + type.FullName.Replace(".", "-"));
+            var classes = type.ToUSSClasses();
+            foreach (var cls in classes) {
+                AddToClassList(cls);
             }
         }
 

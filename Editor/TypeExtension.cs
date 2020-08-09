@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace BlueGraph.Editor
 {
@@ -11,7 +13,10 @@ namespace BlueGraph.Editor
     public static class TypeExtension
     {
         /// Caching of castability between types to avoid repeat reflection
-        static Dictionary<(Type, Type), bool> k_CastSupportCache = new Dictionary<(Type, Type), bool>();
+        static readonly Dictionary<(Type, Type), bool> k_CastSupportCache = new Dictionary<(Type, Type), bool>();
+
+        /// Caching of prettified type names
+        static readonly Dictionary<Type, string> k_Names = new Dictionary<Type, string>();
 
         /// <summary>
         /// Test if a type can cast to another, taking in account cast operators. 
@@ -78,6 +83,73 @@ namespace BlueGraph.Editor
                 m => (m.Name == "op_Implicit" || (!implicitly && m.Name == "op_Explicit"))
                     && baseType(m).IsAssignableFrom(derivedType(m))
             );
+        }
+
+        /// <summary>
+        /// Generate a list of USS classes that can represent this type.
+        /// 
+        /// Special properties of the type are also represented as additional classes
+        /// (e.g. <c>type-is-enumerable</c> and <c>type-is-generic</c>)
+        /// </summary>
+        /// <param name="Type"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> ToUSSClasses(this Type type)
+        {
+            // TODO: Better variant that handles lists and such.
+            // E.g. lists end up something like:
+            // type-System-Collections-Generic-List`1[[System-Single, mscorlib, Ver... etc
+            var classes = new List<string>();
+            var name = type.ToPrettyName();
+
+            if (type.IsCastableTo(typeof(IEnumerable)))
+            {
+                classes.Add("type-is-enumerable");
+            }
+
+            if (type.IsCastableTo(typeof(ICollection)))
+            {
+                classes.Add("type-is-collection");
+            }
+            
+            if (type.IsGenericType)
+            {
+                classes.Add("type-is-generic");
+
+                // Use the type inside the generic as the name
+                name = type.GenericTypeArguments[0].ToPrettyName();
+            }
+
+            if (type.IsEnum)
+            {
+                classes.Add("type-is-enum");
+            }
+
+            // Add a class for the resolved name itself
+            classes.Add("type-" + Regex.Replace(name, @"[^a-zA-Z0-9]+", "-").Trim('-'));
+            return classes;
+        }
+
+        /// <summary>
+        /// Convert the type name to something more human readable
+        /// </summary>
+        /// <remarks>
+        /// Code adapted from https://stackoverflow.com/a/56281483
+        /// </remarks>
+        public static string ToPrettyName(this Type type)
+        {
+            if (k_Names.TryGetValue(type, out string name))
+            {
+                return name;
+            }
+
+            var args = type.IsGenericType ? type.GetGenericArguments() : Type.EmptyTypes;
+            var format = Regex.Replace(type.FullName, @"`\d+.*", "") + (type.IsGenericType ? "<?>" : "");
+            var names = args.Select((arg) => arg.IsGenericParameter ? "" : arg.ToPrettyName());
+
+            name = string.Join(string.Join(",", names), format.Split('?'));
+            k_Names.Add(type, name);
+
+            return name;
         }
     }
 }
