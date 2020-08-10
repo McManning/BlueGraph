@@ -120,7 +120,7 @@ namespace BlueGraph.Editor
             m_EditingCancelled = false;
         }
         
-        private void EditTitle()
+        public void EditTitle()
         {
             m_TitleLabel.visible = false;
 

@@ -54,7 +54,7 @@ namespace BlueGraph.Editor
             this.AddManipulator(new ClickSelector());
         
             // Add event handlers for shortcuts and changes
-            RegisterCallback<KeyDownEvent>(OnGraphKeydown);
+            RegisterCallback<KeyUpEvent>(OnGraphKeyUp);
             RegisterCallback<MouseMoveEvent>(OnGraphMouseMove);
 
             graphViewChanged = OnGraphViewChanged;
@@ -79,6 +79,7 @@ namespace BlueGraph.Editor
             Insert(0, new GridBackground());
         }
 
+
         void OnUndoRedo()
         {
             Refresh();
@@ -88,7 +89,7 @@ namespace BlueGraph.Editor
         {
             m_LastMousePosition = evt.mousePosition;
         }
-
+        
         /// <summary>
         /// Event handler to frame the graph view on initial layout
         /// </summary>
@@ -138,7 +139,7 @@ namespace BlueGraph.Editor
             return change;
         }
         
-        void OnGraphKeydown(KeyDownEvent evt)
+        void OnGraphKeyUp(KeyUpEvent evt)
         {
             // C: Add a new comment around the selected nodes (or just at mouse position)
             if (evt.keyCode == KeyCode.C && !evt.ctrlKey && !evt.commandKey)
@@ -596,6 +597,9 @@ namespace BlueGraph.Editor
             AddElement(commentView);
             
             Dirty(commentView);
+
+            // Focus the title editor on first load
+            commentView.EditTitle();
         }
         
         /// <summary>
