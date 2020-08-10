@@ -24,6 +24,11 @@ namespace BlueGraph
         /// Slash-delimited directory path to categorize this node in the search window.
         /// </summary>
         public string path;
+
+        /// <summary>
+        /// Can this node be deleted from the graph
+        /// </summary>
+        public bool deletable = true;
         
         public NodeAttribute(string name = null)
         {
@@ -153,5 +158,20 @@ namespace BlueGraph
     public class DeprecatedAttribute : Attribute
     {
         public Type replaceWith;
+    }
+
+    /// <summary>
+    /// Mark a class inherited from <c>NodeView</c> as the primary view
+    /// for a specific type of node. 
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class CustomNodeViewAttribute : Attribute
+    {
+        public Type nodeType;
+
+        public CustomNodeViewAttribute(Type nodeType)
+        {
+            this.nodeType = nodeType; 
+        }
     }
 }

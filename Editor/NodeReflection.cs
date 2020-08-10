@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Policy;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -102,6 +103,11 @@ namespace BlueGraph.Editor
         /// </summary>
         public string help;
 
+        /// <summary>
+        /// Can this node be deleted from the graph 
+        /// </summary>
+        public bool deletable;
+
         public List<PortReflectionData> ports = new List<PortReflectionData>();
         public List<EditableReflectionData> editables = new List<EditableReflectionData>();
     
@@ -116,6 +122,7 @@ namespace BlueGraph.Editor
             name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
             path = nodeAttr.path?.Split('/');
             help = nodeAttr.help;
+            deletable = nodeAttr.deletable;
 
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)

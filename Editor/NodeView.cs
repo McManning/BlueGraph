@@ -8,17 +8,6 @@ using UnityEngine.UIElements;
 
 namespace BlueGraph.Editor
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class CustomNodeViewAttribute : Attribute
-    {
-        public Type nodeType;
-
-        public CustomNodeViewAttribute(Type nodeType)
-        {
-            this.nodeType = nodeType; 
-        }
-    }
-    
     public class NodeView : Node, ICanDirty
     {
         public AbstractNode target;
@@ -44,6 +33,11 @@ namespace BlueGraph.Editor
             
             SetPosition(new Rect(node.position, Vector2.one));
             title = node.name;
+            
+            if (!m_ReflectionData.deletable)
+            {
+                capabilities &= ~Capabilities.Deletable;
+            }
             
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
             RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
