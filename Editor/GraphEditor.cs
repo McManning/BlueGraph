@@ -34,7 +34,7 @@ namespace BlueGraph.Editor
             var windows = Resources.FindObjectsOfTypeAll<GraphEditorWindow>();
             foreach (var window in windows)
             {
-                if (window.graph == graph)
+                if (window.Graph == graph)
                 {
                     return window;
                 }

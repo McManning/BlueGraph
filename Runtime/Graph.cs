@@ -5,8 +5,20 @@ using UnityEngine;
 
 namespace BlueGraph
 {
-    public class Graph : ScriptableObject
+    public abstract class Graph : ScriptableObject
     {
+        /// <summary>
+        /// Retrieve the title of the graph displayed in the editor.
+        ///
+        /// Override to provide identifiable information between
+        /// different types of graphs (e.g. NPC AI vs Dialog Tree)
+        /// </summary>
+        public virtual string Title {
+            get {
+                return "BLUEGRAPH";
+            }
+        }
+
         /// <summary>
         /// All nodes contained within this Graph
         /// </summary>

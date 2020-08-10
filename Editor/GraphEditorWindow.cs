@@ -9,20 +9,21 @@ namespace BlueGraph.Editor
     /// </summary>
     public class GraphEditorWindow : EditorWindow
     {
-        public Graph graph;
-        CanvasView m_Canvas;
-    
+        public CanvasView Canvas { get; protected set; }
+
+        public Graph Graph { get; protected set; }
+
         /// <summary>
         /// Load a graph asset in this window for editing
         /// </summary>
         public void Load(Graph graph)
         {
-            this.graph = graph;
+            Graph = graph;
             
-            m_Canvas = new CanvasView(this);
-            m_Canvas.Load(graph);
+            Canvas = new CanvasView(this);
+            Canvas.Load(graph);
             
-            rootVisualElement.Add(m_Canvas);
+            rootVisualElement.Add(Canvas);
         
             titleContent = new GUIContent(graph.name);
             Repaint();
@@ -30,7 +31,7 @@ namespace BlueGraph.Editor
 
         private void Update()
         {
-            m_Canvas.Update();
+            Canvas.Update();
         }
 
         /// <summary>
@@ -38,9 +39,9 @@ namespace BlueGraph.Editor
         /// </summary>
         private void OnEnable()
         {
-            if (graph)
+            if (Graph)
             {
-                Load(graph);
+                Load(Graph);
             }
         }
     }

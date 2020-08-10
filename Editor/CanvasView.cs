@@ -17,26 +17,10 @@ namespace BlueGraph.Editor
     /// </summary>
     public class CanvasView : GraphView
     {
-        /// <summary>
-        /// Title displayed in the bottom left of the canvas
-        /// </summary>
-        public string Title
-        {
-            get
-            {
-                return m_Title.text;
-            }
-            set
-            {
-                m_Title.text = value;
-            }
-        }
-        
         Label m_Title;
         
         List<CommentView> m_CommentViews = new List<CommentView>();
         
-        GraphEditor m_GraphEditor;
         Graph m_Graph;
         SerializedObject m_SerializedGraph;
         
@@ -167,7 +151,8 @@ namespace BlueGraph.Editor
         {
             m_Graph = graph;
             m_SerializedGraph = new SerializedObject(m_Graph);
-            
+            m_Title.text = graph.Title;
+
             AddNodeViews(graph.nodes);
             AddCommentViews(graph.comments);
 
