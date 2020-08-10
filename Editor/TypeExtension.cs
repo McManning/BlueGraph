@@ -124,6 +124,11 @@ namespace BlueGraph.Editor
                 classes.Add("type-is-enum");
             }
 
+            if (type.IsValueType)
+            {
+                classes.Add("type-is-value");
+            }
+
             // Add a class for the resolved name itself
             classes.Add("type-" + Regex.Replace(name, @"[^a-zA-Z0-9]+", "-").Trim('-'));
             return classes;

@@ -12,12 +12,12 @@
 }
 
 GridBackground {
-	--grid-background-color: #202b3c;
-	--line-color: #283042;
-	--thick-line-color: #3a455e;
+	--grid-background-color: var(--bluegraph-grid-background-color); 
+	--line-color: var(--bluegraph-grid-line-color); 
+	--thick-line-color: var(--bluegraph-grid-thick-line-color); 
 	--spacing: 100;
 }
 
 .canvasView .edge {
-	--selected-edge-color: #FFD244; 
+	--selected-edge-color: var(--bluegraph-highlight-color); 
 }

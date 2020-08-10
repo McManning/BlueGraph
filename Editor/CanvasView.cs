@@ -52,7 +52,8 @@ namespace BlueGraph.Editor
         public CanvasView(EditorWindow window)
         {
             m_EditorWindow = window;
-
+            
+            styleSheets.Add(Resources.Load<StyleSheet>("Styles/BlueGraphVariables"));
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CanvasView"));
             AddToClassList("canvasView");
             

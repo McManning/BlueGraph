@@ -1,18 +1,18 @@
 ﻿
 .nodeView #title {
-	background-color: #3B4C64;
+	background-color: var(--bluegraph-node-title-background-color);
 	height: 26px;
 }
 
 .nodeView #contents > #top > #input {
 	flex: 100 0 auto;
-	background-color: #393A40;
+	background-color: var(--bluegraph-node-inputs-background-color);
 	opacity: 0.95;
 }
 
 .nodeView #contents > #top > #output {
 	flex: 1 0 auto;
-	background-color: #232932;
+	background-color: var(--bluegraph-node-outputs-background-color);
 	opacity: 0.95;
 }
 
@@ -33,7 +33,7 @@
 }
 
 .nodeView #collapsible-area {
-	background-color: #3F3F3F;
+	background-color: var(--bluegraph-node-editables-background-color);
 	opacity: 0.95;
 }
 
@@ -41,9 +41,12 @@
 	padding: 6px;
 }
 
+.nodeView > #selection-border {
+	border-color: var(--bluegraph-focus-color);
+}
 
 .nodeView:selected > #selection-border {
-	border-color: #FFD244; /* Orange/yellow */
+	border-color: var(--bluegraph-highlight-color);
 }
 
 .nodeView #input {
