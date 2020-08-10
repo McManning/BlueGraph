@@ -28,14 +28,16 @@ namespace BlueGraph.Editor
         
         protected EdgeConnectorListener m_ConnectorListener;
         protected SerializedProperty m_SerializedNode;
+        protected NodeReflectionData m_ReflectionData;
+        protected CanvasView m_Canvas;
         
-        public void Initialize(AbstractNode node, SerializedProperty serializedNode, EdgeConnectorListener connectorListener)
+        public void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.id;
             target = node;
-
-            m_SerializedNode = serializedNode;
+            m_ReflectionData = NodeReflection.GetNodeType(node.GetType());
             m_ConnectorListener = connectorListener;
+            m_Canvas = GetFirstAncestorOfType<CanvasView>();
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
@@ -110,7 +112,7 @@ namespace BlueGraph.Editor
 
         protected virtual void AddInputPort(Port port)
         {
-            var view = PortView.Create(port, port.type, m_ConnectorListener);
+            var view = PortView.Create(port, m_ConnectorListener);
             
             // If we're exposing a control element via reflection: include it in the view
             var reflection = NodeReflection.GetNodeType(target.GetType());
@@ -131,7 +133,7 @@ namespace BlueGraph.Editor
 
         protected virtual void AddOutputPort(Port port)
         {
-            var view = PortView.Create(port, port.type, m_ConnectorListener);
+            var view = PortView.Create(port, m_ConnectorListener);
             
             outputs.Add(view);
             outputContainer.Add(view);
@@ -162,9 +164,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public virtual void OnPropertyChange()
         {
-            // TODO: Cache. This lookup will be slow.
-            var canvas = GetFirstAncestorOfType<CanvasView>();
-            canvas?.Dirty(this);
+            m_Canvas?.Dirty(this);
         }
         
         /// <summary>

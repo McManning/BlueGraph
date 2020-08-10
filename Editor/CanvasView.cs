@@ -195,15 +195,10 @@ namespace BlueGraph.Editor
             m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
 
-            var serializedNodesArr = m_SerializedGraph.FindProperty("nodes");
-
-            var nodeIdx = m_Graph.nodes.IndexOf(node);
-            var serializedNode = serializedNodesArr.GetArrayElementAtIndex(nodeIdx);
-            
             // Add a node to the visual graph
             var editorType = NodeReflection.GetNodeEditorType(node.GetType());
             var element = Activator.CreateInstance(editorType) as NodeView;
-            element.Initialize(node, serializedNode, m_EdgeListener);
+            element.Initialize(node, m_EdgeListener);
             
             AddElement(element);
             
@@ -408,8 +403,6 @@ namespace BlueGraph.Editor
         /// </summary>
         void AddNodeViews(List<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
-            var serializedNodesArr = m_SerializedGraph.FindProperty("nodes");
-            
             // Add views of each node from the graph
             var nodeMap = new Dictionary<AbstractNode, NodeView>();
 
@@ -424,12 +417,10 @@ namespace BlueGraph.Editor
                 }
                 else
                 {
-                    var serializedNode = serializedNodesArr.GetArrayElementAtIndex(graphIdx);
-
                     var editorType = NodeReflection.GetNodeEditorType(node.GetType());
                     var element = Activator.CreateInstance(editorType) as NodeView;
                 
-                    element.Initialize(node, serializedNode, m_EdgeListener);
+                    element.Initialize(node, m_EdgeListener);
                     AddElement(element);
                 
                     nodeMap.Add(node, element);

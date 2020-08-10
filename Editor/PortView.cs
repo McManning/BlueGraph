@@ -36,15 +36,13 @@ namespace BlueGraph.Editor
             tooltip = type.ToPrettyName();
         }
     
-        public static PortView Create(
-            Port port,
-            Type type,
-            IEdgeConnectorListener connectorListener
-        ) {
+        public static PortView Create(Port port, IEdgeConnectorListener connectorListener) 
+        {
             Direction direction = port.direction == PortDirection.Input ? Direction.Input : Direction.Output;
             Capacity capacity = port.capacity == PortCapacity.Multiple ? Capacity.Multi : Capacity.Single;
 
-            var view = new PortView(Orientation.Horizontal, direction, capacity, type) {
+            var view = new PortView(Orientation.Horizontal, direction, capacity, port.type) 
+            {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
                 portName = port.name,
                 target = port
