@@ -519,7 +519,7 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// Calculate the bounding box for a set of elements
+        /// Calculate the bounding box for a set of nodes
         /// </summary>
         Rect GetBounds(IEnumerable<ISelectable> items)
         {
@@ -527,7 +527,7 @@ namespace BlueGraph.Editor
                
             foreach (var item in items)
             {
-                if (item is GraphElement ele)
+                if (item is NodeView ele)
                 {
                     var boundingRect = ele.GetPosition();
                     boundingRect.width = Mathf.Max(boundingRect.width, 1);
