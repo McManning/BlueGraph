@@ -4,6 +4,10 @@
 	height: auto; /* Fix expanding port heights for inlined structs */
 }
 
+.portView > #type {
+	color: var(--bluegraph-port-title-color);
+}
+
 .portView .unity-base-field__label {
 	min-width: 0px;
 }
@@ -24,14 +28,20 @@
 	border-radius: 0;
 }
 
-/* Doesn't work - see comment above.
 .portView > #connector {
-	-unity-background-image-tint-color: var(--port-color);
+	background-color: var(--bluegraph-port-background-color);
+	
+	/* Doesn't work - see comment @ 71 */
+	/* -unity-background-image-tint-color: var(--port-color);*/
+
 }
-*/
 
 .portView > #connector:disabled {
 	-unity-background-image-tint-color: var(--disabled-port-color);
+}
+
+.portView > #connector > #cap {
+	background-color: var(--bluegraph-port-background-color);
 }
 
 .portView.type-is-collection > #connector > #cap {

@@ -4,6 +4,10 @@
 	height: 26px;
 }
 
+.nodeView #title-label {
+	color: var(--bluegraph-node-title-color);
+}
+
 .nodeView #contents > #top > #input {
 	flex: 100 0 auto;
 	background-color: var(--bluegraph-node-inputs-background-color);

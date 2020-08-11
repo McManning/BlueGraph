@@ -13,9 +13,14 @@
 
 	/* Node settings */
 	--bluegraph-node-title-background-color:		#3b4c64;
+	--bluegraph-node-title-color:					#c1c1c1;
 	--bluegraph-node-inputs-background-color:		#393a40;
 	--bluegraph-node-outputs-background-color:		#232932;
 	--bluegraph-node-editables-background-color:	#3f3f3f;
+
+	/* Port settings */
+	--bluegraph-port-title-color:		#c1c1c1;
+	--bluegraph-port-background-color:	#212121;
 
 	/* Colors for different port data types */
 
