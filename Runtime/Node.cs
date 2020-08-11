@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BlueGraph
 {
     [Serializable]
-    public abstract class AbstractNode : ISerializationCallbackReceiver
+    public abstract class Node : ISerializationCallbackReceiver
     {
         public string id;
         public string name;
@@ -30,7 +30,7 @@ namespace BlueGraph
 
         [SerializeField] List<Port> m_Ports;
         
-        public AbstractNode()
+        public Node()
         {
             id = Guid.NewGuid().ToString();
             m_Ports = new List<Port>();

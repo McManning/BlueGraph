@@ -25,6 +25,6 @@ namespace BlueGraph.Editor
     public interface ISearchProvider
     {
         IEnumerable<SearchResult> GetSearchResults(SearchFilter filter);
-        AbstractNode Instantiate(SearchResult result);
+        Node Instantiate(SearchResult result);
     }
 }

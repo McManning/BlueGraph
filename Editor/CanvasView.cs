@@ -175,7 +175,7 @@ namespace BlueGraph.Editor
         /// Create a new node from reflection data and insert into the Graph.
         /// </summary>
         internal void AddNodeFromSearch(
-            AbstractNode node,
+            Node node,
             Vector2 screenPosition, 
             PortView connectedPort = null
         ) {
@@ -403,10 +403,10 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Append views for a set of nodes
         /// </summary>
-        void AddNodeViews(IEnumerable<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
+        void AddNodeViews(IEnumerable<Node> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
             // Add views of each node from the graph
-            var nodeMap = new Dictionary<AbstractNode, NodeView>();
+            var nodeMap = new Dictionary<Node, NodeView>();
 
             foreach (var node in nodes)
             {

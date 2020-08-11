@@ -239,9 +239,9 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Create a node instance from the reflected type data
         /// </summary>
-        public AbstractNode CreateInstance()
+        public Node CreateInstance()
         {
-            var node = Activator.CreateInstance(type) as AbstractNode;
+            var node = Activator.CreateInstance(type) as Node;
             node.name = name;
             
             // Create runtime ports from reflection data
@@ -316,7 +316,7 @@ namespace BlueGraph.Editor
                 return k_NodeTypes;
             }
 
-            var baseType = typeof(AbstractNode);
+            var baseType = typeof(Node);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var nodes = new Dictionary<string, NodeReflectionData>();
 
@@ -354,7 +354,7 @@ namespace BlueGraph.Editor
             }
 
             // If it's not found, go up the inheritance tree until we find one
-            while (type != typeof(AbstractNode))
+            while (type != typeof(Node))
             {
                 type = type.BaseType;
                 

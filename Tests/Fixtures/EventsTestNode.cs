@@ -6,7 +6,7 @@ namespace BlueGraph.Tests
     /// <summary>
     /// Test node that tracks what events were fired during a test
     /// </summary>
-    public class EventTestNode : AbstractNode
+    public class EventTestNode : Node
     {
         public int onAddedToGraphCount = 0;
         public int onRemovedFromGraphCount = 0;

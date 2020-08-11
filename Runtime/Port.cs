@@ -38,7 +38,7 @@ namespace BlueGraph
     public class Port : ISerializationCallbackReceiver
     {
         [NonSerialized]
-        public AbstractNode node;
+        public Node node;
         
         /// <summary>
         /// Display name for this port

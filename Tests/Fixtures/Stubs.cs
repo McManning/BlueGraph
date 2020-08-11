@@ -14,7 +14,7 @@ namespace BlueGraph.Tests
 
     }
 
-    public class FuncNode : AbstractNode
+    public class FuncNode : Node
     {
         public FuncNode(MethodInfo mi)
         {

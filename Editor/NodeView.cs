@@ -8,9 +8,9 @@ using UnityEngine.UIElements;
 
 namespace BlueGraph.Editor
 {
-    public class NodeView : Node, ICanDirty
+    public class NodeView : UnityEditor.Experimental.GraphView.Node, ICanDirty
     {
-        public AbstractNode target;
+        public Node target;
         
         public List<PortView> inputs = new List<PortView>();
         public List<PortView> outputs = new List<PortView>();
@@ -20,7 +20,7 @@ namespace BlueGraph.Editor
         protected NodeReflectionData m_ReflectionData;
         protected CanvasView m_Canvas;
         
-        public void Initialize(AbstractNode node, EdgeConnectorListener connectorListener)
+        public void Initialize(Node node, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.id;
             target = node;

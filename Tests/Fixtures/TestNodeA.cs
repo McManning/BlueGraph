@@ -1,7 +1,7 @@
 ﻿
 namespace BlueGraph.Tests
 {
-    public class TestNodeA : AbstractNode
+    public class TestNodeA : Node
     {
         [Input("Input")]
         public int aValue1 = 5;

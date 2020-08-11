@@ -29,7 +29,7 @@ namespace BlueGraph.Editor
             }
         }
 
-        public AbstractNode Instantiate(SearchResult result)
+        public Node Instantiate(SearchResult result)
         {
             NodeReflectionData data = result.userData as NodeReflectionData;
             return data.CreateInstance();

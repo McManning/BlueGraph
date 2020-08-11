@@ -12,7 +12,7 @@ namespace BlueGraph.Editor
     public class CopyPasteGraph : ScriptableObject
     {
         [SerializeReference]
-        public List<AbstractNode> nodes = new List<AbstractNode>();
+        public List<Node> nodes = new List<Node>();
 
         public List<Comment> comments = new List<Comment>();
         

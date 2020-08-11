@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BlueGraph.Tests
 {
-    public class TestNodeB : AbstractNode
+    public class TestNodeB : Node
     {
         [Input("Input")]
         public Vector3 bValue1;

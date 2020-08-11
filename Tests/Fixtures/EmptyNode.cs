@@ -6,7 +6,7 @@ namespace BlueGraph.Tests
     /// <summary>
     /// Node without any ports or fields to test with
     /// </summary>
-    public class EmptyNode : AbstractNode
+    public class EmptyNode : Node
     {
         public EmptyNode() : base()
         {

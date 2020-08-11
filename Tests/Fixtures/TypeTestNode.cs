@@ -28,7 +28,7 @@ namespace BlueGraph.Tests
     /// <summary>
     /// Test fixture with a bunch of type options to check GetInputValue calls
     /// </summary>
-    public class TypeTestNode : AbstractNode
+    public class TypeTestNode : Node
     {
         public int intValue;
         public bool boolValue;
