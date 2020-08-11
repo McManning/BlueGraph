@@ -259,8 +259,15 @@ namespace BlueGraph
             {
                 var edge = m_Connections[i];
                 var connected = graph.FindNodeById(edge.nodeId);
-                edge.port = connected.GetPort(edge.portName);
-                m_Connections[i] = edge;
+                if (connected == null)
+                {
+                    Debug.LogWarning($"Could not locate connected node {edge.nodeId} from port {name} of {node.name}");
+                }
+                else
+                {
+                    edge.port = connected.GetPort(edge.portName);
+                    m_Connections[i] = edge;
+                }
             }
         }
     }
