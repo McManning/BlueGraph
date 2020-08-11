@@ -16,7 +16,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanCloneWithInstantiation()
         {
-            var original = ScriptableObject.CreateInstance<Graph>();
+            var original = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new EmptyNode();
             var node2 = new EmptyNode();
@@ -51,11 +51,11 @@ namespace BlueGraph.Tests
             var cloneNode1 = clone.FindNodeById(node1.id);
             var cloneNode2 = clone.FindNodeById(node2.id);
 
-            Assert.AreEqual(2, clone.nodes.Count);
+            Assert.AreEqual(2, clone.Nodes.Count);
             
             // Check class deserialization
-            Assert.IsInstanceOf<EmptyNode>(clone.nodes[0]);
-            Assert.IsInstanceOf<EmptyNode>(clone.nodes[1]);
+            Assert.IsInstanceOf<EmptyNode>(clone.Nodes.ElementAt(0));
+            Assert.IsInstanceOf<EmptyNode>(clone.Nodes.ElementAt(1));
 
             Assert.AreNotSame(cloneNode1, node1);
             Assert.AreEqual(node1.id, cloneNode1.id);
@@ -85,7 +85,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanCloneWithJsonSerialize()
         {
-            var original = ScriptableObject.CreateInstance<Graph>();
+            var original = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new EmptyNode();
             var node2 = new EmptyNode();
@@ -114,7 +114,7 @@ namespace BlueGraph.Tests
 
             var json =JsonUtility.ToJson(original, true);
 
-            var clone = ScriptableObject.CreateInstance<Graph>();
+            var clone = ScriptableObject.CreateInstance<TestGraph>();
             JsonUtility.FromJsonOverwrite(json, clone);
 
 
@@ -123,11 +123,11 @@ namespace BlueGraph.Tests
             var cloneNode1 = clone.FindNodeById(node1.id);
             var cloneNode2 = clone.FindNodeById(node2.id);
 
-            Assert.AreEqual(2, clone.nodes.Count);
+            Assert.AreEqual(2, clone.Nodes.Count);
             
             // Check class deserialization
-            Assert.IsInstanceOf<EmptyNode>(clone.nodes[0]);
-            Assert.IsInstanceOf<EmptyNode>(clone.nodes[1]);
+            Assert.IsInstanceOf<EmptyNode>(clone.Nodes.ElementAt(0));
+            Assert.IsInstanceOf<EmptyNode>(clone.Nodes.ElementAt(1));
 
             Assert.AreNotSame(cloneNode1, node1);
             Assert.AreEqual(node1.id, cloneNode1.id);

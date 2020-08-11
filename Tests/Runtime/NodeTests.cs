@@ -51,7 +51,7 @@ namespace BlueGraph.Tests
         [Test]
         public void RemovingPortsAlsoRemovesEdges()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
@@ -148,7 +148,7 @@ namespace BlueGraph.Tests
         [Test]
         public void GetInputValueReadsInputConnection()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
             
@@ -169,7 +169,7 @@ namespace BlueGraph.Tests
         [Test]
         public void GetInputValueAggregatesMultipleOutputs()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA { aValue1 = 1 };
             var node2 = new TestNodeA { aValue1 = 2 };
             var node3 = new TestNodeA();
@@ -206,7 +206,7 @@ namespace BlueGraph.Tests
         [Test]
         public void GetOutputValueReadsInputPortValues()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
             
@@ -256,7 +256,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CannotAddDuplicateEdges()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
             var output = node1.GetPort("Output");

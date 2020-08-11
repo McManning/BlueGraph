@@ -22,12 +22,13 @@ namespace BlueGraph
         /// <summary>
         /// All nodes contained within this Graph
         /// </summary>
-        [SerializeReference]
+        [SerializeReference, HideInInspector]
         public List<AbstractNode> nodes = new List<AbstractNode>();
 
         /// <summary>
         /// All comments to display in the editor for this Graph
         /// </summary>
+        [HideInInspector]
         public List<Comment> comments = new List<Comment>();
 
         /// <summary>

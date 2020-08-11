@@ -88,7 +88,7 @@ namespace BlueGraph
             if (existing != null)
             {
                 throw new ArgumentException(
-                    $"[{name}] A port named `{port.name}` already exists"
+                    $"<b>[{name}]</b> A port named `{port.name}` already exists"
                 );
             }
 
@@ -129,7 +129,7 @@ namespace BlueGraph
             if (port == null || port.direction == PortDirection.Output)
             {
                 throw new ArgumentException(
-                    $"[{name}] No input port named `{portName}`"
+                    $"<b>[{name}]<b/> No input port named `{portName}`"
                 );
             }
             
@@ -148,7 +148,7 @@ namespace BlueGraph
             if (port == null || port.direction == PortDirection.Output)
             {
                 throw new ArgumentException(
-                    $"[{name}] No input port named `{portName}`"
+                    $"<b>[{name}]</b> No input port named `{portName}`"
                 );
             }
             
@@ -164,7 +164,7 @@ namespace BlueGraph
             if (port == null || port.direction == PortDirection.Input)
             {
                 throw new ArgumentException(
-                    $"[{name}] No output port named `{portName}`"
+                    $"<b>[{name}]</b> No output port named `{portName}`"
                 );
             }
 

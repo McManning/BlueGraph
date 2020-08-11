@@ -17,18 +17,18 @@ namespace BlueGraph.Tests
         [Test]
         public void CanAddNodes()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             graph.AddNode(new TestNodeA());
             graph.AddNode(new TestNodeA());
             
-            Assert.AreEqual(2, graph.nodes.Count);
+            Assert.AreEqual(2, graph.Nodes.Count);
         }
         
         [Test]
         public void CanFindNodeById()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
@@ -48,7 +48,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanFindNodeByType()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var expected = new TestNodeB();
@@ -66,7 +66,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanFindNodeByBaseType()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeB();
             var expected = new InheritedTestNodeA();
@@ -83,7 +83,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanFindMultipleNodesByType()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             graph.AddNode(new TestNodeA());
             graph.AddNode(new TestNodeB());
@@ -101,7 +101,7 @@ namespace BlueGraph.Tests
         [Test]
         public void ReturnsNullOnInvalidNodeId()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var actual = graph.FindNodeById("BAD ID");
 
@@ -111,7 +111,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanAddEdges()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
@@ -136,7 +136,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanRemoveNode()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var nodeToRemove = new TestNodeA();
@@ -148,14 +148,14 @@ namespace BlueGraph.Tests
             
             graph.RemoveNode(nodeToRemove);
             
-            Assert.AreEqual(2, graph.nodes.Count);
+            Assert.AreEqual(2, graph.Nodes.Count);
             Assert.IsNull(graph.FindNodeById(nodeToRemove.id));
         }
         
         // [Test]
         public void OnRemovedFromGraphExecutes()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var nodeToRemove = new TestNodeA();
             
@@ -172,7 +172,7 @@ namespace BlueGraph.Tests
         [Test]
         public void RemovingNodeAlsoRemovesEdges()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var nodeToRemove = new TestNodeA();
@@ -203,7 +203,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanRemoveEdge()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();

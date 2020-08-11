@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -154,8 +155,8 @@ namespace BlueGraph.Editor
             m_SerializedGraph = new SerializedObject(m_Graph);
             m_Title.text = graph.Title;
 
-            AddNodeViews(graph.nodes);
-            AddCommentViews(graph.comments);
+            AddNodeViews(graph.Nodes);
+            AddCommentViews(graph.m_Comments);
 
             // Reset the lookup to a new set of whitelisted modules
             m_Search.ClearTags();
@@ -402,17 +403,14 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Append views for a set of nodes
         /// </summary>
-        void AddNodeViews(List<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
+        void AddNodeViews(IEnumerable<AbstractNode> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
             // Add views of each node from the graph
             var nodeMap = new Dictionary<AbstractNode, NodeView>();
 
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (var node in nodes)
             {
-                var node = nodes[i];
-                var graphIdx = m_Graph.nodes.IndexOf(node);
-
-                if (graphIdx < 0)
+                if (!m_Graph.Nodes.Contains(node))
                 {
                     Debug.LogError("Cannot add NodeView: Node is not indexed on the graph");
                 }
@@ -587,7 +585,7 @@ namespace BlueGraph.Editor
             comment.text = "New Comment";
             comment.region = bounds;
 
-            m_Graph.comments.Add(comment);
+            m_Graph.m_Comments.Add(comment);
             m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
             
@@ -611,7 +609,7 @@ namespace BlueGraph.Editor
             Undo.RegisterCompleteObjectUndo(m_Graph, "Delete Comment");
             
             // Remove the model
-            m_Graph.comments.Remove(comment.target);
+            m_Graph.m_Comments.Remove(comment.target);
             m_SerializedGraph.Update();
             EditorUtility.SetDirty(m_Graph);
             
@@ -638,7 +636,7 @@ namespace BlueGraph.Editor
 
             foreach (var comment in cpg.comments)
             {
-                m_Graph.comments.Add(comment);
+                m_Graph.m_Comments.Add(comment);
             }
             
             m_SerializedGraph.Update();

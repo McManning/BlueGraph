@@ -13,7 +13,7 @@ namespace BlueGraph.Tests
         [Test]
         public void CanUndoAddNode()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
             
@@ -25,16 +25,16 @@ namespace BlueGraph.Tests
 
             Undo.PerformUndo();
             
-            Assert.AreEqual(1, graph.nodes.Count);
+            Assert.AreEqual(1, graph.Nodes.Count);
 
             // Not the same instance anymore due to undo - but the same data.
-            Assert.AreEqual(graph.nodes[0].id, node1.id);
+            Assert.AreEqual(graph.Nodes.ElementAt(0).id, node1.id);
         }
         
         [Test]
         public void CanUndoAddEdge()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
             
@@ -50,12 +50,12 @@ namespace BlueGraph.Tests
             
             Undo.PerformUndo();
             
-            Assert.AreEqual(2, graph.nodes.Count);
-            Assert.AreEqual(graph.nodes[0].id, node1.id);
-            Assert.AreEqual(graph.nodes[1].id, node2.id);
+            Assert.AreEqual(2, graph.Nodes.Count);
+            Assert.AreEqual(graph.Nodes.ElementAt(0).id, node1.id);
+            Assert.AreEqual(graph.Nodes.ElementAt(1).id, node2.id);
 
-            Assert.AreEqual(0, graph.nodes[0].GetPort("Output").ConnectionCount);
-            Assert.AreEqual(0, graph.nodes[1].GetPort("Input").ConnectionCount);
+            Assert.AreEqual(0, graph.Nodes.ElementAt(0).GetPort("Output").ConnectionCount);
+            Assert.AreEqual(0, graph.Nodes.ElementAt(1).GetPort("Input").ConnectionCount);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace BlueGraph.Tests
         [Test] 
         public void UndoAddNodeDoesNotAffectUnrelatedConnections()
         {
-            var graph = ScriptableObject.CreateInstance<Graph>();
+            var graph = ScriptableObject.CreateInstance<TestGraph>();
             var node1 = new TestNodeA();
             var node2 = new TestNodeA();
             var node3 = new TestNodeA();
@@ -91,15 +91,15 @@ namespace BlueGraph.Tests
             
             // Make sure an undo operation did not destroy unrelated connections and
             // cleanly reset connections to their previous state (no dangling edges)
-            var outputs = graph.nodes[0].GetPort("Output").Connections;
-            var inputs = graph.nodes[1].GetPort("Input").Connections;
+            var outputs = graph.Nodes.ElementAt(0).GetPort("Output").Connections;
+            var inputs = graph.Nodes.ElementAt(1).GetPort("Input").Connections;
             
-            Assert.AreEqual(2, graph.nodes.Count);
+            Assert.AreEqual(2, graph.Nodes.Count);
             Assert.AreEqual(1, outputs.Count());
             Assert.AreEqual(1, inputs.Count());
             
-            Assert.AreSame(graph.nodes[0], inputs.First().node);
-            Assert.AreSame(graph.nodes[1], outputs.First().node);
+            Assert.AreSame(graph.Nodes.ElementAt(0), inputs.First().node);
+            Assert.AreSame(graph.Nodes.ElementAt(1), outputs.First().node);
         }
     }
 }
