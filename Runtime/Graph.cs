@@ -72,7 +72,7 @@ namespace BlueGraph
         /// <summary>
         /// Find a node on the Graph by unique ID 
         /// </summary>
-        public Node FindNodeById(string id)
+        public Node GetNodeById(string id)
         {
             return m_Nodes.Find((node) => node.id == id);
         }
@@ -80,7 +80,7 @@ namespace BlueGraph
         /// <summary>
         /// Find the first node on the Graph of, or inherited from, the given type. 
         /// </summary>
-        public T FindNode<T>() where T : Node
+        public T GetNode<T>() where T : Node
         {
             return m_Nodes.Find((node) => typeof(T).IsAssignableFrom(node.GetType())) as T;
         }
@@ -88,7 +88,7 @@ namespace BlueGraph
         /// <summary>
         /// Find all nodes on the Graph of, or inherited from, the given type. 
         /// </summary>
-        public List<T> FindNodes<T>() where T : Node
+        public T[] GetNodes<T>() where T : Node
         {
             var matches = new List<T>();
             for (int i = 0; i < m_Nodes.Count; i++)
@@ -99,7 +99,7 @@ namespace BlueGraph
                 }
             }
 
-            return matches;
+            return matches.ToArray();
         }
         
         /// <summary>

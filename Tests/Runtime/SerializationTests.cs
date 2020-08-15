@@ -48,8 +48,8 @@ namespace BlueGraph.Tests
 
             // ---- Check Integrity ----
             
-            var cloneNode1 = clone.FindNodeById(node1.id);
-            var cloneNode2 = clone.FindNodeById(node2.id);
+            var cloneNode1 = clone.GetNodeById(node1.id);
+            var cloneNode2 = clone.GetNodeById(node2.id);
 
             Assert.AreEqual(2, clone.Nodes.Count);
             
@@ -120,8 +120,8 @@ namespace BlueGraph.Tests
 
             // ---- Check Integrity ----
             
-            var cloneNode1 = clone.FindNodeById(node1.id);
-            var cloneNode2 = clone.FindNodeById(node2.id);
+            var cloneNode1 = clone.GetNodeById(node1.id);
+            var cloneNode2 = clone.GetNodeById(node2.id);
 
             Assert.AreEqual(2, clone.Nodes.Count);
             

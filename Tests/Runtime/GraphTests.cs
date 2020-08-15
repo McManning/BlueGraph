@@ -40,7 +40,7 @@ namespace BlueGraph.Tests
             graph.AddNode(expected);
             graph.AddNode(node3);
             
-            var actual = graph.FindNodeById(expected.id);
+            var actual = graph.GetNodeById(expected.id);
             
             Assert.AreSame(expected, actual);
         }
@@ -58,7 +58,7 @@ namespace BlueGraph.Tests
             graph.AddNode(expected);
             graph.AddNode(node2);
             
-            var actual = graph.FindNode<TestNodeB>();
+            var actual = graph.GetNode<TestNodeB>();
 
             Assert.AreSame(expected, actual);
         }
@@ -75,7 +75,7 @@ namespace BlueGraph.Tests
             graph.AddNode(expected);
             
             // Search using a base type (TestNodeA)
-            var actual = graph.FindNode<TestNodeA>();
+            var actual = graph.GetNode<TestNodeA>();
 
             Assert.AreSame(expected, actual);
         }
@@ -90,9 +90,9 @@ namespace BlueGraph.Tests
             graph.AddNode(new TestNodeA());
             graph.AddNode(new TestNodeB());
             
-            List<TestNodeA> actual = graph.FindNodes<TestNodeA>();
+            TestNodeA[] actual = graph.GetNodes<TestNodeA>();
 
-            Assert.AreEqual(2, actual.Count);
+            Assert.AreEqual(2, actual.Length);
 
             Assert.IsInstanceOf<TestNodeA>(actual[0]);
             Assert.IsInstanceOf<TestNodeA>(actual[1]);
@@ -103,7 +103,7 @@ namespace BlueGraph.Tests
         {
             var graph = ScriptableObject.CreateInstance<TestGraph>();
             
-            var actual = graph.FindNodeById("BAD ID");
+            var actual = graph.GetNodeById("BAD ID");
 
             Assert.IsNull(actual);
         }
@@ -149,7 +149,7 @@ namespace BlueGraph.Tests
             graph.RemoveNode(nodeToRemove);
             
             Assert.AreEqual(2, graph.Nodes.Count);
-            Assert.IsNull(graph.FindNodeById(nodeToRemove.id));
+            Assert.IsNull(graph.GetNodeById(nodeToRemove.id));
         }
         
         // [Test]

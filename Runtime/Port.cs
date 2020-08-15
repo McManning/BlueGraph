@@ -258,7 +258,7 @@ namespace BlueGraph
             for (var i = 0; i < m_Connections.Count; i++)
             {
                 var edge = m_Connections[i];
-                var connected = graph.FindNodeById(edge.nodeId);
+                var connected = graph.GetNodeById(edge.nodeId);
                 if (connected == null)
                 {
                     Debug.LogWarning($"Could not locate connected node {edge.nodeId} from port {name} of {node.name}");
