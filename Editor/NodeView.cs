@@ -1,14 +1,16 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor;
+
+using UnityEditor.Experimental.GraphView;
+using GraphViewNode = UnityEditor.Experimental.GraphView.Node;
 
 namespace BlueGraph.Editor
 {
-    public class NodeView : UnityEditor.Experimental.GraphView.Node, ICanDirty
+    public class NodeView : GraphViewNode, ICanDirty
     {
         public Node target;
         
@@ -20,13 +22,13 @@ namespace BlueGraph.Editor
         protected NodeReflectionData m_ReflectionData;
         protected CanvasView m_Canvas;
         
-        public void Initialize(Node node, EdgeConnectorListener connectorListener)
+        public void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.id;
             target = node;
+            m_Canvas = canvas;
             m_ReflectionData = NodeReflection.GetNodeType(node.GetType());
             m_ConnectorListener = connectorListener;
-            m_Canvas = GetFirstAncestorOfType<CanvasView>();
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");

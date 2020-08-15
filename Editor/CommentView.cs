@@ -1,9 +1,9 @@
 ﻿
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+
+using UnityEditor.Experimental.GraphView;
 
 namespace BlueGraph.Editor
 {

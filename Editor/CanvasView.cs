@@ -147,6 +147,69 @@ namespace BlueGraph.Editor
             {
                 AddComment();
             }
+
+            // H: Horizontally align selected nodes
+            if (evt.keyCode == KeyCode.H && !evt.ctrlKey && !evt.commandKey)
+            {
+                HorizontallyAlignSelectedNodes();
+            }
+
+            if (evt.keyCode == KeyCode.V && !evt.ctrlKey && !evt.commandKey)
+            {
+                VerticallyAlignSelectedNodes();
+            }
+        }
+
+        protected void HorizontallyAlignSelectedNodes()
+        {
+            float sum = 0;
+            int count = 0;
+
+            foreach (var selectable in selection)
+            {
+                if (selectable is NodeView node)
+                {
+                    sum += node.GetPosition().yMin;
+                    count++;
+                }
+            }
+
+            float yAvg = sum / count;
+            foreach (var selectable in selection)
+            {
+                if (selectable is NodeView node)
+                {
+                    var pos = node.GetPosition();
+                    pos.yMin = yAvg;
+                    node.SetPosition(pos);
+                }
+            }
+        }
+
+        protected void VerticallyAlignSelectedNodes()
+        {
+            float sum = 0;
+            int count = 0;
+
+            foreach (var selectable in selection)
+            {
+                if (selectable is NodeView node)
+                {
+                    sum += node.GetPosition().xMin;
+                    count++;
+                }
+            }
+
+            float xAvg = sum / count;
+            foreach (var selectable in selection)
+            {
+                if (selectable is NodeView node)
+                {
+                    var pos = node.GetPosition();
+                    pos.xMin = xAvg;
+                    node.SetPosition(pos);
+                }
+            }
         }
         
         public void Load(Graph graph)
@@ -200,7 +263,7 @@ namespace BlueGraph.Editor
             // Add a node to the visual graph
             var editorType = NodeReflection.GetNodeEditorType(node.GetType());
             var element = Activator.CreateInstance(editorType) as NodeView;
-            element.Initialize(node, m_EdgeListener);
+            element.Initialize(node, this, m_EdgeListener);
             
             AddElement(element);
             
@@ -419,7 +482,7 @@ namespace BlueGraph.Editor
                     var editorType = NodeReflection.GetNodeEditorType(node.GetType());
                     var element = Activator.CreateInstance(editorType) as NodeView;
                 
-                    element.Initialize(node, m_EdgeListener);
+                    element.Initialize(node, this, m_EdgeListener);
                     AddElement(element);
                 
                     nodeMap.Add(node, element);
