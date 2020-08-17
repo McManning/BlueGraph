@@ -85,25 +85,13 @@ namespace BlueGraph.Editor
                 }
             }
         }
-        
-        /// <summary>
-        /// Returns true if the intersection between the tags and our allow
-        /// list has more than one tag, OR if our allow list is empty.
-        /// </summary>
-        bool IsInSupportedTags(IEnumerable<string> tags)
-        {
-            // If we have no include list, allow anything.
-            if (includeTags.Count < 1) return true;
-            
-            // Otherwise - only allow if at least one tag intersects. 
-            return includeTags.Intersect(tags).Count() > 0;
-        }
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {
             var filter = new SearchFilter
             {
-                sourcePort = sourcePort?.target
+                sourcePort = sourcePort?.target,
+                includeTags = includeTags
             };
 
             // First item is the title of the window
@@ -116,9 +104,6 @@ namespace BlueGraph.Editor
             // Aggregate search providers and get nodes matching the filter
             foreach (var result in FilterSearchProviders(filter))
             {
-                // Skip any results not in our allow list
-                if (!IsInSupportedTags(result.tags)) continue;
-
                 var path = result.path;
                 var group = groups;
 

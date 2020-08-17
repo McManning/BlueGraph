@@ -7,7 +7,6 @@ namespace BlueGraph.Editor
     {
         public string name;
         public IEnumerable<string> path;
-        public IEnumerable<string> tags;
         public object userData;
 
         public ISearchProvider provider;
@@ -20,6 +19,11 @@ namespace BlueGraph.Editor
         /// that are compatible, this is that source port.
         /// </summary>
         public Port sourcePort;
+
+        /// <summary>
+        /// List of tags in the Graph's [IncludeTags] attribute
+        /// </summary>
+        public IEnumerable<string> includeTags;
     }
 
     public interface ISearchProvider
