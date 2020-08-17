@@ -80,7 +80,6 @@ namespace BlueGraph.Editor
             Insert(0, new GridBackground());
         }
 
-
         void OnUndoRedo()
         {
             Refresh();
@@ -212,6 +211,15 @@ namespace BlueGraph.Editor
             }
         }
         
+        /// <summary>
+        /// Add a new provider to populate the search window
+        /// </summary>
+        /// <param name="provider"></param>
+        public void AddSearchProvider(ISearchProvider provider)
+        {
+            m_Search.AddSearchProvider(provider);
+        }
+
         public void Load(Graph graph)
         {
             m_Graph = graph;
