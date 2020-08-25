@@ -20,7 +20,7 @@ namespace BlueGraph.Editor
         public CommentView(Comment comment)
         {
             target = comment;
-            SetPosition(comment.region);
+            SetPosition(comment.Region);
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CommentView"));
             
@@ -36,7 +36,7 @@ namespace BlueGraph.Editor
             m_TitleContainer.Add(m_TitleEditor);
             
             m_TitleLabel = new Label();
-            m_TitleLabel.text = comment.text;
+            m_TitleLabel.text = comment.Text;
             
             m_TitleContainer.Add(m_TitleLabel);
 
@@ -53,7 +53,7 @@ namespace BlueGraph.Editor
             RegisterCallback<MouseDownEvent>(OnMouseDown);
             this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
             
-            SetTheme(target.theme);
+            SetTheme(target.Theme);
         }
         
         public virtual void BuildContextualMenu(ContextualMenuPopulateEvent evt)
@@ -83,7 +83,7 @@ namespace BlueGraph.Editor
             RemoveFromClassList("theme-" + m_Theme);
             AddToClassList("theme-" + theme);
             m_Theme = theme;
-            target.theme = theme;
+            target.Theme = theme;
         }
         
         private void OnTitleKeyDown(KeyDownEvent evt)
@@ -124,14 +124,14 @@ namespace BlueGraph.Editor
         {
             m_TitleLabel.visible = false;
 
-            m_TitleEditor.SetValueWithoutNotify(target.text);
+            m_TitleEditor.SetValueWithoutNotify(target.Text);
             m_TitleEditor.style.display = DisplayStyle.Flex;
             m_TitleEditor.Q(TextField.textInputUssName).Focus();
         }
         
         public virtual void OnRenamed(string oldName, string newName)
         {
-            target.text = newName;
+            target.Text = newName;
         }
 
         private void OnMouseDown(MouseDownEvent evt)
@@ -157,7 +157,7 @@ namespace BlueGraph.Editor
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            target.region = newPos;
+            target.Region = newPos;
         }
 
         public void OnDirty()

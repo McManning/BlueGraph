@@ -42,25 +42,25 @@ namespace BlueGraph.Tests
     
         public TypeTestNode() : base()
         {
-            name = "Type Test Node";
+            Name = "Type Test Node";
             
             // Input (any)
-            AddPort(new Port { name = "Input", direction = PortDirection.Input });
+            AddPort(new Port { Name = "Input", Direction = PortDirection.Input });
 
             // Output types
-            AddPort(new Port { name = "intval", direction = PortDirection.Output });
-            AddPort(new Port { name = "boolval", direction = PortDirection.Output });
-            AddPort(new Port { name = "stringval", direction = PortDirection.Output });
-            AddPort(new Port { name = "floatval", direction = PortDirection.Output });
-            AddPort(new Port { name = "vector3val", direction = PortDirection.Output });
-            AddPort(new Port { name = "curveval", direction = PortDirection.Output });
-            AddPort(new Port { name = "classval", direction = PortDirection.Output });
-            AddPort(new Port { name = "structval", direction = PortDirection.Output });
+            AddPort(new Port { Name = "intval", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "boolval", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "stringval", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "floatval", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "vector3val", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "curveval", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "classval", Direction = PortDirection.Output });
+            AddPort(new Port { Name = "structval", Direction = PortDirection.Output });
         }
 
         public override object OnRequestValue(Port port)
         {
-            switch (port.name) 
+            switch (port.Name) 
             {
                 case "intval": return intValue;
                 case "boolval": return boolValue;

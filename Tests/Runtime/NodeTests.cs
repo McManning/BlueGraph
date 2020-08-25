@@ -16,8 +16,8 @@ namespace BlueGraph.Tests
         public void CanAddPorts()
         {
             var node = new TestNodeA(); 
-            var port1 = new OutputPort<float> { name = "Test 1" };
-            var port2 = new OutputPort<float> { name = "Test 2" };
+            var port1 = new OutputPort<float> { Name = "Test 1" };
+            var port2 = new OutputPort<float> { Name = "Test 2" };
 
             node.AddPort(port1);
             node.AddPort(port2);
@@ -32,8 +32,8 @@ namespace BlueGraph.Tests
         public void CanRemovePorts()
         {
             var node = new TestNodeA();
-            var port1 = new OutputPort<float> { name = "Test 1" };
-            var port2 = new OutputPort<float> { name = "Test 2" };
+            var port1 = new OutputPort<float> { Name = "Test 1" };
+            var port2 = new OutputPort<float> { Name = "Test 2" };
 
             node.AddPort(port1);
             node.AddPort(port2);
@@ -86,23 +86,23 @@ namespace BlueGraph.Tests
         public void CanGetPorts()
         {
             var node = new TestNodeA(); 
-            node.AddPort(new OutputPort<float> { name = "Test 1" });
-            node.AddPort(new OutputPort<float> { name = "Test 2" });
+            node.AddPort(new OutputPort<float> { Name = "Test 1" });
+            node.AddPort(new OutputPort<float> { Name = "Test 2" });
             
             var actual = node.GetPort("Test 2");
             
-            Assert.AreSame(node, actual.node);
-            Assert.AreSame("Test 2", actual.name);
+            Assert.AreSame(node, actual.Node);
+            Assert.AreSame("Test 2", actual.Name);
         }
         
         [Test]
         public void AddPortThrowsOnDuplicateName()
         {
             var node = new TestNodeA();
-            node.AddPort(new OutputPort<float> { name = "Test" });
+            node.AddPort(new OutputPort<float> { Name = "Test" });
             
             Assert.Throws<ArgumentException>(
-                () => node.AddPort(new OutputPort<float> { name = "Test" })
+                () => node.AddPort(new OutputPort<float> { Name = "Test" })
             );
         }
         

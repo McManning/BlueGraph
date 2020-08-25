@@ -168,18 +168,18 @@ namespace BlueGraph.Editor
             {
                 if (selectable is NodeView node)
                 {
-                    sum += node.GetPosition().yMin;
+                    sum += node.GetPosition().xMin;
                     count++;
                 }
             }
 
-            float yAvg = sum / count;
+            float xAvg = sum / count;
             foreach (var selectable in selection)
             {
                 if (selectable is NodeView node)
                 {
                     var pos = node.GetPosition();
-                    pos.yMin = yAvg;
+                    pos.xMin = xAvg;
                     node.SetPosition(pos);
                 }
             }
@@ -194,18 +194,18 @@ namespace BlueGraph.Editor
             {
                 if (selectable is NodeView node)
                 {
-                    sum += node.GetPosition().xMin;
+                    sum += node.GetPosition().yMin;
                     count++;
                 }
             }
 
-            float xAvg = sum / count;
+            float yAvg = sum / count;
             foreach (var selectable in selection)
             {
                 if (selectable is NodeView node)
                 {
                     var pos = node.GetPosition();
-                    pos.xMin = xAvg;
+                    pos.yMin = yAvg;
                     node.SetPosition(pos);
                 }
             }
@@ -260,9 +260,9 @@ namespace BlueGraph.Editor
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
             // Track undo and add to the graph
-            Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {node.name}");
+            Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {node.Name}");
             
-            node.position = graphMousePosition;
+            node.Position = graphMousePosition;
 
             m_Graph.AddNode(node);
             m_SerializedGraph.Update();
@@ -511,7 +511,7 @@ namespace BlueGraph.Editor
                 
                 foreach (var node in nodeMap)
                 {
-                    node.Value.SetPosition(new Rect(node.Key.position + delta, Vector2.one));
+                    node.Value.SetPosition(new Rect(node.Key.Position + delta, Vector2.one));
                 }
             }
 
@@ -522,15 +522,15 @@ namespace BlueGraph.Editor
             {
                 foreach (var port in node.Key.Ports)
                 {
-                    if (port.direction == PortDirection.Output) continue;
+                    if (port.Direction == PortDirection.Output) continue;
 
                     foreach (var conn in port.Connections)
                     {
-                        var connectedNode = conn.node;
+                        var connectedNode = conn.Node;
                         if (connectedNode == null)
                         {
                             Debug.LogError(
-                                 $"Could not connect `{node.Value.title}:{port.name}`: " +
+                                 $"Could not connect `{node.Value.title}:{port.Name}`: " +
                                  $"Connected node no longer exists."
                             );
                             continue;
@@ -541,27 +541,27 @@ namespace BlueGraph.Editor
                         if (!nodeMap.ContainsKey(connectedNode))
                         {
                             Debug.LogError(
-                                 $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.name}`. " +
+                                 $"Could not connect `{node.Value.title}:{port.Name}` -> `{connectedNode.Name}:{conn.Name}`. " +
                                  $"Target node does not exist in the NodeView map"
                             );
                             continue;
                         }
 
-                        var inPort = node.Value.GetInputPort(port.name);
-                        var outPort = nodeMap[connectedNode].GetOutputPort(conn.name);
+                        var inPort = node.Value.GetInputPort(port.Name);
+                        var outPort = nodeMap[connectedNode].GetOutputPort(conn.Name);
                         
                         if (inPort == null)
                         {
                             Debug.LogError(
-                                $"Could not connect `{node.Value.title}:{port.name}` -> `{connectedNode.name}:{conn.name}`. " +
-                                $"Input port `{port.name}` no longer exists."
+                                $"Could not connect `{node.Value.title}:{port.Name}` -> `{connectedNode.Name}:{conn.Name}`. " +
+                                $"Input port `{port.Name}` no longer exists."
                             );
                         }
                         else if (outPort == null)
                         {
                             Debug.LogError(
-                                $"Could not connect `{connectedNode.name}:{conn.name}` to `{node.Value.name}:{port.name}`. " +
-                                $"Output port `{conn.name}` no longer exists."
+                                $"Could not connect `{connectedNode.Name}:{conn.Name}` to `{node.Value.name}:{port.Name}`. " +
+                                $"Output port `{conn.Name}` no longer exists."
                             );
                         }
                         else
@@ -653,8 +653,8 @@ namespace BlueGraph.Editor
             
             // Add the model
             var comment = new Comment();
-            comment.text = "New Comment";
-            comment.region = bounds;
+            comment.Text = "New Comment";
+            comment.Region = bounds;
 
             m_Graph.m_Comments.Add(comment);
             m_SerializedGraph.Update();

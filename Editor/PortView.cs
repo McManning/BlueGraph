@@ -5,6 +5,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using GraphViewPort = UnityEditor.Experimental.GraphView.Port;
 using System.Collections;
+using UnityEditor;
 
 namespace BlueGraph.Editor
 {
@@ -38,13 +39,13 @@ namespace BlueGraph.Editor
     
         public static PortView Create(Port port, IEdgeConnectorListener connectorListener) 
         {
-            Direction direction = port.direction == PortDirection.Input ? Direction.Input : Direction.Output;
-            Capacity capacity = port.capacity == PortCapacity.Multiple ? Capacity.Multi : Capacity.Single;
+            Direction direction = port.Direction == PortDirection.Input ? Direction.Input : Direction.Output;
+            Capacity capacity = port.Capacity == PortCapacity.Multiple ? Capacity.Multi : Capacity.Single;
 
-            var view = new PortView(Orientation.Horizontal, direction, capacity, port.type) 
+            var view = new PortView(Orientation.Horizontal, direction, capacity, port.Type) 
             {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
-                portName = port.name,
+                portName = port.Name,
                 target = port
             };
 

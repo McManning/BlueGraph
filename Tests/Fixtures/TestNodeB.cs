@@ -13,20 +13,20 @@ namespace BlueGraph.Tests
     
         public TestNodeB() : base()
         {
-            name = "Test Node B";
+            Name = "Test Node B";
 
             AddPort(new Port
             { 
-                name = "Input",
-                direction = PortDirection.Input,
-                type = typeof(Vector3) 
+                Name = "Input",
+                Direction = PortDirection.Input,
+                Type = typeof(Vector3) 
             });
 
             AddPort(new Port
             { 
-                name = "Output",
-                direction = PortDirection.Output,
-                type = typeof(string) 
+                Name = "Output",
+                Direction = PortDirection.Output,
+                Type = typeof(string) 
             });
         }
         

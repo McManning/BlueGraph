@@ -33,8 +33,8 @@ namespace BlueGraph
         /// <summary>
         /// All nodes contained within this Graph
         /// </summary>
-        [SerializeReference, HideInInspector]
-        protected List<Node> m_Nodes = new List<Node>();
+        [SerializeReference, HideInInspector] 
+        List<Node> m_Nodes = new List<Node>();
 
         /// <summary>
         /// All comments to display in the editor for this Graph
@@ -74,7 +74,7 @@ namespace BlueGraph
         /// </summary>
         public Node GetNodeById(string id)
         {
-            return m_Nodes.Find((node) => node.id == id);
+            return m_Nodes.Find((node) => node.ID == id);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace BlueGraph
         /// <param name="node"></param>
         public void AddNode(Node node)
         {
-            node.graph = this;
+            node.Graph = this;
             m_Nodes.Add(node);
             node.OnAddedToGraph();
         }
@@ -126,7 +126,7 @@ namespace BlueGraph
             node.DisconnectAllPorts();
             m_Nodes.Remove(node);
 
-            node.graph = null;
+            node.Graph = null;
             node.OnRemovedFromGraph();
         }
 

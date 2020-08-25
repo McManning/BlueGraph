@@ -144,7 +144,7 @@ namespace BlueGraph.Editor
             catch (InvalidCastException e)
             {
                 Debug.LogError(
-                    $"Failed to build control for {view.target.name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
+                    $"Failed to build control for {view.target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
                 );
 
                 return null;
@@ -176,7 +176,7 @@ namespace BlueGraph.Editor
             catch (InvalidCastException e)
             {
                 Debug.LogError(
-                    $"Failed to build control for {view.target.name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
+                    $"Failed to build control for {view.target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
                 );
 
                 return null;

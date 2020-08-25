@@ -24,7 +24,7 @@ namespace BlueGraph.Editor
         
         public void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
         {
-            viewDataKey = node.id;
+            viewDataKey = node.ID;
             target = node;
             m_Canvas = canvas;
             m_ReflectionData = NodeReflection.GetNodeType(node.GetType());
@@ -51,7 +51,8 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// Executed once this node has been added to the canvas
+        /// Executed after receiving a node target and initial configuration
+        /// but before being added to the graph. 
         /// </summary>
         protected virtual void OnInitialize()
         {
@@ -73,7 +74,7 @@ namespace BlueGraph.Editor
         {
             foreach (var port in target.Ports)
             {
-                if (port.direction == PortDirection.Input)
+                if (port.Direction == PortDirection.Input)
                 {
                     AddInputPort(port);
                 }
@@ -112,7 +113,7 @@ namespace BlueGraph.Editor
             
             // If we're exposing a control element via reflection: include it in the view
             var reflection = NodeReflection.GetNodeType(target.GetType());
-            var element = reflection.GetPortByName(port.name)?.GetControlElement(this);
+            var element = reflection.GetPortByName(port.Name)?.GetControlElement(this);
 
             if (element != null)
             {
@@ -194,13 +195,13 @@ namespace BlueGraph.Editor
                 return position;
             }
             
-            return new Rect(target.position, Vector2.one);
+            return new Rect(target.Position, Vector2.one);
         }
 
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            target.position = newPos.position;
+            target.Position = newPos.position;
         }
         
         protected void OnTooltip(TooltipEvent evt)

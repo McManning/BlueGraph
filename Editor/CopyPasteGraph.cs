@@ -97,8 +97,8 @@ namespace BlueGraph.Editor
             foreach (var node in graph.nodes)
             {
                 var newId = Guid.NewGuid().ToString();
-                idMap[node.id] = newId;
-                node.id = newId;
+                idMap[node.ID] = newId;
+                node.ID = newId;
             }
 
             // Remap connections to new node IDs and drop any connections
@@ -113,12 +113,12 @@ namespace BlueGraph.Editor
                     // Only re-add connections that are in the new pasted subset
                     foreach (var edge in edges)
                     {
-                        if (idMap.ContainsKey(edge.nodeId))
+                        if (idMap.ContainsKey(edge.NodeID))
                         {
                             port.m_Connections.Add(new Connection
                             {
-                                nodeId = idMap[edge.nodeId],
-                                portName = edge.portName
+                                NodeID = idMap[edge.NodeID],
+                                PortName = edge.PortName
                             });
                         }
                     }

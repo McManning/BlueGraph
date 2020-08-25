@@ -57,12 +57,12 @@ namespace BlueGraph.Editor
                 return true;
             }
 
-            if (sourcePort.direction == PortDirection.Input)
+            if (sourcePort.Direction == PortDirection.Input)
             {
-                return node.HasOutputOfType(sourcePort.type);
+                return node.HasOutputOfType(sourcePort.Type);
             }
 
-            return node.HasInputOfType(sourcePort.type);
+            return node.HasInputOfType(sourcePort.Type);
         }
     }
 }

@@ -242,17 +242,17 @@ namespace BlueGraph.Editor
         public Node CreateInstance()
         {
             var node = Activator.CreateInstance(type) as Node;
-            node.name = name;
+            node.Name = name;
             
             // Create runtime ports from reflection data
             foreach (var port in ports)
             {
                 node.AddPort(new Port {
-                    type = port.type,
-                    node = node,
-                    name = port.name,
-                    capacity = port.capacity,
-                    direction = port.direction
+                    Type = port.type,
+                    Node = node,
+                    Name = port.name,
+                    Capacity = port.capacity,
+                    Direction = port.direction
                 });
             }
 

@@ -10,10 +10,28 @@ namespace BlueGraph
     [Serializable]
     public class Connection
     {
-        public string nodeId;
-        public string portName;
+        [SerializeField] string m_NodeID;
 
-        [NonSerialized] public Port port;
+        public string NodeID
+        {
+            get { return m_NodeID; }
+            set { m_NodeID = value; }
+        }
+
+        [SerializeField] string m_PortName;
+
+        public string PortName
+        {
+            get { return m_PortName; }
+            set { m_PortName = value; }
+        }
+
+        [NonSerialized] Port m_Port;
+
+        public Port Port { 
+            get { return m_Port; }
+            internal set { m_Port = value; }
+        }
     }
 
     /// <summary>
@@ -37,38 +55,61 @@ namespace BlueGraph
     [Serializable]
     public class Port : ISerializationCallbackReceiver
     {
-        [NonSerialized]
-        public Node node;
+        [NonSerialized] Node m_Node;
+
+        public Node Node { 
+            get { return m_Node; }
+            internal set { m_Node = value; }
+        }
         
+        [SerializeField] string m_Name;
+
         /// <summary>
         /// Display name for this port
         /// </summary>
-        public string name;
+        public string Name
+        {
+            get { return m_Name; }
+            set { m_Name = value; }
+        }
+        
+        [SerializeField] string m_Type;
+
+        /// <summary>
+        /// Allowable connection types made to this port.
+        /// </summary>
+        public Type Type { get; set; }
+
+        [SerializeField] PortCapacity m_Capacity = PortCapacity.Single;
 
         /// <summary>
         /// Whether or not multiple edges can be connected 
         /// between this port and other ports.
         /// </summary>
-        public PortCapacity capacity = PortCapacity.Single;
+        public PortCapacity Capacity
+        {
+            get { return m_Capacity; }
+            set { m_Capacity = value; }
+        }
+
+        [SerializeField] PortDirection m_Direction = PortDirection.Input;
 
         /// <summary>
         /// Whether to treat this as an input or output port.
         /// </summary>
-        public PortDirection direction = PortDirection.Input;
+        public PortDirection Direction
+        {
+            get { return m_Direction; }
+            set { m_Direction = value; }
+        }
 
-        /// <summary>
-        /// Allowable connection types made to this port.
-        /// </summary>
-        public Type type;
-        
         public int ConnectionCount
         {
-            get
-            {
-                return m_Connections.Count;
-            }
+            get { return m_Connections.Count; }
         }
         
+        [SerializeField] internal List<Connection> m_Connections;
+
         /// <summary>
         /// Enumerate all ports connected by edges to this port
         /// </summary>
@@ -77,13 +118,10 @@ namespace BlueGraph
                 HydratePorts();
                 for (var i = 0; i < m_Connections.Count; i++)
                 {
-                    yield return m_Connections[i].port;
+                    yield return m_Connections[i].Port;
                 }
             }
         }
-
-        [SerializeField] internal List<Connection> m_Connections;
-        [SerializeField] string m_Type;
 
         public Port()
         {
@@ -92,12 +130,12 @@ namespace BlueGraph
         
         public void OnBeforeSerialize()
         {
-            m_Type = type.AssemblyQualifiedName;
+            m_Type = Type.AssemblyQualifiedName;
         }
 
         public void OnAfterDeserialize()
         {
-            type = Type.GetType(m_Type);
+            Type = Type.GetType(m_Type);
         }
 
         /// <summary>
@@ -114,19 +152,19 @@ namespace BlueGraph
         {
             // If this is an input port, consume the  
             // value from connected port. 
-            if (direction == PortDirection.Input)
+            if (Direction == PortDirection.Input)
             {
                 HydratePorts();
                 if (m_Connections.Count > 0)
                 {
-                    return m_Connections[0].port.GetValue<T>();
+                    return m_Connections[0].Port.GetValue<T>();
                 }
 
                 return defaultValue;
             }
             
             // Otherwise, attempt resolution from the parent node.
-            object value = node.OnRequestValue(this);
+            object value = Node.OnRequestValue(this);
 
             // Make sure we don't try to cast to a value type from null
             if (value == null && typeof(T).IsValueType)
@@ -166,7 +204,7 @@ namespace BlueGraph
         /// </summary>
         public virtual IEnumerable<T> GetValues<T>()
         {
-            if (direction == PortDirection.Input)
+            if (Direction == PortDirection.Input)
             {
                 HydratePorts();
 
@@ -175,7 +213,7 @@ namespace BlueGraph
                 {
                     for (var i = 0; i < m_Connections.Count; i++)
                     {
-                        values[i] = m_Connections[i].port.GetValue<T>();
+                        values[i] = m_Connections[i].Port.GetValue<T>();
                     }
                 }
 
@@ -183,7 +221,7 @@ namespace BlueGraph
             }
             
             // Otherwise, resolve from the node.
-            return (IEnumerable<T>)node.OnRequestValue(this);
+            return (IEnumerable<T>)Node.OnRequestValue(this);
         }
         
         /// <summary>
@@ -194,10 +232,13 @@ namespace BlueGraph
             // Remove ourselves from all other connected ports
             for (var i = 0; i < m_Connections.Count; i++)
             {
-                var port = m_Connections[i].port;
-                port?.m_Connections.RemoveAll((edge) => edge.port == this);
+                var port = m_Connections[i].Port;
+                
+                port.m_Connections.RemoveAll((edge) => 
+                    edge.NodeID == Node.ID && edge.PortName == Name
+                );
             }
-            
+
             m_Connections.Clear();
         }
         
@@ -212,16 +253,16 @@ namespace BlueGraph
             if (GetConnection(port) != null) return;
 
             m_Connections.Add(new Connection() {
-                port = port,
-                nodeId = port.node.id,
-                portName = port.name
+                Port = port,
+                NodeID = port.Node.ID,
+                PortName = port.Name
             });
 
             port.m_Connections.Add(new Connection()
             {
-                port = this,
-                nodeId = node.id,
-                portName = name
+                Port = this,
+                NodeID = Node.ID,
+                PortName = Name
             });
         }
 
@@ -230,18 +271,27 @@ namespace BlueGraph
         /// </summary>
         internal Connection GetConnection(Port port)
         {
-            return m_Connections.Find((conn) => conn.port == port);
+            return m_Connections.Find((edge) => 
+                edge.NodeID == port.Node.ID && edge.PortName == port.Name
+            );
         }
         
         /// <summary>
         /// Remove any edges between this and the given Port.
         /// 
-        /// Use <c>Graph.RemoveEdge()</c> over this.
+        /// Use <c>Graph.RemoveEdge()</c> externally
         /// </summary>
         internal void Disconnect(Port port)
         {
-            m_Connections.RemoveAll((edge) => edge.port == port);
-            port.m_Connections.RemoveAll((edge) => edge.port == this);
+            // Remove all outbound connections to the other port
+            m_Connections.RemoveAll((edge) => 
+                edge.NodeID == port.Node.ID && edge.PortName == port.Name
+            );
+            
+            // Remove inbound connections to the other port
+            port.m_Connections.RemoveAll((edge) => 
+                edge.NodeID == Node.ID && edge.PortName == Name
+            );
         }
         
         /// <summary>
@@ -253,19 +303,19 @@ namespace BlueGraph
         /// </remarks>
         internal void HydratePorts()
         {
-            var graph = node.graph;
+            var graph = Node.Graph;
 
             for (var i = 0; i < m_Connections.Count; i++)
             {
                 var edge = m_Connections[i];
-                var connected = graph.GetNodeById(edge.nodeId);
+                var connected = graph.GetNodeById(edge.NodeID);
                 if (connected == null)
                 {
-                    Debug.LogWarning($"Could not locate connected node {edge.nodeId} from port {name} of {node.name}");
+                    Debug.LogWarning($"Could not locate connected node {edge.NodeID} from port {Name} of {Node.Name}");
                 }
                 else
                 {
-                    edge.port = connected.GetPort(edge.portName);
+                    edge.Port = connected.GetPort(edge.PortName);
                     m_Connections[i] = edge;
                 }
             }

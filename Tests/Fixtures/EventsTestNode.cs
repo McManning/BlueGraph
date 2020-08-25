@@ -15,10 +15,10 @@ namespace BlueGraph.Tests
     
         public EventTestNode() : base()
         {
-            name = "Test Node B";
+            Name = "Test Node B";
             
-            AddPort(new InputPort<float> { name = "Input" });
-            AddPort(new OutputPort<float> { name = "Output" });
+            AddPort(new InputPort<float> { Name = "Input" });
+            AddPort(new OutputPort<float> { Name = "Output" });
         }
 
         public override void OnAddedToGraph()

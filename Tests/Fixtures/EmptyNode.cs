@@ -10,7 +10,7 @@ namespace BlueGraph.Tests
     {
         public EmptyNode() : base()
         {
-            name = "Empty Node";
+            Name = "Empty Node";
         }
 
         public override object OnRequestValue(Port port)

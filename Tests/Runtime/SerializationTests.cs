@@ -22,15 +22,15 @@ namespace BlueGraph.Tests
             var node2 = new EmptyNode();
 
             node1.AddPort(new Port { 
-                name = "Output", 
-                direction = PortDirection.Output,
-                type = typeof(float), 
+                Name = "Output", 
+                Direction = PortDirection.Output,
+                Type = typeof(float), 
             });
 
             node2.AddPort(new Port { 
-                name = "Input",
-                direction = PortDirection.Input,
-                type = typeof(float), 
+                Name = "Input",
+                Direction = PortDirection.Input,
+                Type = typeof(float), 
             });
             
             original.AddNode(node1);
@@ -48,8 +48,8 @@ namespace BlueGraph.Tests
 
             // ---- Check Integrity ----
             
-            var cloneNode1 = clone.GetNodeById(node1.id);
-            var cloneNode2 = clone.GetNodeById(node2.id);
+            var cloneNode1 = clone.GetNodeById(node1.ID);
+            var cloneNode2 = clone.GetNodeById(node2.ID);
 
             Assert.AreEqual(2, clone.Nodes.Count);
             
@@ -58,10 +58,10 @@ namespace BlueGraph.Tests
             Assert.IsInstanceOf<EmptyNode>(clone.Nodes.ElementAt(1));
 
             Assert.AreNotSame(cloneNode1, node1);
-            Assert.AreEqual(node1.id, cloneNode1.id);
+            Assert.AreEqual(node1.ID, cloneNode1.ID);
             
             Assert.AreNotSame(cloneNode2, node2);
-            Assert.AreEqual(node2.id, cloneNode2.id);
+            Assert.AreEqual(node2.ID, cloneNode2.ID);
             
             // Check port deserialization
             Assert.IsInstanceOf<Port>(cloneNode1.GetPort("Output"));
@@ -74,8 +74,8 @@ namespace BlueGraph.Tests
             Assert.AreEqual(1, outputsFromNode1.Count());
             Assert.AreEqual(1, inputsToNode2.Count());
             
-            Assert.AreSame(cloneNode2, outputsFromNode1.First().node);
-            Assert.AreSame(cloneNode1, inputsToNode2.First().node);
+            Assert.AreSame(cloneNode2, outputsFromNode1.First().Node);
+            Assert.AreSame(cloneNode1, inputsToNode2.First().Node);
         }
         
         /// <summary>
@@ -91,15 +91,15 @@ namespace BlueGraph.Tests
             var node2 = new EmptyNode();
 
             node1.AddPort(new Port { 
-                name = "Output", 
-                direction = PortDirection.Output,
-                type = typeof(float), 
+                Name = "Output", 
+                Direction = PortDirection.Output,
+                Type = typeof(float), 
             });
 
             node2.AddPort(new Port { 
-                name = "Input",
-                direction = PortDirection.Input,
-                type = typeof(float), 
+                Name = "Input",
+                Direction = PortDirection.Input,
+                Type = typeof(float), 
             });
             
             original.AddNode(node1);
@@ -120,8 +120,8 @@ namespace BlueGraph.Tests
 
             // ---- Check Integrity ----
             
-            var cloneNode1 = clone.GetNodeById(node1.id);
-            var cloneNode2 = clone.GetNodeById(node2.id);
+            var cloneNode1 = clone.GetNodeById(node1.ID);
+            var cloneNode2 = clone.GetNodeById(node2.ID);
 
             Assert.AreEqual(2, clone.Nodes.Count);
             
@@ -130,10 +130,10 @@ namespace BlueGraph.Tests
             Assert.IsInstanceOf<EmptyNode>(clone.Nodes.ElementAt(1));
 
             Assert.AreNotSame(cloneNode1, node1);
-            Assert.AreEqual(node1.id, cloneNode1.id);
+            Assert.AreEqual(node1.ID, cloneNode1.ID);
             
             Assert.AreNotSame(cloneNode2, node2);
-            Assert.AreEqual(node2.id, cloneNode2.id);
+            Assert.AreEqual(node2.ID, cloneNode2.ID);
             
             // Check port deserialization
             Assert.IsInstanceOf<Port>(cloneNode1.GetPort("Output"));
@@ -151,8 +151,8 @@ namespace BlueGraph.Tests
             // still points to the old instance when cloned,
             // thus the ports read the wrong graph when retrieving
             // connected node information.
-            Assert.AreSame(cloneNode2, outputsFromNode1.First().node);
-            Assert.AreSame(cloneNode1, inputsToNode2.First().node);
+            Assert.AreSame(cloneNode2, outputsFromNode1.First().Node);
+            Assert.AreSame(cloneNode1, inputsToNode2.First().Node);
         }
     }
 }

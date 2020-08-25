@@ -40,7 +40,7 @@ namespace BlueGraph.Tests
             graph.AddNode(expected);
             graph.AddNode(node3);
             
-            var actual = graph.GetNodeById(expected.id);
+            var actual = graph.GetNodeById(expected.ID);
             
             Assert.AreSame(expected, actual);
         }
@@ -129,8 +129,8 @@ namespace BlueGraph.Tests
             Assert.AreEqual(1, outputsFromNode1.Count());
             Assert.AreEqual(1, inputsToNode2.Count());
             
-            Assert.AreSame(node2, outputsFromNode1.First().node);
-            Assert.AreSame(node1, inputsToNode2.First().node);
+            Assert.AreSame(node2, outputsFromNode1.First().Node);
+            Assert.AreSame(node1, inputsToNode2.First().Node);
         }
 
         [Test]
@@ -149,7 +149,7 @@ namespace BlueGraph.Tests
             graph.RemoveNode(nodeToRemove);
             
             Assert.AreEqual(2, graph.Nodes.Count);
-            Assert.IsNull(graph.GetNodeById(nodeToRemove.id));
+            Assert.IsNull(graph.GetNodeById(nodeToRemove.ID));
         }
         
         // [Test]
