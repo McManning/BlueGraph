@@ -1,101 +1,101 @@
 ﻿
 .commentView {
-	--layer: -500;
+    --layer: -500;
 
-	min-width: 150px;
-	min-height: 100px;
+    min-width: 150px;
+    min-height: 100px;
 
-	border-width: 2px;
-	border-radius: 8px;
+    border-width: 2px;
+    border-radius: 8px;
 
-	background-color: rgba(253, 199, 39, 0.1);
-	border-color: rgba(253, 199, 39, 0.25);
+    background-color: rgba(253, 199, 39, 0.1);
+    border-color: rgba(253, 199, 39, 0.25);
 }
 
 .commentView .resizer {
-	right: -10px;
-	bottom: -10px;
-	width: 30px;
-	height: 30px;
+    right: -10px;
+    bottom: -10px;
+    width: 30px;
+    height: 30px;
 
-	/* TODO: These are being overridden by inline rules */
+    /* TODO: These are being overridden by inline rules */
 }
 
 .commentView .resizer-icon {
-	/* Icon doesn't get the event, so we just toss it. */
-	visibility: hidden;
+    /* Icon doesn't get the event, so we just toss it. */
+    visibility: hidden;
 }
 
 .commentView .unity-label {
-	white-space: normal;
-	padding: 5px;
-	border-radius: 3px;
-	margin: 5px;
-	
-	background-color: rgba(253, 199, 39, 1);
-	color: #000000;
+    white-space: normal;
+    padding: 5px;
+    border-radius: 3px;
+    margin: 5px;
+    
+    background-color: rgba(253, 199, 39, 1);
+    color: #000000;
 }
 
 .commentView #unity-text-input {
-	font-size: 15px;
-	margin: 5px;
-	padding: 5px;
+    font-size: 15px;
+    margin: 5px;
+    padding: 5px;
 }
 
 /* Themes */
 
 .commentView.theme-Grey {
-	background-color: #191919;
-	border-color: #343434;
-	
-	background-color: rgba(0, 0, 0, 0.1);
-	border-color: rgba(0, 0, 0, 0.25);
+    background-color: #191919;
+    border-color: #343434;
+    
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.25);
 }
 
 .commentView.theme-Grey .unity-label {
-	background-color: rgba(15, 15, 15, 1);
+    background-color: rgba(15, 15, 15, 1);
 }
 
 .commentView.theme-Grey .unity-label {
-	color: #ffffff;
+    color: #ffffff;
 }
 
 .commentView.theme-Red {
-	background-color: rgba(148, 0, 8, 0.1);
-	border-color: rgba(148, 0, 8, 0.5);
+    background-color: rgba(148, 0, 8, 0.1);
+    border-color: rgba(148, 0, 8, 0.5);
 }
 
 .commentView.theme-Red .unity-label {
-	background-color: rgba(148, 0, 8, 1);
+    background-color: rgba(148, 0, 8, 1);
 }
 
 .commentView.theme-Red .unity-label {
-	color: #ffffff;
+    color: #ffffff;
 }
 
 .commentView.theme-Green {
-	background-color: rgba(158, 251, 82, 0.1);
-	border-color: rgba(158, 251, 82, 0.25);
+    background-color: rgba(158, 251, 82, 0.1);
+    border-color: rgba(158, 251, 82, 0.25);
 }
 
 .commentView.theme-Green .unity-label {
-	background-color: rgba(158, 251, 82, 1);
+    background-color: rgba(158, 251, 82, 1);
 }
 
 .commentView.theme-Blue {
-	background-color: rgba(24, 171, 242, 0.1);
-	border-color: rgba(24, 171, 242, 0.25);
+    background-color: rgba(24, 171, 242, 0.1);
+    border-color: rgba(24, 171, 242, 0.25);
 }
 
 .commentView.theme-Blue .unity-label {
-	background-color: rgba(24, 171, 242, 1);
+    background-color: rgba(24, 171, 242, 1);
 }
 
 .commentView.theme-Blue .unity-label {
-	color: #ffffff;
+    color: #ffffff;
 }
 
 
 .commentView:checked {
-	border-color: #44C0FF;
+    border-color: #44C0FF;
 }

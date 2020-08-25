@@ -1,75 +1,90 @@
 ﻿
 .nodeView #title {
-	background-color: var(--bluegraph-node-title-background-color);
-	height: 26px;
+    background-color: var(--bluegraph-node-title-background-color);
+    height: 26px;
 }
 
 .nodeView #title-label {
-	color: var(--bluegraph-node-title-color);
+    color: var(--bluegraph-node-title-color);
 }
 
-.nodeView #contents > #top > #input {
-	flex: 100 0 auto;
-	background-color: var(--bluegraph-node-inputs-background-color);
-	opacity: 0.95;
-}
-
-.nodeView #contents > #top > #output {
-	flex: 1 0 auto;
-	background-color: var(--bluegraph-node-outputs-background-color);
-	opacity: 0.95;
-}
-
-.nodeView #contents
-{
-	flex-direction: column;
-}
-
-.nodeView #extension .unity-property-field__label {
-	min-width: 60px;
-	flex: 1 0 0;
-	-unity-text-align: upper-left;
-	padding-right: 8px;
-}
-
-.nodeView #extension .unity-property-field__input {
-	min-width: 60px;
-}
-
-.nodeView #collapsible-area {
-	background-color: var(--bluegraph-node-editables-background-color);
-	opacity: 0.95;
-}
-
-.nodeView #extension {
-	padding: 6px;
-}
-
-.nodeView > #selection-border {
-	border-color: var(--bluegraph-focus-color);
-}
-
-.nodeView:selected > #selection-border {
-	border-color: var(--bluegraph-highlight-color);
+/* TODO: Actually remove from the DOM or improve behaviour.
+    Stock Unity version of this button doesn't work very well */
+.nodeView #collapse-button {
+    display: none;
 }
 
 .nodeView #input {
-	display: none;
+    flex: 100 0 auto;
+    background-color: var(--bluegraph-node-inputs-background-color);
+    opacity: 0.95;
 }
 
 .nodeView #output {
-	display: none;
+    flex: 1 0 auto;
+    background-color: var(--bluegraph-node-outputs-background-color);
+    opacity: 0.95;
 }
 
 .nodeView #contents {
-	flex-direction: column;
+    flex-direction: column;
+}
+
+.nodeView #extension .unity-property-field__label {
+    min-width: 60px;
+    flex: 1 0 0;
+    -unity-text-align: upper-left;
+    padding-right: 8px;
+}
+
+.nodeView #extension .unity-property-field__input {
+    min-width: 60px;
+}
+
+.nodeView .unity-base-field__input {
+    background-color: var(--bluegraph-port-field-background-color);
+    border-color: var(--bluegraph-port-field-border-color);
+    color: var(--bluegraph-port-field-color);
+}
+
+.nodeView .unity-toggle__input {
+    background-color: transparent;
+}
+
+.nodeView #collapsible-area {
+    background-color: var(--bluegraph-node-editables-background-color);
+    opacity: 0.95;
+}
+
+.nodeView #extension {
+    padding: 6px;
+}
+
+.nodeView #selection-border {
+    border-color: var(--bluegraph-focus-color);
+}
+
+.nodeView:selected #selection-border {
+    border-color: var(--bluegraph-highlight-color);
+}
+
+.nodeView #input {
+    display: none;
+}
+
+.nodeView #output {
+    display: none;
+}
+
+.nodeView #contents {
+    flex-direction: column;
 }
 
 .nodeView.hasInputs #input {
-	display: flex;
+    display: flex;
 }
 
 .nodeView.hasOutputs #output {
-	display: flex;
+    display: flex;
 }
 

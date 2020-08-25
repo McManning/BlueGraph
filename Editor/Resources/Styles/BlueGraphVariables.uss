@@ -2,43 +2,48 @@
 /* Variables that can be overridden to change the look 'n feel of a graph */
 
 * {
-	/* Background grid display configurations */
-	--bluegraph-grid-background-color:	#202b3c;
-	--bluegraph-grid-line-color:		#283042;
-	--bluegraph-grid-thick-line-color:	#3a455e;
+    /* Background grid display configurations */
+    --bluegraph-grid-background-color:              #202b3c;
+    --bluegraph-grid-line-color:                    #283042;
+    --bluegraph-grid-thick-line-color:              #3a455e;
 
-	/* Highlighting for selected edges/nodes */
-	--bluegraph-focus-color:			#006798;		
-	--bluegraph-highlight-color:		#ffd244;
+    /* Highlighting for selected edges/nodes */
+    --bluegraph-focus-color:                        #006798;        
+    --bluegraph-highlight-color:                    #ffd244;
 
-	/* Node settings */
-	--bluegraph-node-title-background-color:		#3b4c64;
-	--bluegraph-node-title-color:					#c1c1c1;
-	--bluegraph-node-inputs-background-color:		#393a40;
-	--bluegraph-node-outputs-background-color:		#232932;
-	--bluegraph-node-editables-background-color:	#3f3f3f;
+    /* Node settings */
+    --bluegraph-node-title-background-color:        #3b4c64;
+    --bluegraph-node-title-color:                   #efefef;
+    --bluegraph-node-inputs-background-color:       #393a40;
+    --bluegraph-node-outputs-background-color:      #232932;
+    --bluegraph-node-editables-background-color:    #3f3f3f;
 
-	/* Port settings */
-	--bluegraph-port-title-color:		#c1c1c1;
-	--bluegraph-port-background-color:	#212121;
+    /* Port settings */
+    --bluegraph-port-title-color:                   #c1c1c1;
+    --bluegraph-port-background-color:              #212121;
 
-	/* Colors for different port data types */
+    /* Property field associated with an input port */
+    --bluegraph-port-field-background-color:        rgba(0, 0, 0, 0.25);
+    --bluegraph-port-field-border-color:            #666666;
+    --bluegraph-port-field-color:                   #eeeeee;
 
-	/* Unknown object types or value types */
-	--bluegraph-port-object-color:		#18abf2;
-	--bluegraph-port-value-color:		#4eaeae;
+    /* Colors for different port data types */
 
-	/* Standard C# types */
-	--bluegraph-port-string-color:		#fb02d1;
-	--bluegraph-port-boolean-color:		#d9000c;
-	--bluegraph-port-int-color:			#29e0ad;
-	--bluegraph-port-float-color:		#9efb52;
-	--bluegraph-port-enum-color:		#076f64;
+    /* Unknown object types or value types */
+    --bluegraph-port-object-color:                  #18abf2;
+    --bluegraph-port-value-color:                   #4eaeae;
 
-	/* Common Unity types */
-	--bluegraph-port-vector-color:		#fdc727;
-	--bluegraph-port-quaternion-color:	#8f9fdd;
-	--bluegraph-port-color-color:		#bebebe;
-	--bluegraph-port-transform-color:	#fa711d;
-	--bluegraph-port-gameobject-color:	#ab60ff;
+    /* Standard C# types */
+    --bluegraph-port-string-color:                  #fb02d1;
+    --bluegraph-port-boolean-color:                 #d9000c;
+    --bluegraph-port-int-color:                     #29e0ad;
+    --bluegraph-port-float-color:                   #9efb52;
+    --bluegraph-port-enum-color:                    #076f64;
+
+    /* Common Unity types */
+    --bluegraph-port-vector-color:                  #fdc727;
+    --bluegraph-port-quaternion-color:              #8f9fdd;
+    --bluegraph-port-color-color:                   #bebebe;
+    --bluegraph-port-transform-color:               #fa711d;
+    --bluegraph-port-gameobject-color:              #ab60ff;
 }
