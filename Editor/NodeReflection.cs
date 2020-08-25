@@ -34,7 +34,12 @@ namespace BlueGraph.Editor
         public PortDirection direction;
         public PortCapacity capacity;
 
-        public bool isEditable; // TODO: Rename?
+        public bool hasControlElement;
+
+        /// <summary>
+        /// Is this.name just the this.field or set via the attribute
+        /// </summary>
+        public bool isUsingFieldName;
         
         /// <summary>
         /// Create a VisualElement for this port's inline editor based on the field data type.
@@ -44,7 +49,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public VisualElement GetControlElement(NodeView view)
         {
-            if (!isEditable)
+            if (!hasControlElement)
             {
                 return null;
             }
@@ -68,7 +73,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public VisualElement GetControlElement(NodeView view)
         {
-            return ControlElementFactory.CreateControl(field, view);
+            return ControlElementFactory.CreateControl(field, view, name);
         }
     }
 
@@ -141,7 +146,7 @@ namespace BlueGraph.Editor
                         type = output.type,
                         direction = PortDirection.Output,
                         capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
-                        isEditable = false
+                        hasControlElement = false
                     });
                 }
             }
@@ -204,31 +209,33 @@ namespace BlueGraph.Editor
                     {
                         ports.Add(new PortReflectionData()
                         {
-                            name = input.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            name = input.name ?? fields[i].Name,
                             field = fields[i],
                             type = fields[i].FieldType,
                             direction = PortDirection.Input,
                             capacity = input.multiple ? PortCapacity.Multiple : PortCapacity.Single,
-                            isEditable = input.editable
+                            hasControlElement = input.editable,
+                            isUsingFieldName = input.name != null
                         });
                     }
                     else if (attribs[j] is OutputAttribute output)
                     {
                         ports.Add(new PortReflectionData()
                         {
-                            name = output.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            name = output.name ?? fields[i].Name,
                             field = fields[i],
                             type = fields[i].FieldType,
                             direction = PortDirection.Output,
                             capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
-                            isEditable = false
+                            hasControlElement = false,
+                            isUsingFieldName = output.name != null
                         });
                     }
                     else if (attribs[j] is EditableAttribute editable)
                     {
                         editables.Add(new EditableReflectionData()
                         {
-                            name = editable.name ?? ObjectNames.NicifyVariableName(fields[i].Name),
+                            name = editable.name ?? fields[i].Name,
                             field = fields[i]
                         });
                     }
@@ -275,7 +282,7 @@ namespace BlueGraph.Editor
                 {
                     inputs.Add(port.name);
                 }
-                else if (!port.isEditable)
+                else if (!port.hasControlElement)
                 {
                     outputs.Add(port.name);
                 }
@@ -403,6 +410,14 @@ namespace BlueGraph.Editor
             }
 
             k_NodeEditors = nodeEditors;
+        }
+
+        /// <summary>
+        /// Instantiate a new node by type
+        /// </summary>
+        public static T Instantiate<T>() where T : Node
+        {
+            return GetNodeType(typeof(T)).CreateInstance() as T;
         }
     }
 }

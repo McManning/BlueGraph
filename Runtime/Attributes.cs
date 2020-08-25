@@ -16,7 +16,7 @@ namespace BlueGraph
         public string name;
 
         /// <summary>
-        /// Tooltip help content displayed for the node
+        /// Tooltip help content displayed for the node.
         /// </summary>
         public string help;
 
@@ -26,7 +26,7 @@ namespace BlueGraph
         public string path;
 
         /// <summary>
-        /// Can this node be deleted from the graph
+        /// Can this node be deleted from the graph.
         /// </summary>
         public bool deletable = true;
         
@@ -60,17 +60,17 @@ namespace BlueGraph
         /// <summary>
         /// Display name of the input slot.
         /// 
-        /// If not supplied, this will be inferred based on the field name.
+        /// If not supplied, this will default to the field name.
         /// </summary>
         public string name;
 
         /// <summary>
-        /// Can this input accept multiple connections at once
+        /// Can this input accept multiple outputs at once.
         /// </summary>
         public bool multiple = false;
 
         /// <summary>
-        /// Can this input value be directly modified when there are no connections
+        /// Can the associated field be directly modified when there are no connections.
         /// </summary>
         public bool editable = true;
         
@@ -91,12 +91,12 @@ namespace BlueGraph
         /// <summary>
         /// Display name of the output slot.
         /// 
-        /// If not supplied, this will be inferred based on the field name.
+        /// If not supplied, this will default to the field name.
         /// </summary>
         public string name;
         
         /// <summary>
-        /// Can this output go to multiple connections at once
+        /// Can this output go to multiple inputs at once.
         /// </summary>
         public bool multiple = true;
 
