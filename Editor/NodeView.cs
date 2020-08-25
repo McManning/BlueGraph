@@ -1,5 +1,5 @@
 ﻿
-using System;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -33,8 +33,12 @@ namespace BlueGraph.Editor
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
-            SetPosition(new Rect(node.position, Vector2.one));
-            title = node.name;
+            // Add a class name matching the node's name (e.g. `.node-My-Branch`)
+            var ussSafeName = Regex.Replace(target.Name, @"[^a-zA-Z0-9]+", "-").Trim('-');
+            AddToClassList($"node-{ussSafeName}");
+            
+            SetPosition(new Rect(node.Position, Vector2.one));
+            title = node.Name;
             
             if (!m_ReflectionData.deletable)
             {
