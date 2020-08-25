@@ -5,7 +5,7 @@ using UnityEditor;
 namespace BlueGraph.Editor
 {
     /// <summary>
-    /// Basic inspector that adds a button to edit the graph.
+    /// Basic inspector that manages the graph editor window
     /// 
     /// Typically, you should build your own inspectors that
     /// open an instance of GraphEditorWindow for the asset.
@@ -13,16 +13,6 @@ namespace BlueGraph.Editor
     [CustomEditor(typeof(Graph), true)]
     public class GraphEditor : UnityEditor.Editor
     {
-        public override void OnInspectorGUI()
-        {
-            if (GUILayout.Button("Edit Graph"))
-            {
-                CreateOrFocusEditorWindow();    
-            }
-        
-            base.OnInspectorGUI();
-        }
-
         /// <summary>
         /// Find an existing GraphEditorWindow for the target Graph.
         /// </summary>
