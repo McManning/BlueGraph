@@ -141,6 +141,8 @@ namespace BlueGraph.Editor
         
         void OnGraphKeyUp(KeyUpEvent evt)
         {
+            if (evt.target != this) return;
+
             // C: Add a new comment around the selected nodes (or just at mouse position)
             if (evt.keyCode == KeyCode.C && !evt.ctrlKey && !evt.commandKey)
             {
