@@ -19,7 +19,7 @@ namespace BlueGraph.Editor
                 var node = entry.Value;
                 if (
                     IsCompatible(filter.sourcePort, node) && 
-                    IsInSupportedTags(filter, node.tags)
+                    IsInSupportedTags(filter.includeTags, node.tags)
                 ) {
                     yield return new SearchResult
                     {
@@ -41,13 +41,13 @@ namespace BlueGraph.Editor
         /// Returns true if the intersection between the tags and our allow
         /// list has more than one tag, OR if our allow list is empty.
         /// </summary>
-        bool IsInSupportedTags(SearchFilter filter, IEnumerable<string> tags)
+        bool IsInSupportedTags(IEnumerable<string> supported, IEnumerable<string> tags)
         {
             // If we have no include list, allow anything.
-            if (filter.includeTags.Count() < 1) return true;
+            if (supported.Count() < 1) return true;
             
             // Otherwise - only allow if at least one tag intersects. 
-            return filter.includeTags.Intersect(tags).Count() > 0;
+            return supported.Intersect(tags).Count() > 0;
         }
 
         bool IsCompatible(Port sourcePort, NodeReflectionData node)
