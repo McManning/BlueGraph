@@ -26,26 +26,28 @@ namespace BlueGraph
             get { return nodes.AsReadOnly(); }
         }
 
-        /// <summary>
-        /// All nodes contained within this Graph
-        /// </summary>
         [SerializeReference, HideInInspector] 
         private List<Node> nodes = new List<Node>();
-
+        
+        /// <summary>
+        /// All comments to display in the editor for this Graph
+        /// </summary>
         public List<Comment> Comments
         {
             get { return comments; }
         }
 
-        /// <summary>
-        /// All comments to display in the editor for this Graph
-        /// </summary>
         [SerializeField, HideInInspector]
         private List<Comment> comments = new List<Comment>();
-
+        
         /// <summary>
         /// Graph serialization version for safely handling automatic upgrades.
         /// </summary>
+        public int AssetVersion
+        {
+            get { return assetVersion; }
+        }
+
         [SerializeField, HideInInspector] 
         private int assetVersion = 1;
 
