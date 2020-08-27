@@ -1,7 +1,7 @@
 {
   "name": "com.github.mcmanning.bluegraph",
   "displayName": "BlueGraph",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "unity": "2019.3",
   "description": "Visual Scripting Framework for Unity",
   "type": "tool",

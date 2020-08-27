@@ -1,10 +1,10 @@
 {
-    "name": "McManning.BlueGraph.Tests",
+    "name": "BlueGraph.Tests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "McManning.BlueGraph.Runtime",
-        "McManning.BlueGraph.Editor"
+        "BlueGraph.Editor",
+        "BlueGraph.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

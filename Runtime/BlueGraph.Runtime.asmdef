@@ -1,16 +1,13 @@
 {
-    "name": "McManning.BlueGraph.Editor",
-    "references": [
-        "McManning.BlueGraph.Runtime"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "name": "BlueGraph.Runtime",
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }
