@@ -3,7 +3,7 @@
     --layer: -500;
 
     min-width: 150px;
-    min-height: 100px;
+    min-height: 50px;
 
     border-width: 2px;
     border-radius: 8px;
@@ -37,14 +37,13 @@
 }
 
 .commentView #unity-text-input {
-    font-size: 15px;
     margin: 5px;
     padding: 5px;
 }
 
 /* Themes */
 
-.commentView.theme-Grey {
+.commentView.theme-Tertiary {
     background-color: #191919;
     border-color: #343434;
     
@@ -52,49 +51,26 @@
     border-color: rgba(0, 0, 0, 0.25);
 }
 
-.commentView.theme-Grey .unity-label {
+.commentView.theme-Tertiary .unity-label {
     background-color: rgba(15, 15, 15, 1);
 }
 
-.commentView.theme-Grey .unity-label {
+.commentView.theme-Tertiary .unity-label {
     color: #ffffff;
 }
 
-.commentView.theme-Red {
+.commentView.theme-Secondary {
     background-color: rgba(148, 0, 8, 0.1);
     border-color: rgba(148, 0, 8, 0.5);
 }
 
-.commentView.theme-Red .unity-label {
+.commentView.theme-Secondary .unity-label {
     background-color: rgba(148, 0, 8, 1);
 }
 
-.commentView.theme-Red .unity-label {
+.commentView.theme-Secondary .unity-label {
     color: #ffffff;
 }
-
-.commentView.theme-Green {
-    background-color: rgba(158, 251, 82, 0.1);
-    border-color: rgba(158, 251, 82, 0.25);
-}
-
-.commentView.theme-Green .unity-label {
-    background-color: rgba(158, 251, 82, 1);
-}
-
-.commentView.theme-Blue {
-    background-color: rgba(24, 171, 242, 0.1);
-    border-color: rgba(24, 171, 242, 0.25);
-}
-
-.commentView.theme-Blue .unity-label {
-    background-color: rgba(24, 171, 242, 1);
-}
-
-.commentView.theme-Blue .unity-label {
-    color: #ffffff;
-}
-
 
 .commentView:checked {
     border-color: #44C0FF;

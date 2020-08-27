@@ -5,11 +5,9 @@ namespace BlueGraph
 {
     public enum CommentTheme
     {
-        Yellow = 0,
-        Grey = 1,
-        Red = 2,
-        Green = 3,
-        Blue = 4
+        Primary = 0,
+        Secondary = 1,
+        Tertiary = 3
     }
        
     /// <summary>
