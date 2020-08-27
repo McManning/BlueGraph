@@ -1,5 +1,4 @@
-﻿
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace BlueGraph.Editor
@@ -16,7 +15,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Load a graph asset in this window for editing
         /// </summary>
-        public void Load(Graph graph)
+        public virtual void Load(Graph graph)
         {
             Graph = graph;
             
@@ -29,7 +28,7 @@ namespace BlueGraph.Editor
             Repaint();
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             Canvas.Update();
         }
@@ -37,7 +36,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Restore an already opened graph after a reload of assemblies
         /// </summary>
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             if (Graph)
             {

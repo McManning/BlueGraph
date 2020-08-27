@@ -12,31 +12,30 @@ namespace BlueGraph.Editor
     /// </summary>
     public static class TypeExtension
     {
-        /// Caching of castability between types to avoid repeat reflection
-        static readonly Dictionary<(Type, Type), bool> k_CastSupportCache = new Dictionary<(Type, Type), bool>();
+        /// <summary>Caching of cast support between types to avoid repeat reflection</summary>
+        private static readonly Dictionary<(Type, Type), bool> CachedCacheSupport = new Dictionary<(Type, Type), bool>();
 
-        /// Caching of prettified type names
-        static readonly Dictionary<Type, string> k_Names = new Dictionary<Type, string>();
+        /// <summary>Caching of prettified type names</summary>
+        private static readonly Dictionary<Type, string> CachedNameMap = new Dictionary<Type, string>();
 
         /// <summary>
-        /// Test if a type can cast to another, taking in account cast operators. 
-        /// Based on https://stackoverflow.com/a/22031364
+        /// Test if a type can cast to another, taking in account cast operators.
         /// </summary>
-        /// <returns></returns>
         public static bool IsCastableTo(this Type from, Type to, bool implicitly = false)
         {
+            // Based on https://stackoverflow.com/a/22031364
             var key = (from, to);
-            if (k_CastSupportCache.TryGetValue(key, out bool support))
+            if (CachedCacheSupport.TryGetValue(key, out bool support))
             {
                 return support;
             }
 
             support = to.IsAssignableFrom(from) || from.HasCastDefined(to, implicitly);
-            k_CastSupportCache.Add(key, support);
+            CachedCacheSupport.Add(key, support);
             return support;
         }
 
-        static bool HasCastDefined(this Type from, Type to, bool implicitly)
+        private static bool HasCastDefined(this Type from, Type to, bool implicitly)
         {
             if ((from.IsPrimitive || from.IsEnum) && (to.IsPrimitive || to.IsEnum))
             {
@@ -72,9 +71,12 @@ namespace BlueGraph.Editor
                 || HasCastOperator(from, _ => to, m => m.ReturnType, implicitly, true);
         }
 
-        static bool HasCastOperator(
-            Type type, Func<MethodInfo, Type> baseType, 
-            Func<MethodInfo, Type> derivedType, bool implicitly, bool lookInBase
+        private static bool HasCastOperator(
+            Type type, 
+            Func<MethodInfo, Type> baseType, 
+            Func<MethodInfo, Type> derivedType,
+            bool implicitly, 
+            bool lookInBase
         ) {
             var bindingFlags = BindingFlags.Public | BindingFlags.Static
                             | (lookInBase ? BindingFlags.FlattenHierarchy : BindingFlags.DeclaredOnly);
@@ -91,8 +93,6 @@ namespace BlueGraph.Editor
         /// Special properties of the type are also represented as additional classes
         /// (e.g. <c>type-is-enumerable</c> and <c>type-is-generic</c>)
         /// </summary>
-        /// <param name="Type"></param>
-        /// <returns></returns>
         public static IEnumerable<string> ToUSSClasses(this Type type)
         {
             // TODO: Better variant that handles lists and such.
@@ -137,22 +137,20 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Convert the type name to something more human readable
         /// </summary>
-        /// <remarks>
-        /// Code adapted from https://stackoverflow.com/a/56281483
-        /// </remarks>
         public static string ToPrettyName(this Type type)
         {
-            if (k_Names.TryGetValue(type, out string name))
+            if (CachedNameMap.TryGetValue(type, out string name))
             {
                 return name;
             }
-
+            
+            // Adapted from https://stackoverflow.com/a/56281483
             var args = type.IsGenericType ? type.GetGenericArguments() : Type.EmptyTypes;
-            var format = Regex.Replace(type.FullName, @"`\d+.*", "") + (type.IsGenericType ? "<?>" : "");
-            var names = args.Select((arg) => arg.IsGenericParameter ? "" : arg.ToPrettyName());
+            var format = Regex.Replace(type.FullName, @"`\d+.*", string.Empty) + (type.IsGenericType ? "<?>" : string.Empty);
+            var names = args.Select((arg) => arg.IsGenericParameter ? string.Empty : arg.ToPrettyName());
 
             name = string.Join(string.Join(",", names), format.Split('?'));
-            k_Names.Add(type, name);
+            CachedNameMap.Add(type, name);
 
             return name;
         }

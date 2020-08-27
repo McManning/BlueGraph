@@ -1,7 +1,4 @@
-﻿
-using UnityEngine;
-
-namespace BlueGraph.Tests
+﻿namespace BlueGraph.Tests
 {
     /// <summary>
     /// Node without any ports or fields to test with

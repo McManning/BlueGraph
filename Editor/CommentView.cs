@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,40 +8,41 @@ namespace BlueGraph.Editor
 {
     public class CommentView : GraphElement, ICanDirty
     {
-        public Comment target;
+        public Comment Target { get; protected set; }
 
-        CommentTheme m_Theme;
-        VisualElement m_TitleContainer;
-        TextField m_TitleEditor;
-        Label m_TitleLabel;
-        bool m_EditingCancelled;
+        private readonly VisualElement titleContainer;
+        private readonly TextField titleEditor;
+        private readonly Label titleLabel;
+        
+        private CommentTheme theme;
+        private bool isEditingCancelled;
 
         public CommentView(Comment comment)
         {
-            target = comment;
+            Target = comment;
             SetPosition(comment.Region);
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CommentView"));
             
-            m_TitleContainer = new VisualElement();
-            m_TitleContainer.AddToClassList("titleContainer");
+            titleContainer = new VisualElement();
+            titleContainer.AddToClassList("titleContainer");
             
-            m_TitleEditor = new TextField();
+            titleEditor = new TextField();
             
-            var input = m_TitleEditor.Q(TextField.textInputUssName);
+            var input = titleEditor.Q(TextField.textInputUssName);
             input.RegisterCallback<KeyDownEvent>(OnTitleKeyDown);
             input.RegisterCallback<FocusOutEvent>(e => { OnFinishEditingTitle(); });
             
-            m_TitleContainer.Add(m_TitleEditor);
+            titleContainer.Add(titleEditor);
             
-            m_TitleLabel = new Label();
-            m_TitleLabel.text = comment.Text;
+            titleLabel = new Label();
+            titleLabel.text = comment.Text;
             
-            m_TitleContainer.Add(m_TitleLabel);
+            titleContainer.Add(titleLabel);
 
-            m_TitleEditor.style.display = DisplayStyle.None;
+            titleEditor.style.display = DisplayStyle.None;
 
-            Add(m_TitleContainer);
+            Add(titleContainer);
 
             ClearClassList();
             AddToClassList("commentView");
@@ -53,7 +53,7 @@ namespace BlueGraph.Editor
             RegisterCallback<MouseDownEvent>(OnMouseDown);
             this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
             
-            SetTheme(target.Theme);
+            SetTheme(Target.Theme);
         }
         
         public virtual void BuildContextualMenu(ContextualMenuPopulateEvent evt)
@@ -63,11 +63,16 @@ namespace BlueGraph.Editor
                 // Add options to change theme
                 foreach (var theme in (CommentTheme[])Enum.GetValues(typeof(CommentTheme)))
                 {
+                    var actionStatus = DropdownMenuAction.Status.Normal;
+                    if (this.theme != theme)
+                    {
+                        actionStatus = DropdownMenuAction.Status.Disabled;
+                    }
+
                     evt.menu.AppendAction(
                         theme + " Theme", 
                         (a) => { SetTheme(theme); }, 
-                        (m_Theme != theme) ? DropdownMenuAction.Status.Normal 
-                            : DropdownMenuAction.Status.Disabled
+                        actionStatus
                     );
                 }
 
@@ -80,10 +85,10 @@ namespace BlueGraph.Editor
         /// </summary>
         public void SetTheme(CommentTheme theme)
         {
-            RemoveFromClassList("theme-" + m_Theme);
+            RemoveFromClassList("theme-" + this.theme);
             AddToClassList("theme-" + theme);
-            m_Theme = theme;
-            target.Theme = theme;
+            this.theme = theme;
+            Target.Theme = theme;
         }
         
         private void OnTitleKeyDown(KeyDownEvent evt)
@@ -91,7 +96,7 @@ namespace BlueGraph.Editor
             switch (evt.keyCode)
             {
                 case KeyCode.Escape:
-                    m_EditingCancelled = true;
+                    isEditingCancelled = true;
                     OnFinishEditingTitle();
                     break;
                 case KeyCode.Return:
@@ -105,33 +110,33 @@ namespace BlueGraph.Editor
         private void OnFinishEditingTitle()
         {
             // Show the label and hide the editor
-            m_TitleLabel.visible = true;
-            m_TitleEditor.style.display = DisplayStyle.None;
+            titleLabel.visible = true;
+            titleEditor.style.display = DisplayStyle.None;
 
-            if (!m_EditingCancelled)
+            if (!isEditingCancelled)
             {
-                string oldName = m_TitleLabel.text;
-                string newName = m_TitleEditor.value;
+                string oldName = titleLabel.text;
+                string newName = titleEditor.value;
                 
-                m_TitleLabel.text = newName;
+                titleLabel.text = newName;
                 OnRenamed(oldName, newName);
             }
                 
-            m_EditingCancelled = false;
+            isEditingCancelled = false;
         }
         
         public void EditTitle()
         {
-            m_TitleLabel.visible = false;
+            titleLabel.visible = false;
 
-            m_TitleEditor.SetValueWithoutNotify(target.Text);
-            m_TitleEditor.style.display = DisplayStyle.Flex;
-            m_TitleEditor.Q(TextField.textInputUssName).Focus();
+            titleEditor.SetValueWithoutNotify(Target.Text);
+            titleEditor.style.display = DisplayStyle.Flex;
+            titleEditor.Q(TextField.textInputUssName).Focus();
         }
         
         public virtual void OnRenamed(string oldName, string newName)
         {
-            target.Text = newName;
+            Target.Text = newName;
         }
 
         private void OnMouseDown(MouseDownEvent evt)
@@ -150,24 +155,18 @@ namespace BlueGraph.Editor
         /// </summary>
         public override bool HitTest(Vector2 localPoint)
         {
-            Vector2 mappedPoint = this.ChangeCoordinatesTo(m_TitleContainer, localPoint);
-            return m_TitleContainer.ContainsPoint(mappedPoint);
+            Vector2 mappedPoint = this.ChangeCoordinatesTo(titleContainer, localPoint);
+            return titleContainer.ContainsPoint(mappedPoint);
         }
         
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            target.Region = newPos;
+            Target.Region = newPos;
         }
 
-        public void OnDirty()
-        {
+        public void OnDirty() { }
 
-        }
-
-        public void OnUpdate()
-        {
-
-        }
+        public void OnUpdate() { }
     }
 }

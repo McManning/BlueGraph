@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using GraphViewEdge = UnityEditor.Experimental.GraphView.Edge;
 
@@ -11,11 +10,11 @@ namespace BlueGraph.Editor
     /// </summary>
     public class EdgeConnectorListener : IEdgeConnectorListener
     {
-        CanvasView m_Canvas;
+        private CanvasView canvas;
     
         public EdgeConnectorListener(CanvasView canvas)
         {
-            m_Canvas = canvas;
+            this.canvas = canvas;
         }
     
         /// <summary>
@@ -23,7 +22,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public void OnDrop(GraphView graphView, GraphViewEdge edge)
         {
-            m_Canvas.AddEdge(edge, true);
+            canvas.AddEdge(edge, true);
         }
 
         /// <summary>
@@ -37,14 +36,14 @@ namespace BlueGraph.Editor
             
             if (edge.output != null)
             {
-                m_Canvas.OpenSearch(
+                canvas.OpenSearch(
                     screenPosition, 
                     edge.output.edgeConnector.edgeDragHelper.draggedPort as PortView
                 );
             }
             else if (edge.input != null)
             {
-                m_Canvas.OpenSearch(
+                canvas.OpenSearch(
                     screenPosition, 
                     edge.input.edgeConnector.edgeDragHelper.draggedPort as PortView
                 );

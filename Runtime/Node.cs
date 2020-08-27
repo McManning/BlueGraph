@@ -7,52 +7,55 @@ namespace BlueGraph
     [Serializable]
     public abstract class Node : ISerializationCallbackReceiver
     {
-        [SerializeField] string m_ID;
+        [SerializeField] private string id;
 
-        public string ID {
-            get { return m_ID; }
-            set { m_ID = value; }
+        public string ID 
+        {
+            get { return id; }
+            set { id = value; }
         }
         
-        [SerializeField] string m_Name;
+        [SerializeField] private string name;
 
-        public string Name {
-            get { return m_Name; }
-            set { m_Name = value; }
+        public string Name 
+        {
+            get { return name; }
+            set { name = value; }
         }
         
-        [SerializeField] Graph m_Graph;
+        [SerializeField] private Graph graph;
 
-        public Graph Graph { 
-            get { return m_Graph; }
-            internal set { m_Graph = value; }
+        public Graph Graph 
+        { 
+            get { return graph; }
+            internal set { graph = value; }
         }
 
-        [SerializeField] Vector2 m_Position;
+        [SerializeField] private Vector2 position;
        
         /// <summary>
         /// Where this node is located on the Graph in CanvasView
         /// </summary>
         public Vector2 Position
         {
-            get { return m_Position; }
-            set { m_Position = value; }
+            get { return position; }
+            set { position = value; }
         }
 
-        [SerializeField] List<Port> m_Ports;
+        [SerializeField] private List<Port> ports;
         
         /// <summary>
         /// Accessor for ports and their connections to/from this node.
         /// </summary>
         public IReadOnlyCollection<Port> Ports 
         { 
-            get { return m_Ports.AsReadOnly(); } 
+            get { return ports.AsReadOnly(); } 
         }
 
         public Node()
         {
             ID = Guid.NewGuid().ToString();
-            m_Ports = new List<Port>();
+            ports = new List<Port>();
         }
 
         public virtual void OnAfterDeserialize()
@@ -67,9 +70,9 @@ namespace BlueGraph
             
             // Add a backref to each child port of this node.
             // We don't store this in the serialized copy to avoid cyclic refs.
-            for (int i = 0; i < m_Ports.Count; i++)
+            for (int i = 0; i < ports.Count; i++)
             {
-                m_Ports[i].Node = this;
+                ports[i].Node = this;
             }
         }
 
@@ -95,7 +98,7 @@ namespace BlueGraph
         /// </summary>
         public Port GetPort(string name)
         {
-            return m_Ports.Find((port) => port.Name == name);
+            return ports.Find((port) => port.Name == name);
         }
         
         /// <summary>
@@ -111,7 +114,7 @@ namespace BlueGraph
                 );
             }
 
-            m_Ports.Add(port);
+            ports.Add(port);
             port.Node = this;
         }
         
@@ -123,7 +126,7 @@ namespace BlueGraph
             port.DisconnectAll();
             port.Node = null;
 
-            m_Ports.Remove(port);
+            ports.Remove(port);
         }
         
         /// <summary>
@@ -131,7 +134,7 @@ namespace BlueGraph
         /// </summary>
         public void DisconnectAllPorts()
         {
-            foreach (var port in m_Ports)
+            foreach (var port in ports)
             {
                 port.DisconnectAll();
             }

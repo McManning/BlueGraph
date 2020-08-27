@@ -1,7 +1,4 @@
-﻿
-using UnityEngine;
-
-namespace BlueGraph.Tests
+﻿namespace BlueGraph.Tests
 {
     /// <summary>
     /// Test node that tracks what events were fired during a test

@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace BlueGraph.Editor
@@ -16,7 +15,6 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Find an existing GraphEditorWindow for the target Graph.
         /// </summary>
-        /// <returns></returns>
         public GraphEditorWindow GetExistingEditorWindow()
         {
             var graph = target as Graph;
@@ -36,7 +34,6 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Create a new editor window
         /// </summary>
-        /// <returns></returns>
         public virtual GraphEditorWindow CreateEditorWindow()
         {
             var window = CreateInstance<GraphEditorWindow>();
@@ -48,7 +45,6 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Focus the existing editor or create a new one for the target Graph
         /// </summary>
-        /// <returns></returns>
         public GraphEditorWindow CreateOrFocusEditorWindow()
         {
             var window = GetExistingEditorWindow();

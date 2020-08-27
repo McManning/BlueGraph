@@ -57,12 +57,12 @@ namespace BlueGraph.Editor
 
             if (type == typeof(LayerMask))
             {
-                var value = ((LayerMask)fieldInfo.GetValue(view.target)).value;
+                var value = ((LayerMask)fieldInfo.GetValue(view.Target)).value;
                 var field = new LayerMaskField(label, value);
                 
                 field.RegisterValueChangedCallback((change) =>
                 {
-                    fieldInfo.SetValue(view.target, (LayerMask)change.newValue);
+                    fieldInfo.SetValue(view.Target, (LayerMask)change.newValue);
                     view.OnPropertyChange();
                 });
 
@@ -75,15 +75,15 @@ namespace BlueGraph.Editor
             if (typeof(Enum).IsAssignableFrom(type))
             {
                 var choices = new List<string>(type.GetEnumNames());
-                var defaultIndex = (int)fieldInfo.GetValue(view.target);
+                var defaultIndex = (int)fieldInfo.GetValue(view.Target);
 
                 if (type.IsDefined(typeof(FlagsAttribute), false))
                 {
-                    var field = new EnumFlagsField(label, (Enum)fieldInfo.GetValue(view.target));
+                    var field = new EnumFlagsField(label, (Enum)fieldInfo.GetValue(view.Target));
                     
                     field.RegisterValueChangedCallback((change) =>
                     {
-                        fieldInfo.SetValue(view.target, change.newValue);
+                        fieldInfo.SetValue(view.Target, change.newValue);
                         view.OnPropertyChange();
                     });
 
@@ -95,7 +95,7 @@ namespace BlueGraph.Editor
                 
                     field.RegisterValueChangedCallback((change) =>
                     {
-                        fieldInfo.SetValue(view.target, field.index);
+                        fieldInfo.SetValue(view.Target, field.index);
                         view.OnPropertyChange();
                     });
 
@@ -104,13 +104,13 @@ namespace BlueGraph.Editor
             }
             
             // Specialized construct so I can set .objectType on the ObjectField
-            if (typeof(Object).IsAssignableFrom(type))
+            if (typeof(UnityEngine.Object).IsAssignableFrom(type))
             {
-                var field = BuildRef<ObjectField, Object>(view, fieldInfo, label) as ObjectField;
+                var field = BuildRef<ObjectField, UnityEngine.Object>(view, fieldInfo, label) as ObjectField;
                 field.objectType = type;
                 return field;
             }
-                
+
             // TODO: EnumFlags/Masks (we have MaskField - how do we detect mask types?)
 
             // TODO: Specialized common types. Transform, Rotation, Texture2D, etc.
@@ -121,21 +121,21 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// Generic factory for instantiating and configuring builtin Unity controls for value types
+        /// Generic factory for instantiating and configuring built-in Unity controls for value types
         /// 
         /// The control will be created and bound to the given NodeView and its associated target node. 
         /// </summary>
-        static VisualElement BuildVal<TField, TType>(NodeView view, FieldInfo fieldInfo, string label) 
+        private static VisualElement BuildVal<TField, TType>(NodeView view, FieldInfo fieldInfo, string label) 
             where TField : BaseField<TType>, new()
         {
             try
             {
                 var field = new TField();
                 field.label = label;
-                field.SetValueWithoutNotify((TType)fieldInfo.GetValue(view.target));
+                field.SetValueWithoutNotify((TType)fieldInfo.GetValue(view.Target));
                 field.RegisterValueChangedCallback((change) =>
                 {
-                    fieldInfo.SetValue(view.target, change.newValue);
+                    fieldInfo.SetValue(view.Target, change.newValue);
                     view.OnPropertyChange();
                 });
 
@@ -144,7 +144,7 @@ namespace BlueGraph.Editor
             catch (InvalidCastException e)
             {
                 Debug.LogError(
-                    $"Failed to build control for {view.target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
+                    $"Failed to build control for {view.Target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
                 );
 
                 return null;
@@ -152,11 +152,11 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Generic factory for instantiating and configuring builtin Unity controls for reference types
+        /// Generic factory for instantiating and configuring built-in Unity controls for reference types
         /// 
         /// The control will be created and bound to the given NodeView and its associated target node. 
         /// </summary>
-        static VisualElement BuildRef<TField, TType>(NodeView view, FieldInfo fieldInfo, string label) 
+        private static VisualElement BuildRef<TField, TType>(NodeView view, FieldInfo fieldInfo, string label) 
             where TField : BaseField<TType>, new() 
             where TType : class
         {
@@ -164,10 +164,10 @@ namespace BlueGraph.Editor
             {
                 var field = new TField();
                 field.label = label;
-                field.SetValueWithoutNotify(fieldInfo.GetValue(view.target) as TType);
+                field.SetValueWithoutNotify(fieldInfo.GetValue(view.Target) as TType);
                 field.RegisterValueChangedCallback((change) =>
                 {
-                    fieldInfo.SetValue(view.target, change.newValue);
+                    fieldInfo.SetValue(view.Target, change.newValue);
                     view.OnPropertyChange();
                 });
 
@@ -176,7 +176,7 @@ namespace BlueGraph.Editor
             catch (InvalidCastException e)
             {
                 Debug.LogError(
-                    $"Failed to build control for {view.target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
+                    $"Failed to build control for {view.Target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
                 );
 
                 return null;

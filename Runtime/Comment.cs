@@ -18,37 +18,37 @@ namespace BlueGraph
     [Serializable]
     public class Comment
     {
-        [SerializeField] string m_Text;
+        [SerializeField] private string text;
 
         /// <summary>
         /// Comment content
         /// </summary>
         public string Text
         {
-            get { return m_Text; }
-            set { m_Text = value; }
+            get { return text; }
+            set { text = value; }
         }
         
-        [SerializeField] CommentTheme m_Theme;
+        [SerializeField] private CommentTheme theme;
 
         /// <summary>
         /// Theme used to display the comment in CanvasView
         /// </summary>
         public CommentTheme Theme
         {
-            get { return m_Theme; }
-            set { m_Theme = value; }
+            get { return theme; }
+            set { theme = value; }
         }
 
-        [SerializeField] Rect m_Region;
+        [SerializeField] private Rect region;
 
         /// <summary>
         /// Region covered by this comment in the CanvasView
         /// </summary>
         public Rect Region
         {
-            get { return m_Region; }
-            set { m_Region = value; }
+            get { return region; }
+            set { region = value; }
         }
     }
 }

@@ -1,86 +1,45 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
-using System.Linq;
 
 namespace BlueGraph.Editor
 {
     public class SearchWindow : ScriptableObject, ISearchWindowProvider
     {
-        public CanvasView target;
-        public PortView sourcePort;
+        public CanvasView Target { get; set; }
+
+        public PortView SourcePort { get; set; }
 
         /// <summary>
         /// If non-empty, only nodes with these tags may be included in search results.
         /// </summary>
-        public List<string> includeTags = new List<string>();
+        public List<string> IncludeTags { get; set; } = new List<string>();
 
-        HashSet<ISearchProvider> m_Providers = new HashSet<ISearchProvider>();
+        private readonly HashSet<ISearchProvider> providers = new HashSet<ISearchProvider>();
         
         public void ClearTags()
         {
-            includeTags.Clear();
+            IncludeTags.Clear();
         }
 
         public void ClearSearchProviders()
         {
-            m_Providers.Clear();
+            providers.Clear();
         }
 
         public void AddSearchProvider(ISearchProvider provider)
         {
-            m_Providers.Add(provider);
+            providers.Add(provider);
         }
 
-        class SearchGroup
+        private IEnumerable<SearchResult> FilterSearchProviders(SearchFilter filter)
         {
-            public SearchGroup(int depth)
-            {
-                this.depth = depth;
-            }
-            
-            internal int depth;
-            internal SortedDictionary<string, SearchGroup> subgroups = new SortedDictionary<string, SearchGroup>();
-            internal List<SearchResult> results = new List<SearchResult>();
-
-            internal void AddToTree(List<SearchTreeEntry> tree)
-            {
-                SearchTreeEntry entry;
-                
-                // Add subgroups
-                foreach (var group in subgroups)
-                {
-                    entry = new SearchTreeGroupEntry(new GUIContent(group.Key))
-                    {
-                        level = depth
-                    };
-
-                    tree.Add(entry);
-                    group.Value.AddToTree(tree);
-                }
-
-                // Add nodes
-                foreach (var result in results)
-                {
-                    entry = new SearchTreeEntry(new GUIContent(result.name))
-                    {
-                        level = depth,
-                        userData = result
-                    };
-
-                    tree.Add(entry);
-                }
-            }
-        }
-
-        IEnumerable<SearchResult> FilterSearchProviders(SearchFilter filter)
-        {
-            foreach (var provider in m_Providers)
+            foreach (var provider in providers)
             {
                 foreach (var result in provider.GetSearchResults(filter))
                 {
-                    result.provider = provider;
+                    result.Provider = provider;
                     yield return result;
                 }
             }
@@ -90,8 +49,8 @@ namespace BlueGraph.Editor
         {
             var filter = new SearchFilter
             {
-                sourcePort = sourcePort?.target,
-                includeTags = includeTags
+                SourcePort = SourcePort?.Target,
+                IncludeTags = IncludeTags
             };
 
             // First item is the title of the window
@@ -104,7 +63,7 @@ namespace BlueGraph.Editor
             // Aggregate search providers and get nodes matching the filter
             foreach (var result in FilterSearchProviders(filter))
             {
-                var path = result.path;
+                var path = result.Path;
                 var group = groups;
 
                 if (path != null)
@@ -113,16 +72,16 @@ namespace BlueGraph.Editor
                     // SearchGroup entries until we find the matching directory
                     foreach (var directory in path)
                     {
-                        if (!group.subgroups.ContainsKey(directory))
+                        if (!group.Subgroups.ContainsKey(directory))
                         {
-                            group.subgroups.Add(directory, new SearchGroup(group.depth + 1));
+                            group.Subgroups.Add(directory, new SearchGroup(group.Depth + 1));
                         }
 
-                        group = group.subgroups[directory];
+                        group = group.Subgroups[directory];
                     }
                 }
 
-                group.results.Add(result);
+                group.Results.Add(result);
             }
             
             groups.AddToTree(tree);
@@ -133,15 +92,58 @@ namespace BlueGraph.Editor
         public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
         {
             var result = entry.userData as SearchResult;
-            var node = result.provider.Instantiate(result);
+            var node = result.Provider.Instantiate(result);
 
-            target.AddNodeFromSearch(
+            Target.AddNodeFromSearch(
                 node,
                 context.screenMousePosition, 
-                sourcePort
+                SourcePort
             );
 
             return true;
+        }
+    }
+    
+    internal class SearchGroup
+    {
+        public SearchGroup(int depth)
+        {
+            Depth = depth;
+        }
+            
+        internal int Depth { get; private set; }
+
+        internal SortedDictionary<string, SearchGroup> Subgroups { get; } = new SortedDictionary<string, SearchGroup>();
+
+        internal List<SearchResult> Results { get; } = new List<SearchResult>();
+
+        internal void AddToTree(List<SearchTreeEntry> tree)
+        {
+            SearchTreeEntry entry;
+                
+            // Add subgroups
+            foreach (var group in Subgroups)
+            {
+                entry = new SearchTreeGroupEntry(new GUIContent(group.Key))
+                {
+                    level = Depth
+                };
+
+                tree.Add(entry);
+                group.Value.AddToTree(tree);
+            }
+
+            // Add nodes
+            foreach (var result in Results)
+            {
+                entry = new SearchTreeEntry(new GUIContent(result.Name))
+                {
+                    level = Depth,
+                    userData = result
+                };
+
+                tree.Add(entry);
+            }
         }
     }
 }

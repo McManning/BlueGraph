@@ -1,5 +1,4 @@
-﻿
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,35 +11,39 @@ namespace BlueGraph.Editor
 {
     public class NodeView : GraphViewNode, ICanDirty
     {
-        public Node target;
+        public Node Target { get; private set; }
         
-        public List<PortView> inputs = new List<PortView>();
-        public List<PortView> outputs = new List<PortView>();
+        public List<PortView> Inputs { get; set; } = new List<PortView>();
+
+        public List<PortView> Outputs { get; set; } = new List<PortView>();
         
-        protected EdgeConnectorListener m_ConnectorListener;
-        protected SerializedProperty m_SerializedNode;
-        protected NodeReflectionData m_ReflectionData;
-        protected CanvasView m_Canvas;
+        protected EdgeConnectorListener ConnectorListener { get; set; }
+
+        protected SerializedProperty SerializedNode { get; set; }
+
+        protected NodeReflectionData ReflectionData { get; set; }
+
+        protected CanvasView Canvas { get; set; }
         
         public void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.ID;
-            target = node;
-            m_Canvas = canvas;
-            m_ReflectionData = NodeReflection.GetNodeType(node.GetType());
-            m_ConnectorListener = connectorListener;
+            Target = node;
+            Canvas = canvas;
+            ReflectionData = NodeReflection.GetNodeType(node.GetType());
+            ConnectorListener = connectorListener;
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
             AddToClassList("nodeView");
             
             // Add a class name matching the node's name (e.g. `.node-My-Branch`)
-            var ussSafeName = Regex.Replace(target.Name, @"[^a-zA-Z0-9]+", "-").Trim('-');
+            var ussSafeName = Regex.Replace(Target.Name, @"[^a-zA-Z0-9]+", "-").Trim('-');
             AddToClassList($"node-{ussSafeName}");
             
             SetPosition(new Rect(node.Position, Vector2.one));
             title = node.Name;
             
-            if (!m_ReflectionData.deletable)
+            if (!ReflectionData.Deletable)
             {
                 capabilities &= ~Capabilities.Deletable;
             }
@@ -58,25 +61,19 @@ namespace BlueGraph.Editor
         /// Executed after receiving a node target and initial configuration
         /// but before being added to the graph. 
         /// </summary>
-        protected virtual void OnInitialize()
-        {
-
-        }
+        protected virtual void OnInitialize() { }
         
         /// <summary>
         /// Executed when we're about to detach this element from the graph. 
         /// </summary>
-        protected virtual void OnDestroy()
-        {
-            
-        }
+        protected virtual void OnDestroy() { }
         
         /// <summary>
-        /// Make sure our list of PortViews and editables sync up with our NodePorts
+        /// Make sure our list of PortViews and editable controls sync up with our NodePorts
         /// </summary>
         protected void UpdatePorts()
         {
-            foreach (var port in target.Ports)
+            foreach (var port in Target.Ports)
             {
                 if (port.Direction == PortDirection.Input)
                 {
@@ -88,10 +85,10 @@ namespace BlueGraph.Editor
                 }
             }
             
-            var reflectionData = NodeReflection.GetNodeType(target.GetType());
+            var reflectionData = NodeReflection.GetNodeType(Target.GetType());
             if (reflectionData != null) 
             {
-                foreach (var editable in reflectionData.editables)
+                foreach (var editable in reflectionData.Editables)
                 {
                     AddEditableField(editable);
                 }
@@ -101,8 +98,8 @@ namespace BlueGraph.Editor
             RefreshExpandedState();
 
             // Update state classes
-            EnableInClassList("hasInputs", inputs.Count > 0);
-            EnableInClassList("hasOutputs", outputs.Count > 0);
+            EnableInClassList("hasInputs", Inputs.Count > 0);
+            EnableInClassList("hasOutputs", Outputs.Count > 0);
         }
 
         protected void AddEditableField(EditableReflectionData editable)
@@ -113,10 +110,10 @@ namespace BlueGraph.Editor
 
         protected virtual void AddInputPort(Port port)
         {
-            var view = PortView.Create(port, m_ConnectorListener);
+            var view = PortView.Create(port, ConnectorListener);
             
             // If we're exposing a control element via reflection: include it in the view
-            var reflection = NodeReflection.GetNodeType(target.GetType());
+            var reflection = NodeReflection.GetNodeType(Target.GetType());
             var element = reflection.GetPortByName(port.Name)?.GetControlElement(this);
 
             if (element != null)
@@ -128,36 +125,36 @@ namespace BlueGraph.Editor
                 view.SetEditorField(container);
             }
 
-            inputs.Add(view);
+            Inputs.Add(view);
             inputContainer.Add(view);
         }
 
         protected virtual void AddOutputPort(Port port)
         {
-            var view = PortView.Create(port, m_ConnectorListener);
+            var view = PortView.Create(port, ConnectorListener);
             
-            outputs.Add(view);
+            Outputs.Add(view);
             outputContainer.Add(view);
         }
 
         public PortView GetInputPort(string name)
         {
-            return inputs.Find((port) => port.portName == name);
+            return Inputs.Find((port) => port.portName == name);
         }
 
         public PortView GetOutputPort(string name)
         {
-            return outputs.Find((port) => port.portName == name);
+            return Outputs.Find((port) => port.portName == name);
         }
         
         public PortView GetCompatibleInputPort(PortView output)
         { 
-            return inputs.Find((port) => port.IsCompatibleWith(output));
+            return Inputs.Find((port) => port.IsCompatibleWith(output));
         }
     
         public PortView GetCompatibleOutputPort(PortView input)
         {
-            return outputs.Find((port) => port.IsCompatibleWith(input));
+            return Outputs.Find((port) => port.IsCompatibleWith(input));
         }
 
         /// <summary>
@@ -165,18 +162,18 @@ namespace BlueGraph.Editor
         /// </summary>
         public virtual void OnPropertyChange()
         {
-            m_Canvas?.Dirty(this);
+            Canvas?.Dirty(this);
         }
         
         /// <summary>
         /// Dirty this node in response to a change in connectivity. Invalidate
-        /// any cache in prep for an OnUpdate() followup call. 
+        /// any cache in prep for an OnUpdate() call. 
         /// </summary>
         public virtual void OnDirty()
         {
             // Dirty all ports so they can refresh their state
-            inputs.ForEach(port => port.OnDirty());
-            outputs.ForEach(port => port.OnDirty());
+            Inputs.ForEach(port => port.OnDirty());
+            Outputs.ForEach(port => port.OnDirty());
         }
 
         /// <summary>
@@ -185,8 +182,8 @@ namespace BlueGraph.Editor
         public virtual void OnUpdate()
         {
             // Propagate update to all ports
-            inputs.ForEach(port => port.OnUpdate());
-            outputs.ForEach(port => port.OnUpdate());
+            Inputs.ForEach(port => port.OnUpdate());
+            Outputs.ForEach(port => port.OnUpdate());
         }
 
         public override Rect GetPosition()
@@ -199,13 +196,13 @@ namespace BlueGraph.Editor
                 return position;
             }
             
-            return new Rect(target.Position, Vector2.one);
+            return new Rect(Target.Position, Vector2.one);
         }
 
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            target.Position = newPos.position;
+            Target.Position = newPos.position;
         }
         
         protected void OnTooltip(TooltipEvent evt)
@@ -213,8 +210,8 @@ namespace BlueGraph.Editor
             // TODO: Better implementation that can be styled
             if (evt.target == titleContainer.Q("title-label"))
             {
-                var typeData = NodeReflection.GetNodeType(target.GetType());
-                evt.tooltip = typeData?.help;
+                var typeData = NodeReflection.GetNodeType(Target.GetType());
+                evt.tooltip = typeData?.Help;
                 
                 // Float the tooltip above the node title bar
                 var bound = titleContainer.worldBound;

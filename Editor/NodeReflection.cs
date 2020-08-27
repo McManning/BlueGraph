@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
 using UnityEditor;
-using UnityEditor.UIElements;
-using UnityEngine;
 using UnityEngine.UIElements;
-using Object = UnityEngine.Object;
 
 /// <summary>
 /// Suite of reflection methods and caching for retrieving available
@@ -23,23 +19,25 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Associated class field if generated via Input/Output attributes
         /// </summary>
-        public FieldInfo field;
+        public FieldInfo Field { get; set; }
 
         /// <summary>
         /// Display name for this port
         /// </summary>
-        public string name;
+        public string Name { get; set; }
         
-        public Type type;
-        public PortDirection direction;
-        public PortCapacity capacity;
+        public Type Type { get; set; }
 
-        public bool hasControlElement;
+        public PortDirection Direction { get; set; }
+
+        public PortCapacity Capacity { get; set; }
+
+        public bool HasControlElement { get; set; }
 
         /// <summary>
         /// Is this.name just the this.field or set via the attribute
         /// </summary>
-        public bool isUsingFieldName;
+        public bool IsUsingFieldName { get; set; }
         
         /// <summary>
         /// Create a VisualElement for this port's inline editor based on the field data type.
@@ -49,12 +47,12 @@ namespace BlueGraph.Editor
         /// </summary>
         public VisualElement GetControlElement(NodeView view)
         {
-            if (!hasControlElement)
+            if (!HasControlElement)
             {
                 return null;
             }
 
-            return ControlElementFactory.CreateControl(field, view);
+            return ControlElementFactory.CreateControl(Field, view);
         }
     }
 
@@ -63,17 +61,18 @@ namespace BlueGraph.Editor
     /// </summary>
     public class EditableReflectionData
     {
-        public string name;
-        public FieldInfo field;
+        public string Name { get; set; }
+
+        public FieldInfo Field { get; set; }
         
         /// <summary>
-        /// Create a VisualElement for this editable's inline editor based on the field data type.
+        /// Create a VisualElement for this editable field's inline editor based on the field data type.
         /// 
         /// This returns null if the type could not be resolved to a supported control element.
         /// </summary>
         public VisualElement GetControlElement(NodeView view)
         {
-            return ControlElementFactory.CreateControl(field, view, name);
+            return ControlElementFactory.CreateControl(Field, view, Name);
         }
     }
 
@@ -85,49 +84,50 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Class type to instantiate for the node 
         /// </summary>
-        public Type type;
+        public Type Type { get; set; }
 
         /// <summary>
         /// Module path for grouping nodes together in the search
         /// </summary>
-        public IEnumerable<string> path;
+        public IEnumerable<string> Path { get; set; }
 
         /// <summary>
         /// List of tags associated with a Node
         /// </summary>
-        public List<string> tags = new List<string>();
+        public List<string> Tags { get; set; } = new List<string>();
 
         /// <summary>
         /// Human-readable display name of the node. Will come from the last
         /// part of the path parsed out of node information - or be the class name.
         /// </summary>
-        public string name;
+        public string Name { get; set; }
 
         /// <summary>
         /// Content for node usage instructions
         /// </summary>
-        public string help;
+        public string Help { get; set; }
 
         /// <summary>
         /// Can this node be deleted from the graph 
         /// </summary>
-        public bool deletable;
+        public bool Deletable { get; set; }
 
-        public List<PortReflectionData> ports = new List<PortReflectionData>();
-        public List<EditableReflectionData> editables = new List<EditableReflectionData>();
+        public List<PortReflectionData> Ports { get; set; } = new List<PortReflectionData>();
+
+        public List<EditableReflectionData> Editables { get; set; } = new List<EditableReflectionData>();
     
         /// <summary>
         /// Cache of FieldInfo entries on the node class
         /// </summary>
-        public List<FieldInfo> fields = new List<FieldInfo>();
+        public List<FieldInfo> Fields { get; set; } = new List<FieldInfo>();
 
         public NodeReflectionData(Type type, NodeAttribute nodeAttr)
         {
-            this.type = type;
-            name = nodeAttr.name ?? ObjectNames.NicifyVariableName(type.Name);
-            path = nodeAttr.path?.Split('/');
-            help = nodeAttr.help;
-            deletable = nodeAttr.deletable;
+            this.Type = type;
+            Name = nodeAttr.Name ?? ObjectNames.NicifyVariableName(type.Name);
+            Path = nodeAttr.Path?.Split('/');
+            Help = nodeAttr.Help;
+            Deletable = nodeAttr.Deletable;
 
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)
@@ -135,18 +135,18 @@ namespace BlueGraph.Editor
                 if (attr is TagsAttribute tagAttr)
                 {
                     // Load any tags associated with the node
-                    tags.AddRange(tagAttr.tags);
+                    Tags.AddRange(tagAttr.Tags);
                 }
                 else if (attr is OutputAttribute output)
                 {
                     // Load any Outputs defined at the class level
-                    ports.Add(new PortReflectionData()
+                    Ports.Add(new PortReflectionData()
                     {
-                        name = output.name,
-                        type = output.type,
-                        direction = PortDirection.Output,
-                        capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
-                        hasControlElement = false
+                        Name = output.Name,
+                        Type = output.Type,
+                        Direction = PortDirection.Output,
+                        Capacity = output.Multiple ? PortCapacity.Multiple : PortCapacity.Single,
+                        HasControlElement = false
                     });
                 }
             }
@@ -157,12 +157,12 @@ namespace BlueGraph.Editor
 
         public bool HasInputOfType(Type type)
         {
-            foreach (var port in ports)
+            foreach (var port in Ports)
             {
-                if (port.direction == PortDirection.Output) continue;
+                if (port.Direction == PortDirection.Output) continue;
        
                 // Cast direction type -> port input
-                if (type.IsCastableTo(port.type, true))
+                if (type.IsCastableTo(port.Type, true))
                 {
                     return true;
                 }
@@ -173,12 +173,12 @@ namespace BlueGraph.Editor
 
         public bool HasOutputOfType(Type type)
         {
-            foreach (var port in ports)
+            foreach (var port in Ports)
             {
-                if (port.direction == PortDirection.Input) continue;
+                if (port.Direction == PortDirection.Input) continue;
        
                 // Cast direction port output -> type
-                if (port.type.IsCastableTo(type, true))
+                if (port.Type.IsCastableTo(type, true))
                 {
                     return true;
                 }
@@ -190,53 +190,53 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Add ports based on attributes on the class fields.
         /// 
-        /// This iterates through fields of a class and adds ports, editables, etc
+        /// This iterates through fields of a class and adds ports, editable fields, etc
         /// based on the attributes attached to each field. 
         /// </summary>
         public void AddFieldsFromClass(Type type)
         {
-            fields.AddRange(type.GetFields(
+            Fields.AddRange(type.GetFields(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
             ));
         
             // Extract port and editable metadata from each tagged field
-            for (int i = 0; i < fields.Count; i++)
+            for (int i = 0; i < Fields.Count; i++)
             {
-                var attribs = fields[i].GetCustomAttributes(true);
+                var attribs = Fields[i].GetCustomAttributes(true);
                 for (int j = 0; j < attribs.Length; j++)
                 {
                     if (attribs[j] is InputAttribute input)
                     {
-                        ports.Add(new PortReflectionData()
+                        Ports.Add(new PortReflectionData()
                         {
-                            name = input.name ?? fields[i].Name,
-                            field = fields[i],
-                            type = fields[i].FieldType,
-                            direction = PortDirection.Input,
-                            capacity = input.multiple ? PortCapacity.Multiple : PortCapacity.Single,
-                            hasControlElement = input.editable,
-                            isUsingFieldName = input.name != null
+                            Name = input.Name ?? Fields[i].Name,
+                            Field = Fields[i],
+                            Type = Fields[i].FieldType,
+                            Direction = PortDirection.Input,
+                            Capacity = input.Multiple ? PortCapacity.Multiple : PortCapacity.Single,
+                            HasControlElement = input.Editable,
+                            IsUsingFieldName = input.Name != null
                         });
                     }
                     else if (attribs[j] is OutputAttribute output)
                     {
-                        ports.Add(new PortReflectionData()
+                        Ports.Add(new PortReflectionData()
                         {
-                            name = output.name ?? fields[i].Name,
-                            field = fields[i],
-                            type = fields[i].FieldType,
-                            direction = PortDirection.Output,
-                            capacity = output.multiple ? PortCapacity.Multiple : PortCapacity.Single,
-                            hasControlElement = false,
-                            isUsingFieldName = output.name != null
+                            Name = output.Name ?? Fields[i].Name,
+                            Field = Fields[i],
+                            Type = Fields[i].FieldType,
+                            Direction = PortDirection.Output,
+                            Capacity = output.Multiple ? PortCapacity.Multiple : PortCapacity.Single,
+                            HasControlElement = false,
+                            IsUsingFieldName = output.Name != null
                         });
                     }
                     else if (attribs[j] is EditableAttribute editable)
                     {
-                        editables.Add(new EditableReflectionData()
+                        Editables.Add(new EditableReflectionData()
                         {
-                            name = editable.name ?? fields[i].Name,
-                            field = fields[i]
+                            Name = editable.Name ?? Fields[i].Name,
+                            Field = Fields[i]
                         });
                     }
                 }
@@ -248,18 +248,18 @@ namespace BlueGraph.Editor
         /// </summary>
         public Node CreateInstance()
         {
-            var node = Activator.CreateInstance(type) as Node;
-            node.Name = name;
+            var node = Activator.CreateInstance(Type) as Node;
+            node.Name = Name;
             
             // Create runtime ports from reflection data
-            foreach (var port in ports)
+            foreach (var port in Ports)
             {
                 node.AddPort(new Port {
-                    Type = port.type,
+                    Type = port.Type,
                     Node = node,
-                    Name = port.name,
-                    Capacity = port.capacity,
-                    Direction = port.direction
+                    Name = port.Name,
+                    Capacity = port.Capacity,
+                    Direction = port.Direction
                 });
             }
 
@@ -268,7 +268,7 @@ namespace BlueGraph.Editor
 
         public PortReflectionData GetPortByName(string name)
         {
-            return ports.Find((port) => port.name == name);
+            return Ports.Find((port) => port.Name == name);
         }
 
         public override string ToString()
@@ -276,30 +276,30 @@ namespace BlueGraph.Editor
             var inputs = new List<string>();
             var outputs = new List<string>();
 
-            foreach (var port in ports)
+            foreach (var port in Ports)
             {
-                if (port.direction == PortDirection.Input)
+                if (port.Direction == PortDirection.Input)
                 {
-                    inputs.Add(port.name);
+                    inputs.Add(port.Name);
                 }
-                else if (!port.hasControlElement)
+                else if (!port.HasControlElement)
                 {
-                    outputs.Add(port.name);
+                    outputs.Add(port.Name);
                 }
             }
 
-            return $"<{name}, IN: {string.Join(", ", inputs)}, OUT: {string.Join(", ", outputs)}>";
+            return $"<{Name}, IN: {string.Join(", ", inputs)}, OUT: {string.Join(", ", outputs)}>";
         }
     }
     
     public static class NodeReflection
     {
-        private static Dictionary<string, NodeReflectionData> k_NodeTypes = null;
+        private static Dictionary<string, NodeReflectionData> cachedReflectionMap = null;
         
         /// <summary>
         /// Mapping between an AbstractNode type (key) and a custom editor type (value)
         /// </summary>
-        private static Dictionary<Type, Type> k_NodeEditors = null;
+        private static Dictionary<Type, Type> cachedEditorMap = null;
         
         /// <summary>
         /// Retrieve reflection data for a given node class type
@@ -314,13 +314,12 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Get all types derived from the base node
         /// </summary>
-        /// <returns></returns>
         public static Dictionary<string, NodeReflectionData> GetNodeTypes()
         {
             // Load cache if we got it
-            if (k_NodeTypes != null)
+            if (cachedReflectionMap != null)
             {
-                return k_NodeTypes;
+                return cachedReflectionMap;
             }
 
             var baseType = typeof(Node);
@@ -343,18 +342,18 @@ namespace BlueGraph.Editor
                 }
             }
         
-            k_NodeTypes = nodes;
-            return k_NodeTypes;
+            cachedReflectionMap = nodes;
+            return cachedReflectionMap;
         }
 
         public static Type GetNodeEditorType(Type type)
         {
-            if (k_NodeEditors == null)
+            if (cachedEditorMap == null)
             {
                 LoadNodeEditorTypes();
             }
             
-            k_NodeEditors.TryGetValue(type, out Type editorType);
+            cachedEditorMap.TryGetValue(type, out Type editorType);
             if (editorType != null)
             {
                 return editorType;
@@ -365,7 +364,7 @@ namespace BlueGraph.Editor
             {
                 type = type.BaseType;
                 
-                k_NodeEditors.TryGetValue(type, out editorType);
+                cachedEditorMap.TryGetValue(type, out editorType);
                 if (editorType != null)
                 {
                     return editorType;
@@ -380,7 +379,7 @@ namespace BlueGraph.Editor
         /// Load and cache a mapping between AbstractNode classes and their 
         /// NodeView editor equivalent, if a custom editor has been defined.
         /// </summary>
-        static void LoadNodeEditorTypes()
+        private static void LoadNodeEditorTypes()
         {
             var baseType = typeof(NodeView);
             var types = new List<Type>();
@@ -394,7 +393,10 @@ namespace BlueGraph.Editor
                         (t) => !t.IsAbstract && baseType.IsAssignableFrom(t)
                     ).ToArray());
                 } 
-                catch (ReflectionTypeLoadException) { }
+                catch (ReflectionTypeLoadException)
+                { 
+                    // noop
+                }
             }
             
             var nodeEditors = new Dictionary<Type, Type>();
@@ -405,11 +407,11 @@ namespace BlueGraph.Editor
                 var attrs = t.GetCustomAttributes<CustomNodeViewAttribute>(false);
                 foreach (var attr in attrs)
                 {
-                    nodeEditors[attr.nodeType] = t;
+                    nodeEditors[attr.NodeType] = t;
                 }
             }
 
-            k_NodeEditors = nodeEditors;
+            cachedEditorMap = nodeEditors;
         }
 
         /// <summary>

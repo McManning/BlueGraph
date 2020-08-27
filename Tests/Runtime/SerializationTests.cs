@@ -68,8 +68,8 @@ namespace BlueGraph.Tests
             Assert.IsInstanceOf<Port>(cloneNode2.GetPort("Input"));
             
             // Check connections
-            var outputsFromNode1 = cloneNode1.GetPort("Output").Connections;
-            var inputsToNode2 = cloneNode2.GetPort("Input").Connections;
+            var outputsFromNode1 = cloneNode1.GetPort("Output").ConnectedPorts;
+            var inputsToNode2 = cloneNode2.GetPort("Input").ConnectedPorts;
 
             Assert.AreEqual(1, outputsFromNode1.Count());
             Assert.AreEqual(1, inputsToNode2.Count());
@@ -112,7 +112,7 @@ namespace BlueGraph.Tests
 
             // ---- Clone via JsonUtility ----
 
-            var json =JsonUtility.ToJson(original, true);
+            var json = JsonUtility.ToJson(original, true);
 
             var clone = ScriptableObject.CreateInstance<TestGraph>();
             JsonUtility.FromJsonOverwrite(json, clone);
@@ -140,8 +140,8 @@ namespace BlueGraph.Tests
             Assert.IsInstanceOf<Port>(cloneNode2.GetPort("Input"));
             
             // Check connections
-            var outputsFromNode1 = cloneNode1.GetPort("Output").Connections;
-            var inputsToNode2 = cloneNode2.GetPort("Input").Connections;
+            var outputsFromNode1 = cloneNode1.GetPort("Output").ConnectedPorts;
+            var inputsToNode2 = cloneNode2.GetPort("Input").ConnectedPorts;
 
             Assert.AreEqual(1, outputsFromNode1.Count());
             Assert.AreEqual(1, inputsToNode2.Count());

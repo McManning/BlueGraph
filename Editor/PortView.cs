@@ -1,25 +1,22 @@
-﻿
-using System;
+﻿using System;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using GraphViewPort = UnityEditor.Experimental.GraphView.Port;
-using System.Collections;
-using UnityEditor;
 
 namespace BlueGraph.Editor
 {
     public class PortView : GraphViewPort
     {
-        public Port target;
+        public Port Target { get; set; }
 
         /// <summary>
         /// Should the inline editor field disappear once one or more
         /// connections have been made to this port view
         /// </summary>
-        public bool hideEditorFieldOnConnection = true;
+        public bool HideEditorFieldOnConnection { get; set; } = true;
 
-        VisualElement m_EditorField;
+        private VisualElement editorField;
         
         public PortView(
             Orientation portOrientation, 
@@ -30,10 +27,10 @@ namespace BlueGraph.Editor
         {
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/PortView"));
             AddToClassList("portView");
+
+            visualClass = string.Empty;
             AddTypeClasses(type);
 
-            visualClass = "";
-            //visualClass = GetTypeVisualClass(type);
             tooltip = type.ToPrettyName();
         }
     
@@ -46,7 +43,7 @@ namespace BlueGraph.Editor
             {
                 m_EdgeConnector = new EdgeConnector<Edge>(connectorListener),
                 portName = port.Name,
-                target = port
+                Target = port
             };
 
             view.AddManipulator(view.m_EdgeConnector);
@@ -55,13 +52,13 @@ namespace BlueGraph.Editor
 
         public void SetEditorField(VisualElement field)
         {
-            if (m_EditorField != null)
+            if (editorField != null)
             {
-                m_ConnectorBox.parent.Remove(m_EditorField);
+                m_ConnectorBox.parent.Remove(editorField);
             }
 
-            m_EditorField = field;
-            m_ConnectorBox.parent.Add(m_EditorField);
+            editorField = field;
+            m_ConnectorBox.parent.Add(editorField);
         }
         
         /// <summary>
@@ -85,7 +82,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Add USS class names for the given type
         /// </summary>
-        void AddTypeClasses(Type type)
+        private void AddTypeClasses(Type type)
         {
             var classes = type.ToUSSClasses();
             foreach (var cls in classes) {
@@ -97,24 +94,21 @@ namespace BlueGraph.Editor
         /// Executed on change of a port connection. Perform any prep before the following
         /// OnUpdate() call during redraw. 
         /// </summary>
-        public void OnDirty()
-        {
-            
-        }
+        public void OnDirty() { }
         
         /// <summary>
         /// Toggle visibility of the inline editable value based on whether we have connections
         /// </summary>
         public void OnUpdate()
         {
-            if (connected && m_EditorField != null && hideEditorFieldOnConnection)
+            if (connected && editorField != null && HideEditorFieldOnConnection)
             {
-                m_EditorField.style.display = DisplayStyle.None;
+                editorField.style.display = DisplayStyle.None;
             }
 
-            if (!connected && m_EditorField != null)
+            if (!connected && editorField != null)
             {
-                m_EditorField.style.display = DisplayStyle.Flex;
+                editorField.style.display = DisplayStyle.Flex;
             }
         }
     }

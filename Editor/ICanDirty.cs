@@ -1,5 +1,4 @@
-﻿
-namespace BlueGraph.Editor
+﻿namespace BlueGraph.Editor
 {
     /// <summary>
     /// Objects that can be dirtied by canvas changes and later updated in response. 

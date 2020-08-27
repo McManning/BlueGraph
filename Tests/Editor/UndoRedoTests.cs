@@ -91,8 +91,8 @@ namespace BlueGraph.Tests
             
             // Make sure an undo operation did not destroy unrelated connections and
             // cleanly reset connections to their previous state (no dangling edges)
-            var outputs = graph.Nodes.ElementAt(0).GetPort("Output").Connections;
-            var inputs = graph.Nodes.ElementAt(1).GetPort("Input").Connections;
+            var outputs = graph.Nodes.ElementAt(0).GetPort("Output").ConnectedPorts;
+            var inputs = graph.Nodes.ElementAt(1).GetPort("Input").ConnectedPorts;
             
             Assert.AreEqual(2, graph.Nodes.Count);
             Assert.AreEqual(1, outputs.Count());

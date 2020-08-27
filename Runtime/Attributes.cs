@@ -13,26 +13,26 @@ namespace BlueGraph
         /// 
         /// If not supplied, this will be inferred based on the class name.
         /// </summary>
-        public string name;
+        public string Name { get; set; }
 
         /// <summary>
         /// Tooltip help content displayed for the node.
         /// </summary>
-        public string help;
+        public string Help { get; set; }
 
         /// <summary>
         /// Slash-delimited directory path to categorize this node in the search window.
         /// </summary>
-        public string path;
+        public string Path { get; set; }
 
         /// <summary>
         /// Can this node be deleted from the graph.
         /// </summary>
-        public bool deletable = true;
+        public bool Deletable { get; set; } = true;
         
         public NodeAttribute(string name = null)
         {
-            this.name = name;
+            Name = name;
         }
     }
     
@@ -43,11 +43,11 @@ namespace BlueGraph
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class TagsAttribute : Attribute
     {
-        public string[] tags;
+        public string[] Tags { get; set; }
 
         public TagsAttribute(params string[] tags)
         {
-            this.tags = tags;
+            this.Tags = tags;
         }
     }
     
@@ -62,21 +62,21 @@ namespace BlueGraph
         /// 
         /// If not supplied, this will default to the field name.
         /// </summary>
-        public string name;
+        public string Name { get; set; }
 
         /// <summary>
         /// Can this input accept multiple outputs at once.
         /// </summary>
-        public bool multiple = false;
+        public bool Multiple { get; set; } = false;
 
         /// <summary>
         /// Can the associated field be directly modified when there are no connections.
         /// </summary>
-        public bool editable = true;
+        public bool Editable { get; set; } = true;
         
         public InputAttribute(string name = null)
         {
-            this.name = name;
+            Name = name;
         }
     }
     
@@ -93,24 +93,24 @@ namespace BlueGraph
         /// 
         /// If not supplied, this will default to the field name.
         /// </summary>
-        public string name;
+        public string Name { get; set; }
         
         /// <summary>
         /// Can this output go to multiple inputs at once.
         /// </summary>
-        public bool multiple = true;
+        public bool Multiple { get; set; } = true;
 
         /// <summary>
         /// If defined as a class attribute, this is the output type.
         /// 
         /// When defined on a field, the output will automatically be inferred by the field.
         /// </summary>
-        public Type type;
+        public Type Type { get; set; }
 
         public OutputAttribute(string name = null, Type type = null)
         {
-            this.name = name;
-            this.type = type;
+            Name = name;
+            Type = type;
         }
     }
 
@@ -125,11 +125,11 @@ namespace BlueGraph
         /// 
         /// If not supplied, this will be inferred based on the field name.
         /// </summary>
-        public string name;
+        public string Name { get; set; }
         
         public EditableAttribute(string name = null)
         {
-            this.name = name;
+            Name = name;
         }
     }
     
@@ -142,11 +142,11 @@ namespace BlueGraph
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class IncludeTagsAttribute : Attribute
     {
-        public string[] tags;
+        public string[] Tags { get; set; }
 
         public IncludeTagsAttribute(params string[] tags)
         {
-            this.tags = tags;
+            Tags = tags;
         }
     }
     
@@ -157,7 +157,7 @@ namespace BlueGraph
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class DeprecatedAttribute : Attribute
     {
-        public Type replaceWith;
+        public Type ReplaceWith { get; set; }
     }
 
     /// <summary>
@@ -167,11 +167,11 @@ namespace BlueGraph
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNodeViewAttribute : Attribute
     {
-        public Type nodeType;
+        public Type NodeType { get; set; }
 
         public CustomNodeViewAttribute(Type nodeType)
         {
-            this.nodeType = nodeType; 
+            NodeType = nodeType; 
         }
     }
 }

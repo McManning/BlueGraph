@@ -11,12 +11,11 @@ namespace BlueGraph
         /// Retrieve the title of the graph displayed in the editor.
         ///
         /// Override to provide identifiable information between
-        /// different types of graphs (e.g. NPC AI vs Dialog Tree)
+        /// different types of graphs (e.g. NPC AI versus Dialog Tree)
         /// </summary>
-        public virtual string Title {
-            get {
-                return "BLUEGRAPH";
-            }
+        public virtual string Title 
+        {
+            get { return "BLUEGRAPH"; }
         }
 
         /// <summary>
@@ -24,47 +23,49 @@ namespace BlueGraph
         /// </summary>
         public IReadOnlyCollection<Node> Nodes
         {
-            get
-            {
-                return m_Nodes.AsReadOnly();
-            }
+            get { return nodes.AsReadOnly(); }
         }
 
         /// <summary>
         /// All nodes contained within this Graph
         /// </summary>
         [SerializeReference, HideInInspector] 
-        List<Node> m_Nodes = new List<Node>();
+        private List<Node> nodes = new List<Node>();
+
+        public List<Comment> Comments
+        {
+            get { return comments; }
+        }
 
         /// <summary>
         /// All comments to display in the editor for this Graph
         /// </summary>
         [SerializeField, HideInInspector]
-        protected internal List<Comment> m_Comments = new List<Comment>();
+        private List<Comment> comments = new List<Comment>();
 
         /// <summary>
         /// Graph serialization version for safely handling automatic upgrades.
         /// </summary>
         [SerializeField, HideInInspector] 
-        protected int m_Version = 1;
+        private int assetVersion = 1;
 
         /// <summary>
         /// Automatically convert nodes with a [Deprecated] attribute to their replacement.
         /// </summary>
-        void UpgradeDeprecatedNodes()
+        private void UpgradeDeprecatedNodes()
         {
-            for (int i = 0; i < m_Nodes.Count; i++)
+            for (int i = 0; i < nodes.Count; i++)
             {
-                if (Attribute.GetCustomAttribute(m_Nodes[i].GetType(), typeof(DeprecatedAttribute)) is DeprecatedAttribute deprecated)
+                if (Attribute.GetCustomAttribute(nodes[i].GetType(), typeof(DeprecatedAttribute)) is DeprecatedAttribute deprecated)
                 {
                     Debug.LogWarning(
-                        $"{m_Nodes[i].GetType().Name} is deprecated. " +
-                        $"Upgrading to {deprecated.replaceWith.Name}."
+                        $"{nodes[i].GetType().Name} is deprecated. " +
+                        $"Upgrading to {deprecated.ReplaceWith.Name}."
                     );
 
                     // Gross workaround that abuses JSON serialization for recasting
-                    string json = JsonUtility.ToJson(m_Nodes[i]);
-                    m_Nodes[i] = JsonUtility.FromJson(json, deprecated.replaceWith) as Node;
+                    string json = JsonUtility.ToJson(nodes[i]);
+                    nodes[i] = JsonUtility.FromJson(json, deprecated.ReplaceWith) as Node;
                 }
             }
         }
@@ -74,7 +75,7 @@ namespace BlueGraph
         /// </summary>
         public Node GetNodeById(string id)
         {
-            return m_Nodes.Find((node) => node.ID == id);
+            return nodes.Find((node) => node.ID == id);
         }
 
         /// <summary>
@@ -82,7 +83,7 @@ namespace BlueGraph
         /// </summary>
         public T GetNode<T>() where T : Node
         {
-            return m_Nodes.Find((node) => typeof(T).IsAssignableFrom(node.GetType())) as T;
+            return nodes.Find((node) => typeof(T).IsAssignableFrom(node.GetType())) as T;
         }
 
         /// <summary>
@@ -91,11 +92,11 @@ namespace BlueGraph
         public T[] GetNodes<T>() where T : Node
         {
             var matches = new List<T>();
-            for (int i = 0; i < m_Nodes.Count; i++)
+            for (int i = 0; i < nodes.Count; i++)
             {
-                if (typeof(T).IsAssignableFrom(m_Nodes[i].GetType()))
+                if (typeof(T).IsAssignableFrom(nodes[i].GetType()))
                 {
-                    matches.Add(m_Nodes[i] as T);
+                    matches.Add(nodes[i] as T);
                 }
             }
 
@@ -107,11 +108,10 @@ namespace BlueGraph
         /// 
         /// Once added, the node's <c>OnAddedToGraph()</c> method will be called.
         /// </summary>
-        /// <param name="node"></param>
         public void AddNode(Node node)
         {
             node.Graph = this;
-            m_Nodes.Add(node);
+            nodes.Add(node);
             node.OnAddedToGraph();
         }
         
@@ -120,11 +120,10 @@ namespace BlueGraph
         /// 
         /// Once removed, the node's <c>OnRemovedFromGraph()</c> method will be called.
         /// </summary>
-        /// <param name="node"></param>
         public void RemoveNode(Node node)
         {
             node.DisconnectAllPorts();
-            m_Nodes.Remove(node);
+            nodes.Remove(node);
 
             node.Graph = null;
             node.OnRemovedFromGraph();
@@ -133,8 +132,6 @@ namespace BlueGraph
         /// <summary>
         /// Add a new edge between two Ports.
         /// </summary>
-        /// <param name="output"></param>
-        /// <param name="input"></param>
         public void AddEdge(Port output, Port input)
         {
             output.Connect(input);

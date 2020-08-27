@@ -11,14 +11,25 @@ namespace BlueGraph.Editor
     /// </summary>
     public class CopyPasteGraph : ScriptableObject
     {
-        [SerializeReference]
-        public List<Node> nodes = new List<Node>();
+        public List<Node> Nodes 
+        { 
+            get { return nodes; }
+            set { nodes = value; }
+        }
 
-        public List<Comment> comments = new List<Comment>();
+        [SerializeReference]
+        private List<Node> nodes = new List<Node>();
+        
+        public List<Comment> Comments
+        {
+            get { return comments; }
+        }
+
+        [SerializeField]
+        private List<Comment> comments = new List<Comment>();
         
         /// <summary>
-        /// Serialize a set of graph elements (nodes, comments, etc) 
-        /// into a stringified CopyPasteGraph. 
+        /// Serialize a set of graph elements (nodes, comments, etc) into a string.
         /// </summary>
         public static string Serialize(IEnumerable<GraphElement> elements)
         {
@@ -28,11 +39,11 @@ namespace BlueGraph.Editor
             {
                 if (element is NodeView node)
                 {
-                    graph.nodes.Add(node.target);
+                    graph.Nodes.Add(node.Target);
                 }
                 else if (element is CommentView comment)
                 {
-                    graph.comments.Add(comment.target);
+                    graph.comments.Add(comment.Target);
                 }
             }
 
@@ -55,7 +66,10 @@ namespace BlueGraph.Editor
 
                 return true;
             } 
-            catch { }
+            catch 
+            { 
+                // noop
+            }
         
             return false;
         }
@@ -75,9 +89,9 @@ namespace BlueGraph.Editor
             var allowedAllNodes = true;
             if (includeTags.Count() > 0)
             {
-                graph.nodes = graph.nodes.FindAll((node) => {
+                graph.Nodes = graph.Nodes.FindAll((node) => {
                     var reflectedNode = NodeReflection.GetNodeType(node.GetType());
-                    var allowed = includeTags.Intersect(reflectedNode.tags).Count() > 0;
+                    var allowed = includeTags.Intersect(reflectedNode.Tags).Count() > 0;
                     allowedAllNodes = allowedAllNodes && allowed;
                     
                     return allowed;
@@ -94,7 +108,7 @@ namespace BlueGraph.Editor
             // in case we're copy+pasting back onto the same graph
             var idMap = new Dictionary<string, string>();
             
-            foreach (var node in graph.nodes)
+            foreach (var node in graph.Nodes)
             {
                 var newId = Guid.NewGuid().ToString();
                 idMap[node.ID] = newId;
@@ -103,19 +117,19 @@ namespace BlueGraph.Editor
 
             // Remap connections to new node IDs and drop any connections
             // that were to nodes outside of the subset of pasted nodes
-            foreach (var node in graph.nodes)
+            foreach (var node in graph.Nodes)
             {
                 foreach (var port in node.Ports)
                 {
-                    var edges = new List<Connection>(port.m_Connections);
-                    port.m_Connections.Clear();
+                    var edges = new List<Connection>(port.Connections);
+                    port.Connections.Clear();
 
                     // Only re-add connections that are in the new pasted subset
                     foreach (var edge in edges)
                     {
                         if (idMap.ContainsKey(edge.NodeID))
                         {
-                            port.m_Connections.Add(new Connection
+                            port.Connections.Add(new Connection
                             {
                                 NodeID = idMap[edge.NodeID],
                                 PortName = edge.PortName

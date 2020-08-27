@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +9,7 @@ namespace BlueGraph.Editor
     /// 
     /// This provider provides all nodes found via NodeReflection.
     /// </summary>
-    class DefaultSearchProvider : ISearchProvider
+    public class DefaultSearchProvider : ISearchProvider
     {
         public IEnumerable<SearchResult> GetSearchResults(SearchFilter filter)
         {
@@ -18,14 +17,14 @@ namespace BlueGraph.Editor
             {
                 var node = entry.Value;
                 if (
-                    IsCompatible(filter.sourcePort, node) && 
-                    IsInSupportedTags(filter.includeTags, node.tags)
+                    IsCompatible(filter.SourcePort, node) && 
+                    IsInSupportedTags(filter.IncludeTags, node.Tags)
                 ) {
                     yield return new SearchResult
                     {
-                        name = node.name,
-                        path = node.path,
-                        userData = node,
+                        Name = node.Name,
+                        Path = node.Path,
+                        UserData = node,
                     };
                 }
             }
@@ -33,7 +32,7 @@ namespace BlueGraph.Editor
 
         public Node Instantiate(SearchResult result)
         {
-            NodeReflectionData data = result.userData as NodeReflectionData;
+            NodeReflectionData data = result.UserData as NodeReflectionData;
             return data.CreateInstance();
         }
         
@@ -41,16 +40,19 @@ namespace BlueGraph.Editor
         /// Returns true if the intersection between the tags and our allow
         /// list has more than one tag, OR if our allow list is empty.
         /// </summary>
-        bool IsInSupportedTags(IEnumerable<string> supported, IEnumerable<string> tags)
+        private bool IsInSupportedTags(IEnumerable<string> supported, IEnumerable<string> tags)
         {
             // If we have no include list, allow anything.
-            if (supported.Count() < 1) return true;
-            
+            if (supported.Count() < 1)
+            {
+                return true;
+            }
+
             // Otherwise - only allow if at least one tag intersects. 
             return supported.Intersect(tags).Count() > 0;
         }
 
-        bool IsCompatible(Port sourcePort, NodeReflectionData node)
+        private bool IsCompatible(Port sourcePort, NodeReflectionData node)
         {
             if (sourcePort == null)
             {

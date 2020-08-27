@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEditor;
@@ -18,34 +17,31 @@ namespace BlueGraph.Editor
     /// </summary>
     public class CanvasView : GraphView
     {
-        Label m_Title;
+        public EditorWindow EditorWindow { get; private set; }
         
-        List<CommentView> m_CommentViews = new List<CommentView>();
+        private readonly Label title;
+        private readonly List<CommentView> commentViews = new List<CommentView>();
+        private readonly SearchWindow searchWindow;
+        private readonly EdgeConnectorListener edgeConnectorListener;
+        private readonly HashSet<ICanDirty> dirtyElements = new HashSet<ICanDirty>();
         
-        Graph m_Graph;
-        SerializedObject m_SerializedGraph;
-        
-        SearchWindow m_Search;
-        EditorWindow m_EditorWindow;
+        private Graph graph;
+        private SerializedObject serializedGraph;
 
-        EdgeConnectorListener m_EdgeListener;
-        
-        HashSet<ICanDirty> m_Dirty = new HashSet<ICanDirty>();
-
-        Vector2 m_LastMousePosition;
+        private Vector2 lastMousePosition;
 
         public CanvasView(EditorWindow window)
         {
-            m_EditorWindow = window;
+            EditorWindow = window;
             
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/BlueGraphVariables"));
             styleSheets.Add(Resources.Load<StyleSheet>("Styles/CanvasView"));
             AddToClassList("canvasView");
             
-            m_EdgeListener = new EdgeConnectorListener(this);
-            m_Search = ScriptableObject.CreateInstance<SearchWindow>();
-            m_Search.AddSearchProvider(new DefaultSearchProvider());
-            m_Search.target = this;
+            edgeConnectorListener = new EdgeConnectorListener(this);
+            searchWindow = ScriptableObject.CreateInstance<SearchWindow>();
+            searchWindow.AddSearchProvider(new DefaultSearchProvider());
+            searchWindow.Target = this;
 
             SetupZoom(0.05f, ContentZoomer.DefaultMaxScale);
         
@@ -72,36 +68,36 @@ namespace BlueGraph.Editor
         
             RegisterCallback<GeometryChangedEvent>(OnFirstResize);
             
-            m_Title = new Label("BLUEGRAPH");
-            m_Title.AddToClassList("canvasViewTitle");
-            Add(m_Title);
+            title = new Label("BLUEGRAPH");
+            title.AddToClassList("canvasViewTitle");
+            Add(title);
             
             // Add a grid renderer *behind* content containers
             Insert(0, new GridBackground());
         }
 
-        void OnUndoRedo()
+        private void OnUndoRedo()
         {
             Refresh();
         }
         
-        void OnGraphMouseMove(MouseMoveEvent evt)
+        private void OnGraphMouseMove(MouseMoveEvent evt)
         {
-            m_LastMousePosition = evt.mousePosition;
+            lastMousePosition = evt.mousePosition;
         }
         
         /// <summary>
         /// Event handler to frame the graph view on initial layout
         /// </summary>
-        void OnFirstResize(GeometryChangedEvent evt)
+        private void OnFirstResize(GeometryChangedEvent evt)
         {
             UnregisterCallback<GeometryChangedEvent>(OnFirstResize);
             FrameAll();
         }
 
-        GraphViewChange OnGraphViewChanged(GraphViewChange change)
+        private GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
-            if (m_SerializedGraph == null)
+            if (serializedGraph == null)
             {
                 return change;
             }
@@ -109,7 +105,7 @@ namespace BlueGraph.Editor
             if (change.movedElements != null)
             {
                 // Moved nodes will update their underlying models automatically.
-                EditorUtility.SetDirty(m_Graph);
+                EditorUtility.SetDirty(graph);
             }
             
             if (change.elementsToRemove != null)
@@ -131,7 +127,7 @@ namespace BlueGraph.Editor
                     
                     if (element is ICanDirty canDirty)
                     {
-                        m_Dirty.Remove(canDirty);
+                        dirtyElements.Remove(canDirty);
                     }
                 }
             }
@@ -139,9 +135,12 @@ namespace BlueGraph.Editor
             return change;
         }
         
-        void OnGraphKeyUp(KeyUpEvent evt)
+        private void OnGraphKeyUp(KeyUpEvent evt)
         {
-            if (evt.target != this) return;
+            if (evt.target != this)
+            {
+                return;
+            }
 
             // C: Add a new comment around the selected nodes (or just at mouse position)
             if (evt.keyCode == KeyCode.C && !evt.ctrlKey && !evt.commandKey)
@@ -216,30 +215,29 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Add a new provider to populate the search window
         /// </summary>
-        /// <param name="provider"></param>
         public void AddSearchProvider(ISearchProvider provider)
         {
-            m_Search.AddSearchProvider(provider);
+            searchWindow.AddSearchProvider(provider);
         }
 
         public void Load(Graph graph)
         {
-            m_Graph = graph;
-            m_SerializedGraph = new SerializedObject(m_Graph);
-            m_Title.text = graph.Title;
+            this.graph = graph;
+            serializedGraph = new SerializedObject(this.graph);
+            title.text = graph.Title;
 
             AddNodeViews(graph.Nodes);
-            AddCommentViews(graph.m_Comments);
+            AddCommentViews(graph.Comments);
 
             // Reset the lookup to a new set of whitelisted modules
-            m_Search.ClearTags();
+            searchWindow.ClearTags();
 
             var attrs = graph.GetType().GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
                 if (attr is IncludeTagsAttribute include)
                 {
-                    m_Search.includeTags.AddRange(include.tags);
+                    searchWindow.IncludeTags.AddRange(include.Tags);
                 }
             }
         }
@@ -253,27 +251,27 @@ namespace BlueGraph.Editor
             PortView connectedPort = null
         ) {
             // Calculate where to place this node on the graph
-            var windowRoot = m_EditorWindow.rootVisualElement;
-            var windowMousePosition = m_EditorWindow.rootVisualElement.ChangeCoordinatesTo(
+            var windowRoot = EditorWindow.rootVisualElement;
+            var windowMousePosition = EditorWindow.rootVisualElement.ChangeCoordinatesTo(
                 windowRoot.parent, 
-                screenPosition - m_EditorWindow.position.position
+                screenPosition - EditorWindow.position.position
             );
 
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
             // Track undo and add to the graph
-            Undo.RegisterCompleteObjectUndo(m_Graph, $"Add Node {node.Name}");
+            Undo.RegisterCompleteObjectUndo(graph, $"Add Node {node.Name}");
             
             node.Position = graphMousePosition;
 
-            m_Graph.AddNode(node);
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            graph.AddNode(node);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
 
             // Add a node to the visual graph
             var editorType = NodeReflection.GetNodeEditorType(node.GetType());
             var element = Activator.CreateInstance(editorType) as NodeView;
-            element.Initialize(node, this, m_EdgeListener);
+            element.Initialize(node, this, edgeConnectorListener);
             
             AddElement(element);
             
@@ -303,14 +301,13 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Remove a node from both the canvas view and the graph model
         /// </summary>
-        /// <param name="node"></param>
         public void RemoveNode(NodeView node)
         {
-            Undo.RegisterCompleteObjectUndo(m_Graph, $"Delete Node {node.name}");
+            Undo.RegisterCompleteObjectUndo(graph, $"Delete Node {node.name}");
             
-            m_Graph.RemoveNode(node.target);
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            graph.RemoveNode(node.Target);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
 
             RemoveElement(node);
         }
@@ -320,11 +317,14 @@ namespace BlueGraph.Editor
         /// </summary>
         public void AddEdge(GraphViewEdge edge, bool registerAsNewUndo)
         {
-            if (edge.input == null || edge.output == null) return;
+            if (edge.input == null || edge.output == null)
+            {
+                return;
+            }
             
             if (registerAsNewUndo)
             {
-                Undo.RegisterCompleteObjectUndo(m_Graph, "Add Edge");
+                Undo.RegisterCompleteObjectUndo(graph, "Add Edge");
             }
             
             // Handle single connection ports on either end. 
@@ -354,9 +354,9 @@ namespace BlueGraph.Editor
             var output = edge.output as PortView;
             
             // Connect the ports in the model
-            m_Graph.AddEdge(input.target, output.target);
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            graph.AddEdge(input.Target, output.Target);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
 
             // Add a matching edge view onto the canvas
             var newEdge = input.ConnectTo(output);
@@ -377,13 +377,13 @@ namespace BlueGraph.Editor
             
             if (registerAsNewUndo)
             {
-                Undo.RegisterCompleteObjectUndo(m_Graph, "Remove Edge");
+                Undo.RegisterCompleteObjectUndo(graph, "Remove Edge");
             }
             
             // Disconnect the ports in the model
-            m_Graph.RemoveEdge(input.target, output.target);
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            graph.RemoveEdge(input.Target, output.Target);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
             
             // Remove the edge view
             edge.input.Disconnect(edge);
@@ -398,9 +398,9 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Resync nodes and edges on the canvas with the modified graph.
+        /// Sync nodes and edges on the canvas with the modified graph.
         /// </summary>
-        void Refresh()
+        private void Refresh()
         {
             // TODO: Smart diff - if we start seeing performance issues. 
             // It gets complicated due to how we bind serialized objects though.
@@ -408,30 +408,29 @@ namespace BlueGraph.Editor
             // For now, we just nuke everything and start over.
 
             // Clear serialized graph first so that change events aren't undo tracked
-            m_SerializedGraph = null;
+            serializedGraph = null;
 
             DeleteElements(graphElements.ToList());
 
-            Load(m_Graph);
+            Load(graph);
         }
         
         /// <summary>
         /// Mark a node and all dependents as dirty for the next refresh. 
         /// </summary>
-        /// <param name="node"></param>
         public void Dirty(ICanDirty element)
         {
-            m_Dirty.Add(element);
+            dirtyElements.Add(element);
             
             // TODO: Not the best place for this.
-            EditorUtility.SetDirty(m_Graph);
+            EditorUtility.SetDirty(graph);
 
             element.OnDirty();
 
             // Also dirty outputs if a NodeView
             if (element is NodeView node)
             {
-                foreach (var port in node.outputs)
+                foreach (var port in node.Outputs)
                 {
                     foreach (var conn in port.connections)
                     {
@@ -451,7 +450,7 @@ namespace BlueGraph.Editor
                 if (element is ICanDirty cd)
                 {
                     cd.OnDirty();
-                    m_Dirty.Add(cd);
+                    dirtyElements.Add(cd);
                 }
             });
         }
@@ -459,31 +458,31 @@ namespace BlueGraph.Editor
         public void Update()
         {
             // Propagate change on dirty elements
-            foreach (var element in m_Dirty)
+            foreach (var element in dirtyElements)
             {
                 element.OnUpdate();
             }
             
-            m_Dirty.Clear();
+            dirtyElements.Clear();
         }
 
         public void OpenSearch(Vector2 screenPosition, PortView connectedPort = null)
         {
-            m_Search.sourcePort = connectedPort;
-            GraphViewSearchWindow.Open(new SearchWindowContext(screenPosition), m_Search);
+            searchWindow.SourcePort = connectedPort;
+            GraphViewSearchWindow.Open(new SearchWindowContext(screenPosition), searchWindow);
         }
         
         /// <summary>
         /// Append views for a set of nodes
         /// </summary>
-        void AddNodeViews(IEnumerable<Node> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
+        private void AddNodeViews(IEnumerable<Node> nodes, bool selectOnceAdded = false, bool centerOnMouse = false)
         {
             // Add views of each node from the graph
             var nodeMap = new Dictionary<Node, NodeView>();
 
             foreach (var node in nodes)
             {
-                if (!m_Graph.Nodes.Contains(node))
+                if (!graph.Nodes.Contains(node))
                 {
                     Debug.LogError("Cannot add NodeView: Node is not indexed on the graph");
                 }
@@ -492,7 +491,7 @@ namespace BlueGraph.Editor
                     var editorType = NodeReflection.GetNodeEditorType(node.GetType());
                     var element = Activator.CreateInstance(editorType) as NodeView;
                 
-                    element.Initialize(node, this, m_EdgeListener);
+                    element.Initialize(node, this, edgeConnectorListener);
                     AddElement(element);
                 
                     nodeMap.Add(node, element);
@@ -508,7 +507,7 @@ namespace BlueGraph.Editor
             if (centerOnMouse)
             {
                 var bounds = GetBounds(nodeMap.Values);
-                var worldPosition = contentViewContainer.WorldToLocal(m_LastMousePosition);
+                var worldPosition = contentViewContainer.WorldToLocal(lastMousePosition);
                 var delta = worldPosition - bounds.center;
                 
                 foreach (var node in nodeMap)
@@ -524,9 +523,12 @@ namespace BlueGraph.Editor
             {
                 foreach (var port in node.Key.Ports)
                 {
-                    if (port.Direction == PortDirection.Output) continue;
+                    if (port.Direction == PortDirection.Output)
+                    {
+                        continue;
+                    }
 
-                    foreach (var conn in port.Connections)
+                    foreach (var conn in port.ConnectedPorts)
                     {
                         var connectedNode = conn.Node;
                         if (connectedNode == null)
@@ -579,12 +581,12 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Append views for comments from a Graph
         /// </summary>
-        void AddCommentViews(IEnumerable<Comment> comments)
+        private void AddCommentViews(IEnumerable<Comment> comments)
         { 
             foreach (var comment in comments)
             {
                 var commentView = new CommentView(comment);
-                m_CommentViews.Add(commentView);
+                commentViews.Add(commentView);
                 AddElement(commentView);
                 Dirty(commentView);
             }
@@ -593,7 +595,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Calculate the bounding box for a set of nodes
         /// </summary>
-        Rect GetBounds(IEnumerable<ISelectable> items)
+        private Rect GetBounds(IEnumerable<ISelectable> items)
         {
             var contentRect = Rect.zero;
                
@@ -627,9 +629,9 @@ namespace BlueGraph.Editor
         /// If there are selected nodes, this'll encapsulate the selection with
         /// the comment box. Otherwise, it'll add at defaultPosition.
         /// </summary>
-        void AddComment()
+        private void AddComment()
         {
-            Undo.RegisterCompleteObjectUndo(m_Graph, "Add Comment");
+            Undo.RegisterCompleteObjectUndo(graph, "Add Comment");
             
             // Pad out the bounding box a bit more on the selection
             var padding = 30f; // TODO: Remove hardcoding
@@ -638,14 +640,14 @@ namespace BlueGraph.Editor
             
             if (bounds.width < 1 || bounds.height < 1)
             {
-                Vector2 worldPosition = contentViewContainer.WorldToLocal(m_LastMousePosition);
+                Vector2 worldPosition = contentViewContainer.WorldToLocal(lastMousePosition);
                 bounds.x = worldPosition.x;
                 bounds.y = worldPosition.y;
 
                 // TODO: For some reason CSS minWidth/minHeight isn't being respected. 
                 // Maybe I need to wait for CSS to load before setting bounds?
-                bounds.width = 150 - padding * 2;
-                bounds.height = 100 - padding * 3;
+                bounds.width = 150 - (padding * 2);
+                bounds.height = 100 - (padding * 3);
             }
 
             bounds.x -= padding;
@@ -658,13 +660,13 @@ namespace BlueGraph.Editor
             comment.Text = "New Comment";
             comment.Region = bounds;
 
-            m_Graph.m_Comments.Add(comment);
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            graph.Comments.Add(comment);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
             
             // Add the view
             var commentView = new CommentView(comment);
-            m_CommentViews.Add(commentView);
+            commentViews.Add(commentView);
             AddElement(commentView);
             
             Dirty(commentView);
@@ -676,49 +678,46 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Remove a comment from both the canvas view and the graph model
         /// </summary>
-        /// <param name="comment"></param>
         public void RemoveComment(CommentView comment)
         {
-            Undo.RegisterCompleteObjectUndo(m_Graph, "Delete Comment");
+            Undo.RegisterCompleteObjectUndo(graph, "Delete Comment");
             
             // Remove the model
-            m_Graph.m_Comments.Remove(comment.target);
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            graph.Comments.Remove(comment.Target);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
             
             // Remove the view
             RemoveElement(comment);
-            m_CommentViews.Remove(comment);
+            commentViews.Remove(comment);
         }
 
         /// <summary>
-        /// Handler for deserializing a node from a string payload
+        /// Handler to deserialize a string back into a CopyPasteGraph
         /// </summary>
-        /// <param name="operationName"></param>
-        /// <param name="data"></param>
         private void OnUnserializeAndPaste(string operationName, string data)
         {
-            Undo.RegisterCompleteObjectUndo(m_Graph, "Paste Subgraph");
+            Undo.RegisterCompleteObjectUndo(graph, "Paste Subgraph");
 
-            var cpg = CopyPasteGraph.Deserialize(data, m_Search.includeTags);
+            var cpg = CopyPasteGraph.Deserialize(data, searchWindow.IncludeTags);
             
-            foreach (var node in cpg.nodes)
+            foreach (var node in cpg.Nodes)
             {
-                m_Graph.AddNode(node);
+                graph.AddNode(node);
             }
 
-            foreach (var comment in cpg.comments)
+            foreach (var comment in cpg.Comments)
             {
-                m_Graph.m_Comments.Add(comment);
+                graph.Comments.Add(comment);
             }
             
-            m_SerializedGraph.Update();
-            EditorUtility.SetDirty(m_Graph);
+            serializedGraph.Update();
+            EditorUtility.SetDirty(graph);
             
             // Add views for all the new elements
             ClearSelection();
-            AddNodeViews(cpg.nodes, true, true);
-            AddCommentViews(cpg.comments);
+            AddNodeViews(cpg.Nodes, true, true);
+            AddCommentViews(cpg.Comments);
 
             ScriptableObject.DestroyImmediate(cpg);
         }
@@ -753,15 +752,13 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// Replacement of the base AddElement() to undo the hardcoded
-        /// border style that's overriding USS files. 
-        /// Should probably report this as dumb. 
-        /// 
-        /// See: https://github.com/Unity-Technologies/UnityCsReference/blob/02d565cf3dd0f6b15069ba976064c75dc2705b08/Modules/GraphViewEditor/Views/GraphView.cs#L1222
+        /// Replacement of the base AddElement() to undo the hardcoded border 
+        /// style that's overriding USS files. Should probably report this as dumb. 
         /// </summary>
-        /// <param name="graphElement"></param>
         public new void AddElement(GraphElement graphElement)
         {
+            // See: https://github.com/Unity-Technologies/UnityCsReference/blob/02d565cf3dd0f6b15069ba976064c75dc2705b08/Modules/GraphViewEditor/Views/GraphView.cs#L1222
+            
             var borderBottomWidth = graphElement.style.borderBottomWidth;
             base.AddElement(graphElement);
 

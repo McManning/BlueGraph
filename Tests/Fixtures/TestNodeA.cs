@@ -1,5 +1,4 @@
-﻿
-namespace BlueGraph.Tests
+﻿namespace BlueGraph.Tests
 {
     public class TestNodeA : Node
     {
@@ -38,8 +37,5 @@ namespace BlueGraph.Tests
         }
     }
 
-    public class InheritedTestNodeA : TestNodeA
-    {
-        
-    }
+    public class InheritedTestNodeA : TestNodeA { }
 }

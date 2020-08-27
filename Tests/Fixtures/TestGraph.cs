@@ -1,5 +1,4 @@
-﻿
-namespace BlueGraph.Tests
+﻿namespace BlueGraph.Tests
 {
     public class TestGraph : Graph
     {

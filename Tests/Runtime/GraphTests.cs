@@ -123,8 +123,8 @@ namespace BlueGraph.Tests
                 node2.GetPort("Input")
             );
             
-            var outputsFromNode1 = node1.GetPort("Output").Connections;
-            var inputsToNode2 = node2.GetPort("Input").Connections;
+            var outputsFromNode1 = node1.GetPort("Output").ConnectedPorts;
+            var inputsToNode2 = node2.GetPort("Input").ConnectedPorts;
 
             Assert.AreEqual(1, outputsFromNode1.Count());
             Assert.AreEqual(1, inputsToNode2.Count());
