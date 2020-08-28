@@ -203,34 +203,19 @@ namespace BlueGraph
         }
 
         /// <summary>
-        /// Return an iterator of connection values to this port.
-        /// 
-        /// If this is an input port, the output value of each connected
-        /// port is aggregated in the order that connections were initially made.
-        /// 
-        /// If this is an output port, then the node's `OnRequestValue()`
-        /// will be executed with the expectation of returning IEnumerable.
+        /// Return an iterator of connection values to this port
+        /// where <c>GetValue</c> of each connected port is enumerated.
         /// </summary>
         public virtual IEnumerable<T> GetValues<T>()
         {
-            if (Direction == PortDirection.Input)
-            {
-                HydratePorts();
+            HydratePorts();
 
-                if (connections.Count > 0)
-                {
-                    for (var i = 0; i < connections.Count; i++)
-                    {
-                        yield return connections[i].Port.GetValue<T>();
-                    }
-                }
-            }
-            
-            // Otherwise, resolve from the node.
-            var values = Node.OnRequestValue(this) as IEnumerable<T>;
-            foreach (var value in values)
+            if (connections.Count > 0)
             {
-                yield return value;
+                for (var i = 0; i < connections.Count; i++)
+                {
+                    yield return connections[i].Port.GetValue<T>();
+                }
             }
         }
         

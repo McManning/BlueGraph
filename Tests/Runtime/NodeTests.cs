@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -189,7 +190,7 @@ namespace BlueGraph.Tests
             );
 
             var expected = new int[] { 2, 3 };
-            var actual = node3.GetInputValues<int>("Input");
+            var actual = node3.GetInputValues<int>("Input").ToArray();
 
             CollectionAssert.AreEqual(expected, actual);
         }

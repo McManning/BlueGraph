@@ -23,7 +23,8 @@
             { 
                 Name = "Output",
                 Direction = PortDirection.Output,
-                Type = typeof(int) 
+                Type = typeof(int),
+                Capacity = PortCapacity.Multiple
             });
         }
 
