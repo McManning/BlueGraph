@@ -1,0 +1,4 @@
+﻿
+.heightmapPreviewNodeView #extension {
+    padding: 0;
+}

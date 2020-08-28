@@ -1,0 +1,109 @@
+﻿
+/* Configurations per named math node */
+
+.node-Add {
+    --math-background-image: resource("add");
+}
+
+.node-And {
+    --math-background-image: resource("and");
+}
+
+.node-Divide {
+    --math-background-image: resource("divide");
+}
+
+.node-Equal {
+    --math-background-image: resource("equal");
+}
+
+.node-Greater-Than {
+    --math-background-image: resource("greater-than");
+}
+
+.node-Greater-Than-Equal {
+    --math-background-image: resource("greater-than-equal");
+}
+
+.node-Less-Than {
+    --math-background-image: resource("less-than");
+}
+
+.node-Less-Than-Equal {
+    --math-background-image: resource("less-than-equal");
+}
+
+.node-Max {
+    --math-background-image: resource("max");
+}
+
+.node-Min {
+    --math-background-image: resource("min");
+}
+
+.node-Multiply {
+    --math-background-image: resource("multiply");
+}
+
+.node-Not {
+    --math-background-image: resource("not");
+}
+
+.node-Not-Equal {
+    --math-background-image: resource("not-equal");
+}
+
+.node-Or {
+    --math-background-image: resource("or");
+}
+
+.node-Sign {
+    --math-background-image: resource("sign");
+}
+
+.node-Subtract {
+    --math-background-image: resource("subtract");
+}
+
+/* Custom styles to simplify the node UI down to just icon + IO */
+
+.mathNodeView #title {
+    display: none;
+}
+
+.mathNodeView .port #type {
+    /* Can't do a display: none because we need events from it */
+    visibility: hidden;
+    width: 0px;
+    margin: 0;
+}
+
+.mathNodeView #divider {
+    display: none;
+}
+
+.mathNodeView #contents {
+    height: 60px;
+    min-width: 90px;
+    
+    background-color: #232932;
+    opacity: 0.9;
+    
+    background-image: var(--math-background-image);
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #969696; /* var(--bluegraph-port-title-color); */
+}
+
+.mathNodeView #contents > #top {
+    height: 100%;
+}
+
+.mathNodeView #contents > #top > #output,
+.mathNodeView #contents > #top > #input {
+    background-color: transparent;
+    justify-content: space-around;
+}
+
+.mathNodeView .unity-base-field__input {
+    border-color: transparent;
+}

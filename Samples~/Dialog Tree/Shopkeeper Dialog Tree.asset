@@ -1,0 +1,697 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a97694840c87c7b469b18c7e7d09f2bf, type: 3}
+  m_Name: Shopkeeper Dialog Tree
+  m_EditorClassIdentifier: 
+  nodes:
+  - id: 0
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  - id: 6
+  - id: 7
+  - id: 8
+  - id: 9
+  - id: 10
+  - id: 11
+  - id: 12
+  - id: 13
+  - id: 14
+  - id: 15
+  comments:
+  - text: Rob the shopkeeper
+    theme: 0
+    region:
+      serializedVersion: 2
+      x: -125.886475
+      y: 947.2378
+      width: 1098.9998
+      height: 299.99994
+  assetVersion: 1
+  references:
+    version: 1
+    00000000:
+      type: {class: StartDialog, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 209b9956-a2a8-4626-a7ab-943a8a0af280
+        name: Start Dialog
+        graph: {fileID: 11400000}
+        position: {x: -1269, y: 24.5}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 289f7c92-fc3c-4fd1-b0d4-59ae3db0d662
+            portName: DialogFlowIn
+    00000001:
+      type: {class: Say, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: b9049959-69f6-417a-a8bb-241fd8a44fee
+        name: Say
+        graph: {fileID: 11400000}
+        position: {x: -1098, y: 271.33334}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: d59bae89-04c2-49be-8065-d77ad357c11f
+            portName: DialogFlowIn
+        - name: Name
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Portrait
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Position
+          type: BlueGraphSamples.PortraitPosition, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Text Speed
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: b34c050e-1091-4c3f-9626-5e2874bb6848
+            portName: DialogFlowOut
+        speakerName: Protag
+        portrait: {fileID: 2800000, guid: a20b0e827864be847b952b4f58a2e6f0, type: 3}
+        portraitPosition: 1
+        textSpeed: 0.02
+        text: Hello!
+    00000002:
+      type: {class: SetPortraits, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 289f7c92-fc3c-4fd1-b0d4-59ae3db0d662
+        name: Set Portraits
+        graph: {fileID: 11400000}
+        position: {x: -1098, y: 24.5}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: b34c050e-1091-4c3f-9626-5e2874bb6848
+            portName: DialogFlowIn
+        - name: Left
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Center
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Right
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 209b9956-a2a8-4626-a7ab-943a8a0af280
+            portName: DialogFlowOut
+        left: {fileID: 2800000, guid: 358ee83b9d375fd4fb676e24681010b5, type: 3}
+        center: {fileID: 0}
+        right: {fileID: 2800000, guid: 907026b3def64834aa9f378363062667, type: 3}
+        keepExisting: 0
+    00000003:
+      type: {class: Wait, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: b34c050e-1091-4c3f-9626-5e2874bb6848
+        name: Wait
+        graph: {fileID: 11400000}
+        position: {x: -1097.8, y: 183}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: b9049959-69f6-417a-a8bb-241fd8a44fee
+            portName: DialogFlowIn
+        - name: Seconds
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 289f7c92-fc3c-4fd1-b0d4-59ae3db0d662
+            portName: DialogFlowOut
+        seconds: 0.8
+    00000004:
+      type: {class: Say, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: a69b5038-7433-4da3-8220-24f1544730e0
+        name: Say
+        graph: {fileID: 11400000}
+        position: {x: -719.88635, y: 490.2379}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: db4624eb-ef29-4c4c-af67-a8b5ed420a50
+            portName: DialogFlowIn
+        - name: Name
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Portrait
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Position
+          type: BlueGraphSamples.PortraitPosition, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Text Speed
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: d59bae89-04c2-49be-8065-d77ad357c11f
+            portName: DialogFlowOut
+        speakerName: Shopkeeper
+        portrait: {fileID: 2800000, guid: 7cd5f0f630771c74584226daa96f4041, type: 3}
+        portraitPosition: 2
+        textSpeed: 0.02
+        text: Welcome to Mice R' Us. How can I help you?
+    00000005:
+      type: {class: SetPortraits, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: d59bae89-04c2-49be-8065-d77ad357c11f
+        name: Set Portraits
+        graph: {fileID: 11400000}
+        position: {x: -1097.8, y: 494}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: a69b5038-7433-4da3-8220-24f1544730e0
+            portName: DialogFlowIn
+        - name: Left
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Center
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Right
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: b9049959-69f6-417a-a8bb-241fd8a44fee
+            portName: DialogFlowOut
+        left: {fileID: 2800000, guid: 358ee83b9d375fd4fb676e24681010b5, type: 3}
+        center: {fileID: 0}
+        right: {fileID: 0}
+        keepExisting: 1
+    00000006:
+      type: {class: GetPlayerStat, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: baa22eb6-2faf-45cf-a3cd-1ea14ad02db1
+        name: Get S.P.E.C.I.A.L.
+        graph: {fileID: 11400000}
+        position: {x: -1061.55, y: 822.85004}
+        ports:
+        - name: 
+          type: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 1
+          direction: 1
+          connections:
+          - nodeId: b31c1c06-03e3-43a5-a34b-22cbdfc8d61c
+            portName: value1
+        - name: stat
+          type: BlueGraphSamples.PlayerStat, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        stat: 4
+    00000007:
+      type: {class: GreaterThan, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: b31c1c06-03e3-43a5-a34b-22cbdfc8d61c
+        name: Greater Than
+        graph: {fileID: 11400000}
+        position: {x: -858.5501, y: 822.85004}
+        ports:
+        - name: value1
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections:
+          - nodeId: baa22eb6-2faf-45cf-a3cd-1ea14ad02db1
+            portName: 
+        - name: value2
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: result
+          type: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 1
+          direction: 1
+          connections:
+          - nodeId: db4624eb-ef29-4c4c-af67-a8b5ed420a50
+            portName: enableOption2
+        value1: 0
+        value2: 10
+        result: 0
+    00000008:
+      type: {class: Say, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 8b869665-6b3a-4994-98f2-c39d2f1784c2
+        name: Say
+        graph: {fileID: 11400000}
+        position: {x: -193, y: 470}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 3118e3bb-811f-4a3c-ace2-14351c89f056
+            portName: DialogFlowIn
+        - name: Name
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Portrait
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Position
+          type: BlueGraphSamples.PortraitPosition, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Text Speed
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: db4624eb-ef29-4c4c-af67-a8b5ed420a50
+            portName: onOption0
+        speakerName: Shopkeeper
+        portrait: {fileID: 0}
+        portraitPosition: 0
+        textSpeed: 0.02
+        text: 'Sorry we''re fresh out. '
+    00000009:
+      type: {class: Say, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 9a82df16-2ed5-480c-a060-951f6d83b36e
+        name: Say
+        graph: {fileID: 11400000}
+        position: {x: -192.88637, y: 696.2378}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 3118e3bb-811f-4a3c-ace2-14351c89f056
+            portName: DialogFlowIn
+        - name: Name
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Portrait
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Position
+          type: BlueGraphSamples.PortraitPosition, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Text Speed
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: db4624eb-ef29-4c4c-af67-a8b5ed420a50
+            portName: onOption1
+        speakerName: Shopkeeper
+        portrait: {fileID: 0}
+        portraitPosition: 0
+        textSpeed: 0.02
+        text: No, sorry.
+    0000000A:
+      type: {class: SetPortraits, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: e9411242-c93c-479d-ab56-4fda5be9dbe8
+        name: Set Portraits
+        graph: {fileID: 11400000}
+        position: {x: -81, y: 1015.75}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 1133b67a-18b6-42c5-922a-189070c57e86
+            portName: DialogFlowIn
+        - name: Left
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Center
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Right
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: db4624eb-ef29-4c4c-af67-a8b5ed420a50
+            portName: onOption2
+        left: {fileID: 2800000, guid: abb220610a7b3764fa04c0d45ad82420, type: 3}
+        center: {fileID: 0}
+        right: {fileID: 2800000, guid: 3e26ae2a7b884994c8dec82d73169316, type: 3}
+        keepExisting: 0
+    0000000B:
+      type: {class: Say, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 1133b67a-18b6-42c5-922a-189070c57e86
+        name: Say
+        graph: {fileID: 11400000}
+        position: {x: 182, y: 1015.75}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: e85a71da-2810-43a6-98d7-d69b31d05d02
+            portName: DialogFlowIn
+        - name: Name
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Portrait
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Position
+          type: BlueGraphSamples.PortraitPosition, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Text Speed
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: e9411242-c93c-479d-ab56-4fda5be9dbe8
+            portName: DialogFlowOut
+        speakerName: Shopkeeper
+        portrait: {fileID: 0}
+        portraitPosition: 0
+        textSpeed: 0.02
+        text: Okay! Don't hurt me!
+    0000000C:
+      type: {class: Choose, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: db4624eb-ef29-4c4c-af67-a8b5ed420a50
+        name: Choose
+        graph: {fileID: 11400000}
+        position: {x: -719.88635, y: 711.2379}
+        ports:
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: a69b5038-7433-4da3-8220-24f1544730e0
+            portName: DialogFlowOut
+        - name: option0
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: enableOption0
+          type: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: onOption0
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 1
+          connections:
+          - nodeId: 8b869665-6b3a-4994-98f2-c39d2f1784c2
+            portName: DialogFlowIn
+        - name: option1
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: enableOption1
+          type: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: onOption1
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 1
+          connections:
+          - nodeId: 9a82df16-2ed5-480c-a060-951f6d83b36e
+            portName: DialogFlowIn
+        - name: option2
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: enableOption2
+          type: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections:
+          - nodeId: b31c1c06-03e3-43a5-a34b-22cbdfc8d61c
+            portName: result
+        - name: onOption2
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 1
+          connections:
+          - nodeId: e9411242-c93c-479d-ab56-4fda5be9dbe8
+            portName: DialogFlowIn
+        option0: I'd like to buy some fish
+        enableOption0: 1
+        option1: Do you know the way to the nearest tavern?
+        enableOption1: 1
+        option2: '[Intimidation] Empty the cash register'
+        enableOption2: 0
+    0000000D:
+      type: {class: EndDialog, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 3118e3bb-811f-4a3c-ace2-14351c89f056
+        name: End Dialog
+        graph: {fileID: 11400000}
+        position: {x: 218.11365, y: 477.2379}
+        ports:
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 9a82df16-2ed5-480c-a060-951f6d83b36e
+            portName: DialogFlowOut
+          - nodeId: 8b869665-6b3a-4994-98f2-c39d2f1784c2
+            portName: DialogFlowOut
+    0000000E:
+      type: {class: EndDialog, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: bf144ac9-2498-408f-ba81-e2384e49f24b
+        name: End Dialog
+        graph: {fileID: 11400000}
+        position: {x: 818, y: 1015.75}
+        ports:
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: e85a71da-2810-43a6-98d7-d69b31d05d02
+            portName: DialogFlowOut
+    0000000F:
+      type: {class: Say, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: e85a71da-2810-43a6-98d7-d69b31d05d02
+        name: Say
+        graph: {fileID: 11400000}
+        position: {x: 504, y: 1015.75}
+        ports:
+        - name: DialogFlowOut
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: bf144ac9-2498-408f-ba81-e2384e49f24b
+            portName: DialogFlowIn
+        - name: Name
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Portrait
+          type: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Position
+          type: BlueGraphSamples.PortraitPosition, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: Text Speed
+          type: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: DialogFlowIn
+          type: BlueGraphSamples.DialogFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 1133b67a-18b6-42c5-922a-189070c57e86
+            portName: DialogFlowOut
+        speakerName: 
+        portrait: {fileID: 0}
+        portraitPosition: 0
+        textSpeed: 0.02
+        text: <Shopkeeper opens the cash register and gives you the money>

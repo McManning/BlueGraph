@@ -1,0 +1,218 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adbcfb50ec106564b96cfc24d41626a1, type: 3}
+  m_Name: Test MonoBehaviourGraph
+  m_EditorClassIdentifier: 
+  nodes:
+  - id: 0
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  comments: []
+  assetVersion: 1
+  references:
+    version: 1
+    00000000:
+      type: {class: OnEnable, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 5281e907-c7a9-4958-b6a7-fce7015f0fe9
+        name: On Enable
+        graph: {fileID: 11400000}
+        position: {x: -1.2499974, y: -93.70002}
+        ports:
+        - name: ExecOut
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 8832681a-adfc-4b21-b7f1-d223db49e5a9
+            portName: ExecIn
+    00000001:
+      type: {class: OnUpdate, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 7fa6a02c-c6c3-4a36-84f0-382150c0ad24
+        name: On Update
+        graph: {fileID: 11400000}
+        position: {x: -1.2499974, y: 188.30002}
+        ports:
+        - name: ExecOut
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 2c9a77ed-2e43-4b0c-808a-5dcd066023ad
+            portName: ExecIn
+    00000002:
+      type: {class: DebugLog, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 8832681a-adfc-4b21-b7f1-d223db49e5a9
+        name: Debug Log
+        graph: {fileID: 11400000}
+        position: {x: 495.74997, y: -93.70002}
+        ports:
+        - name: ExecOut
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections: []
+        - name: message
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: obj
+          type: System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: context
+          type: UnityEngine.Object, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: ExecIn
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 5281e907-c7a9-4958-b6a7-fce7015f0fe9
+            portName: ExecOut
+        message: MonoBehaviour Graph Enabled
+        context: {fileID: 0}
+        mode: 0
+    00000003:
+      type: {class: Branch, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 2c9a77ed-2e43-4b0c-808a-5dcd066023ad
+        name: Branch
+        graph: {fileID: 11400000}
+        position: {x: 193, y: 186}
+        ports:
+        - name: Else
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 620f485e-b402-4ef3-a7ad-d6ca2bb407c0
+            portName: ExecIn
+        - name: ExecOut
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections:
+          - nodeId: 486775a3-6b1d-4ce4-aae9-e729989ef0ff
+            portName: ExecIn
+        - name: Condition
+          type: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: ExecIn
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 7fa6a02c-c6c3-4a36-84f0-382150c0ad24
+            portName: ExecOut
+        condition: 0
+    00000004:
+      type: {class: DebugLog, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 486775a3-6b1d-4ce4-aae9-e729989ef0ff
+        name: Debug Log
+        graph: {fileID: 11400000}
+        position: {x: 495.74997, y: 110.30002}
+        ports:
+        - name: ExecOut
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections: []
+        - name: message
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: obj
+          type: System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: context
+          type: UnityEngine.Object, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: ExecIn
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 2c9a77ed-2e43-4b0c-808a-5dcd066023ad
+            portName: ExecOut
+        message: Condition is true
+        context: {fileID: 0}
+        mode: 0
+    00000005:
+      type: {class: DebugLog, ns: BlueGraphSamples, asm: Assembly-CSharp}
+      data:
+        id: 620f485e-b402-4ef3-a7ad-d6ca2bb407c0
+        name: Debug Log
+        graph: {fileID: 11400000}
+        position: {x: 495.74997, y: 277.30002}
+        ports:
+        - name: ExecOut
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 0
+          direction: 1
+          connections: []
+        - name: message
+          type: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: obj
+          type: System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: context
+          type: UnityEngine.Object, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+            PublicKeyToken=null
+          capacity: 0
+          direction: 0
+          connections: []
+        - name: ExecIn
+          type: BlueGraphSamples.ExecutionFlowData, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+          capacity: 1
+          direction: 0
+          connections:
+          - nodeId: 2c9a77ed-2e43-4b0c-808a-5dcd066023ad
+            portName: Else
+        message: Condition is false
+        context: {fileID: 0}
+        mode: 0
