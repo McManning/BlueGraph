@@ -64,7 +64,7 @@ namespace BlueGraph.Editor
                 foreach (var theme in (CommentTheme[])Enum.GetValues(typeof(CommentTheme)))
                 {
                     var actionStatus = DropdownMenuAction.Status.Normal;
-                    if (this.theme != theme)
+                    if (this.theme == theme)
                     {
                         actionStatus = DropdownMenuAction.Status.Disabled;
                     }
