@@ -49,6 +49,7 @@ namespace BlueGraph.Editor
         {
             var filter = new SearchFilter
             {
+                Graph = Target.Graph,
                 SourcePort = SourcePort?.Target,
                 IncludeTags = IncludeTags
             };

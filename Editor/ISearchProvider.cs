@@ -23,6 +23,11 @@ namespace BlueGraph.Editor
     public class SearchFilter
     {
         /// <summary>
+        /// The graph instance we're searching on
+        /// </summary>
+        public Graph Graph { get; set; }
+
+        /// <summary>
         /// If the user is dragging a port out to search for nodes
         /// that are compatible, this is that source port.
         /// </summary>
