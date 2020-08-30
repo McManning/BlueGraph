@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace BlueGraph.Editor
@@ -134,10 +135,7 @@ namespace BlueGraph.Editor
             return classes;
         }
 
-        /// <summary>
-        /// Convert the type name to something more human readable
-        /// </summary>
-        public static string ToPrettyName(this Type type)
+        private static string GetOrCacheTypeName(this Type type)
         {
             if (CachedNameMap.TryGetValue(type, out string name))
             {
@@ -151,6 +149,21 @@ namespace BlueGraph.Editor
 
             name = string.Join(string.Join(",", names), format.Split('?'));
             CachedNameMap.Add(type, name);
+
+            return name;
+        }
+
+        /// <summary>
+        /// Convert the type name to something more human readable
+        /// </summary>
+        public static string ToPrettyName(this Type type, bool includeNamespaces = true)
+        {
+            var name = type.GetOrCacheTypeName();
+
+            if (!includeNamespaces)
+            {
+                return name.Substring(name.LastIndexOf('.') + 1);
+            }
 
             return name;
         }
