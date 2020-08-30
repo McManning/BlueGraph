@@ -751,5 +751,21 @@ namespace BlueGraph.Editor
                 graphElement.style.borderBottomWidth = borderBottomWidth;
             }
         }
+
+        public override List<GraphViewPort> GetCompatiblePorts(GraphViewPort startPort, NodeAdapter nodeAdapter)
+        {
+            var compatiblePorts = new List<GraphViewPort>();
+            var startPortView = startPort as PortView;
+
+            ports.ForEach((port) => {
+                var portView = port as PortView;
+                if (portView.IsCompatibleWith(startPortView))
+                {
+                    compatiblePorts.Add(portView);
+                }
+            });
+            
+            return compatiblePorts;
+        }
     }
 }
