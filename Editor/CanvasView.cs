@@ -18,6 +18,7 @@ namespace BlueGraph.Editor
     public class CanvasView : GraphView
     {
         public EditorWindow EditorWindow { get; private set; }
+        public Graph Graph { get; private set; }
         
         private readonly Label title;
         private readonly List<CommentView> commentViews = new List<CommentView>();
@@ -25,7 +26,6 @@ namespace BlueGraph.Editor
         private readonly EdgeConnectorListener edgeConnectorListener;
         private readonly HashSet<ICanDirty> dirtyElements = new HashSet<ICanDirty>();
         
-        private Graph graph;
         private SerializedObject serializedGraph;
 
         private Vector2 lastMousePosition;
@@ -105,7 +105,7 @@ namespace BlueGraph.Editor
             if (change.movedElements != null)
             {
                 // Moved nodes will update their underlying models automatically.
-                EditorUtility.SetDirty(graph);
+                EditorUtility.SetDirty(Graph);
             }
             
             if (change.elementsToRemove != null)
@@ -222,8 +222,8 @@ namespace BlueGraph.Editor
 
         public void Load(Graph graph)
         {
-            this.graph = graph;
-            serializedGraph = new SerializedObject(this.graph);
+            Graph = graph;
+            serializedGraph = new SerializedObject(Graph);
             title.text = graph.Title;
 
             AddNodeViews(graph.Nodes);
@@ -260,13 +260,13 @@ namespace BlueGraph.Editor
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
         
             // Track undo and add to the graph
-            Undo.RegisterCompleteObjectUndo(graph, $"Add Node {node.Name}");
+            Undo.RegisterCompleteObjectUndo(Graph, $"Add Node {node.Name}");
             
             node.Position = graphMousePosition;
 
-            graph.AddNode(node);
+            Graph.AddNode(node);
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
 
             // Add a node to the visual graph
             var editorType = NodeReflection.GetNodeEditorType(node.GetType());
@@ -303,11 +303,11 @@ namespace BlueGraph.Editor
         /// </summary>
         public void RemoveNode(NodeView node)
         {
-            Undo.RegisterCompleteObjectUndo(graph, $"Delete Node {node.name}");
+            Undo.RegisterCompleteObjectUndo(Graph, $"Delete Node {node.name}");
             
-            graph.RemoveNode(node.Target);
+            Graph.RemoveNode(node.Target);
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
 
             RemoveElement(node);
         }
@@ -324,7 +324,7 @@ namespace BlueGraph.Editor
             
             if (registerAsNewUndo)
             {
-                Undo.RegisterCompleteObjectUndo(graph, "Add Edge");
+                Undo.RegisterCompleteObjectUndo(Graph, "Add Edge");
             }
             
             // Handle single connection ports on either end. 
@@ -354,9 +354,9 @@ namespace BlueGraph.Editor
             var output = edge.output as PortView;
             
             // Connect the ports in the model
-            graph.AddEdge(input.Target, output.Target);
+            Graph.AddEdge(input.Target, output.Target);
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
 
             // Add a matching edge view onto the canvas
             var newEdge = input.ConnectTo(output);
@@ -377,13 +377,13 @@ namespace BlueGraph.Editor
             
             if (registerAsNewUndo)
             {
-                Undo.RegisterCompleteObjectUndo(graph, "Remove Edge");
+                Undo.RegisterCompleteObjectUndo(Graph, "Remove Edge");
             }
             
             // Disconnect the ports in the model
-            graph.RemoveEdge(input.Target, output.Target);
+            Graph.RemoveEdge(input.Target, output.Target);
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
             
             // Remove the edge view
             edge.input.Disconnect(edge);
@@ -412,7 +412,7 @@ namespace BlueGraph.Editor
 
             DeleteElements(graphElements.ToList());
 
-            Load(graph);
+            Load(Graph);
         }
         
         /// <summary>
@@ -423,7 +423,7 @@ namespace BlueGraph.Editor
             dirtyElements.Add(element);
             
             // TODO: Not the best place for this.
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
 
             element.OnDirty();
 
@@ -482,7 +482,7 @@ namespace BlueGraph.Editor
 
             foreach (var node in nodes)
             {
-                if (!graph.Nodes.Contains(node))
+                if (!Graph.Nodes.Contains(node))
                 {
                     Debug.LogError("Cannot add NodeView: Node is not indexed on the graph");
                 }
@@ -631,7 +631,7 @@ namespace BlueGraph.Editor
         /// </summary>
         private void AddComment()
         {
-            Undo.RegisterCompleteObjectUndo(graph, "Add Comment");
+            Undo.RegisterCompleteObjectUndo(Graph, "Add Comment");
             
             // Pad out the bounding box a bit more on the selection
             var padding = 30f; // TODO: Remove hardcoding
@@ -660,9 +660,9 @@ namespace BlueGraph.Editor
             comment.Text = "New Comment";
             comment.Region = bounds;
 
-            graph.Comments.Add(comment);
+            Graph.Comments.Add(comment);
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
             
             // Add the view
             var commentView = new CommentView(comment);
@@ -680,12 +680,12 @@ namespace BlueGraph.Editor
         /// </summary>
         public void RemoveComment(CommentView comment)
         {
-            Undo.RegisterCompleteObjectUndo(graph, "Delete Comment");
+            Undo.RegisterCompleteObjectUndo(Graph, "Delete Comment");
             
             // Remove the model
-            graph.Comments.Remove(comment.Target);
+            Graph.Comments.Remove(comment.Target);
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
             
             // Remove the view
             RemoveElement(comment);
@@ -697,22 +697,22 @@ namespace BlueGraph.Editor
         /// </summary>
         private void OnUnserializeAndPaste(string operationName, string data)
         {
-            Undo.RegisterCompleteObjectUndo(graph, "Paste Subgraph");
+            Undo.RegisterCompleteObjectUndo(Graph, "Paste Subgraph");
 
             var cpg = CopyPasteGraph.Deserialize(data, searchWindow.IncludeTags);
             
             foreach (var node in cpg.Nodes)
             {
-                graph.AddNode(node);
+                Graph.AddNode(node);
             }
 
             foreach (var comment in cpg.Comments)
             {
-                graph.Comments.Add(comment);
+                Graph.Comments.Add(comment);
             }
             
             serializedGraph.Update();
-            EditorUtility.SetDirty(graph);
+            EditorUtility.SetDirty(Graph);
             
             // Add views for all the new elements
             ClearSelection();
@@ -735,22 +735,6 @@ namespace BlueGraph.Editor
             return CopyPasteGraph.Serialize(elements);
         }
         
-        public override List<GraphViewPort> GetCompatiblePorts(GraphViewPort startPort, NodeAdapter nodeAdapter)
-        {
-            var compatiblePorts = new List<GraphViewPort>();
-            var startPortView = startPort as PortView;
-
-            ports.ForEach((port) => {
-                var portView = port as PortView;
-                if (portView.IsCompatibleWith(startPortView))
-                {
-                    compatiblePorts.Add(portView);
-                }
-            });
-            
-            return compatiblePorts;
-        }
-
         /// <summary>
         /// Replacement of the base AddElement() to undo the hardcoded border 
         /// style that's overriding USS files. Should probably report this as dumb. 
