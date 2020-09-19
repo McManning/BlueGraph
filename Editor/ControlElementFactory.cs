@@ -108,7 +108,11 @@ namespace BlueGraph.Editor
             if (typeof(UnityEngine.Object).IsAssignableFrom(type))
             {
                 var field = BuildRef<ObjectField, UnityEngine.Object>(view, fieldInfo, label) as ObjectField;
-                field.objectType = type;
+                if (field != null)
+                {
+                    field.objectType = type;
+                }
+
                 return field;
             }
 
@@ -174,10 +178,10 @@ namespace BlueGraph.Editor
 
                 return field;
             } 
-            catch (InvalidCastException e)
+            catch (Exception e)
             {
                 Debug.LogError(
-                    $"Failed to build control for {view.Target.Name}:{fieldInfo.Name} of type {fieldInfo.FieldType}: {e}"
+                    $"Failed to build control for \"{view.Target.Name}:{fieldInfo.Name}\" of type {fieldInfo.FieldType}: {e}"
                 );
 
                 return null;
