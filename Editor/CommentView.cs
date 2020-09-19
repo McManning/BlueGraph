@@ -22,7 +22,7 @@ namespace BlueGraph.Editor
             Target = comment;
             SetPosition(comment.Region);
             
-            styleSheets.Add(Resources.Load<StyleSheet>("Styles/CommentView"));
+            styleSheets.Add(Resources.Load<StyleSheet>("BlueGraphEditor/CommentView"));
             
             titleContainer = new VisualElement();
             titleContainer.AddToClassList("titleContainer");

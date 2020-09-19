@@ -25,7 +25,7 @@ namespace BlueGraph.Editor
             Type type
         ) : base(portOrientation, portDirection, portCapacity, type)
         {
-            styleSheets.Add(Resources.Load<StyleSheet>("Styles/PortView"));
+            styleSheets.Add(Resources.Load<StyleSheet>("BlueGraphEditor/PortView"));
             AddToClassList("portView");
 
             visualClass = string.Empty;

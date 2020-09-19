@@ -33,9 +33,10 @@ namespace BlueGraph.Editor
         public CanvasView(EditorWindow window)
         {
             EditorWindow = window;
+            name = "bluegraph-canvas";
             
-            styleSheets.Add(Resources.Load<StyleSheet>("Styles/BlueGraphVariables"));
-            styleSheets.Add(Resources.Load<StyleSheet>("Styles/CanvasView"));
+            styleSheets.Add(Resources.Load<StyleSheet>("BlueGraphEditor/Variables"));
+            styleSheets.Add(Resources.Load<StyleSheet>("BlueGraphEditor/CanvasView"));
             AddToClassList("canvasView");
             
             edgeConnectorListener = new EdgeConnectorListener(this);

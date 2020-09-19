@@ -1,6 +1,17 @@
 ﻿
 /* Variables that can be overridden to change the look 'n feel of a graph */
 
+/* #bluegraph-canvas { 
+
+    Cannot cascade these variables to support 2019.3.7
+    See: https://forum.unity.com/threads/solved-uss-variables-getting-corrupted.824145/
+    This bug also affects -unity-background-image-tint-color
+    for PortView.uss type-is-collection > #connector.
+
+    Seems to be fixed in 2020.1.3, and possibly earlier.
+*/
+
+
 * {
     /* Background grid display configurations */
     --bluegraph-grid-background-color:              #202b3c;
@@ -17,6 +28,7 @@
     --bluegraph-node-inputs-background-color:       #393a40;
     --bluegraph-node-outputs-background-color:      #232932;
     --bluegraph-node-editables-background-color:    #3f3f3f;
+    --bluegraph-node-error-color:                   #D81619;
 
     /* Port settings */
     --bluegraph-port-title-color:                   #c1c1c1;
@@ -46,4 +58,61 @@
     --bluegraph-port-color-color:                   #bebebe;
     --bluegraph-port-transform-color:               #fa711d;
     --bluegraph-port-gameobject-color:              #ab60ff;
+}
+
+/*  
+    Custom type classes to automatically generate a type color variable 
+    if someone is using Type.toUSSClasses() on a visual element.
+*/
+.type-is-object {
+    --type-color: var(--bluegraph-port-object-color);
+}
+
+.type-is-value {
+    --type-color: var(--bluegraph-port-value-color);
+}
+
+.type-is-enum {
+    --type-color: var(--bluegraph-port-enum-color);
+}
+
+.type-System-String {
+    --type-color: var(--bluegraph-port-string-color);
+}
+
+.type-System-Boolean {
+    --type-color: var(--bluegraph-port-boolean-color);
+}
+
+.type-System-Int
+.type-System-Int32,
+.type-System-Int64 {
+    --type-color: var(--bluegraph-port-int-color);
+}
+
+.type-System-Single,
+.type-System-Double {
+    --type-color: var(--bluegraph-port-float-color);
+}
+
+.type-UnityEngine-Vector2,
+.type-UnityEngine-Vector3,
+.type-UnityEngine-Vector4 {
+    --type-color: var(--bluegraph-port-vector-color);
+}
+
+.type-UnityEngine-Quaternion {
+    --type-color: var(--bluegraph-port-quaternion-color);
+}
+
+.type-UnityEngine-Color {
+    --type-color: var(--bluegraph-port-color-color);
+}
+
+.type-UnityEngine-Transform {
+    --type-color: var(--bluegraph-port-transform-color);
+}
+
+.type-UnityEngine-GameObject {
+    --type-color: var(--bluegraph-port-gameobject-color);
 }

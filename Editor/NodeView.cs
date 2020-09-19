@@ -33,7 +33,7 @@ namespace BlueGraph.Editor
             ReflectionData = NodeReflection.GetNodeType(node.GetType());
             ConnectorListener = connectorListener;
             
-            styleSheets.Add(Resources.Load<StyleSheet>("Styles/NodeView"));
+            styleSheets.Add(Resources.Load<StyleSheet>("BlueGraphEditor/NodeView"));
             AddToClassList("nodeView");
             
             // Add a class name matching the node's name (e.g. `.node-My-Branch`)
@@ -85,6 +85,13 @@ namespace BlueGraph.Editor
                 }
             }
             
+            // Update state classes
+            EnableInClassList("hasInputs", Inputs.Count > 0);
+            EnableInClassList("hasOutputs", Outputs.Count > 0);
+        }
+
+        protected void ReloadEditables()
+        {
             var reflectionData = NodeReflection.GetNodeType(Target.GetType());
             if (reflectionData != null) 
             {
@@ -93,13 +100,8 @@ namespace BlueGraph.Editor
                     AddEditableField(editable);
                 }
             }
-            
-            // Toggle visibility of the extension container
-            RefreshExpandedState();
 
-            // Update state classes
-            EnableInClassList("hasInputs", Inputs.Count > 0);
-            EnableInClassList("hasOutputs", Outputs.Count > 0);
+            RefreshExpandedState();
         }
 
         protected void AddEditableField(EditableReflectionData editable)

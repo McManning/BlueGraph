@@ -88,3 +88,50 @@
     display: flex;
 }
 
+/* Error state */
+
+.nodeView #error {
+    display: none;
+}
+
+.nodeView.hasError #error {
+    display: flex;
+}
+
+.nodeView.hasError #node-border {
+    border-width: 1px;
+}
+
+.nodeView #error {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    left: -5px;
+    right: -5px;
+    
+    border-width: 2px;
+    border-radius: 12px;
+    border-color: var(--bluegraph-node-error-color);
+}
+
+.nodeView #error-label {
+    color: var(--bluegraph-node-error-color);
+    -unity-text-align: upper-center;
+    font-size: 110%;
+
+    position: relative;
+    bottom: -50px;
+
+
+    min-width: 200px;
+    align-self: center;
+    white-space: normal;
+}
+
+.nodeView #error-icon {
+    background-image: resource("Error@2x");
+    width: 20px;
+    height: 20px;
+    left: -16px;
+    top: -16px;
+}
