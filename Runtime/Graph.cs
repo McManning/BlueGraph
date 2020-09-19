@@ -5,7 +5,22 @@ using UnityEngine;
 
 namespace BlueGraph
 {
-    public abstract class Graph : ScriptableObject
+    public interface IGraph
+    {
+        T GetNode<T>() where T : Node;
+
+        IEnumerable<T> GetNodes<T>() where T : Node;
+
+        void AddNode(Node node);
+
+        void RemoveNode(Node node);
+
+        void AddEdge(Port output, Port input);
+
+        void RemoveEdge(Port output, Port input);
+    }
+
+    public abstract class Graph : ScriptableObject, IGraph
     {
         /// <summary>
         /// Retrieve the title of the graph displayed in the editor.
@@ -19,9 +34,9 @@ namespace BlueGraph
         }
 
         /// <summary>
-        /// Retrieve an enumerable of nodes on this graph
+        /// Retrieve all nodes on this graph
         /// </summary>
-        public IReadOnlyCollection<Node> Nodes
+        public IReadOnlyList<Node> Nodes
         {
             get { return nodes.AsReadOnly(); }
         }
@@ -32,7 +47,7 @@ namespace BlueGraph
         /// <summary>
         /// All comments to display in the editor for this Graph
         /// </summary>
-        public List<Comment> Comments
+        internal List<Comment> Comments
         {
             get { return comments; }
         }
