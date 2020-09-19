@@ -47,6 +47,23 @@ namespace BlueGraph
 
         [SerializeField] private List<Port> ports;
         
+        [NonSerialized] private string error;
+
+        /// <summary>
+        /// Error information associated with this node
+        /// </summary>
+        public string Error { 
+            get {
+                return error; 
+            }
+            set
+            {
+                error = value;
+                OnError();
+                OnErrorEvent?.Invoke();
+            }
+        }
+
         /// <summary>
         /// Accessor for ports and their connections to/from this node.
         /// </summary>
@@ -141,6 +158,12 @@ namespace BlueGraph
         /// <c>Node.Graph</c> property is still valid during this call. 
         /// </summary>
         public virtual void OnRemovedFromGraph() { } 
+
+        /// <summary>
+        /// Called when the <c>Error</c> property is modified.
+        /// </summary>
+        public virtual void OnError() { } 
+
         /// <summary>
         /// Resolve the return value associated with the given port. 
         /// </summary>

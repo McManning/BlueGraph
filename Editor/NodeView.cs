@@ -24,6 +24,8 @@ namespace BlueGraph.Editor
         protected NodeReflectionData ReflectionData { get; set; }
 
         protected CanvasView Canvas { get; set; }
+
+        private Label errorMessage;
         
         internal void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
         {
@@ -40,9 +42,17 @@ namespace BlueGraph.Editor
             var ussSafeName = Regex.Replace(Target.Name, @"[^a-zA-Z0-9]+", "-").Trim('-');
             AddToClassList($"node-{ussSafeName}");
             
+            var errorContainer = new VisualElement { name = "error" };
+            errorContainer.Add(new VisualElement { name = "error-icon" } );
+
+            errorMessage = new Label { name = "error-label" };
+            errorContainer.Add(errorMessage);
+
+            Insert(0, errorContainer);
+
             SetPosition(new Rect(node.Position, Vector2.one));
             title = node.Name;
-            
+
             if (!ReflectionData.Deletable)
             {
                 capabilities &= ~Capabilities.Deletable;
@@ -80,6 +90,21 @@ namespace BlueGraph.Editor
         /// </summary>
         protected virtual void OnDestroy() { }
         
+        protected void RefreshErrorState()
+        {
+            if (string.IsNullOrEmpty(Target.Error))
+            {
+                RemoveFromClassList("hasError");
+                errorMessage.text = "";
+            } 
+            else
+            {
+                AddToClassList("hasError");
+                errorMessage.text = Target.Error;
+            }
+
+            OnError();
+        }
 
         /// <summary>
         /// Called after the target node's <c>OnError</c> property is executed.
