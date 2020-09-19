@@ -44,7 +44,7 @@ namespace BlueGraph.Editor
             searchWindow = ScriptableObject.CreateInstance<SearchWindow>();
             searchWindow.Target = this;
 
-            SetupZoom(0.05f, ContentZoomer.DefaultMaxScale);
+            SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
         
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
@@ -226,6 +226,7 @@ namespace BlueGraph.Editor
             Graph = graph;
             serializedGraph = new SerializedObject(Graph);
             title.text = graph.Title;
+            SetupZoom(graph.ZoomMinScale, graph.ZoomMaxScale);
 
             AddNodeViews(graph.Nodes);
             AddCommentViews(graph.Comments);
