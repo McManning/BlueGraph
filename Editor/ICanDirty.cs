@@ -8,11 +8,11 @@
         /// <summary>
         /// Called when the Canvas dirties this object
         /// </summary>
-        void OnDirty();
+        void Dirty();
 
         /// <summary>
         /// Called when the canvas iterates through dirtied objects during an update loop
         /// </summary>
-        void OnUpdate();
+        void Update();
     }
 }

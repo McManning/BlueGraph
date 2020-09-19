@@ -165,8 +165,8 @@ namespace BlueGraph.Editor
             Target.Region = newPos;
         }
 
-        public void OnDirty() { }
+        public void Dirty() { }
 
-        public void OnUpdate() { }
+        public void Update() { }
     }
 }

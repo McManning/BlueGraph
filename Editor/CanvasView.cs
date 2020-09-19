@@ -426,7 +426,7 @@ namespace BlueGraph.Editor
             // TODO: Not the best place for this.
             EditorUtility.SetDirty(Graph);
 
-            element.OnDirty();
+            element.Dirty();
 
             // Also dirty outputs if a NodeView
             if (element is NodeView node)
@@ -450,7 +450,7 @@ namespace BlueGraph.Editor
             {
                 if (element is ICanDirty cd)
                 {
-                    cd.OnDirty();
+                    cd.Dirty();
                     dirtyElements.Add(cd);
                 }
             });
@@ -458,10 +458,10 @@ namespace BlueGraph.Editor
 
         public void Update()
         {
-            // Propagate change on dirty elements
+            // Propagate update on dirty elements
             foreach (var element in dirtyElements)
             {
-                element.OnUpdate();
+                element.Update();
             }
             
             dirtyElements.Clear();

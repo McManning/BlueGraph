@@ -167,26 +167,34 @@ namespace BlueGraph.Editor
             Canvas?.Dirty(this);
         }
         
-        /// <summary>
-        /// Dirty this node in response to a change in connectivity. Invalidate
-        /// any cache in prep for an OnUpdate() call. 
-        /// </summary>
-        public virtual void OnDirty()
+        public void Dirty()
         {
+            OnDirty();
+            
             // Dirty all ports so they can refresh their state
             Inputs.ForEach(port => port.OnDirty());
             Outputs.ForEach(port => port.OnDirty());
         }
 
-        /// <summary>
-        /// Called when this node was dirtied and the UI is redrawing. 
-        /// </summary>
-        public virtual void OnUpdate()
+        public void Update()
         {
+            OnUpdate();
+            
             // Propagate update to all ports
             Inputs.ForEach(port => port.OnUpdate());
             Outputs.ForEach(port => port.OnUpdate());
         }
+
+        /// <summary>
+        /// Dirty this node in response to a change in connectivity or internal state. 
+        /// Invalidate any cache in prep for an OnUpdate() call. 
+        /// </summary>
+        public virtual void OnDirty() { }
+
+        /// <summary>
+        /// Called when this node was dirtied and the UI is redrawing. 
+        /// </summary>
+        public virtual void OnUpdate() { }
 
         public override Rect GetPosition()
         {
