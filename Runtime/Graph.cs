@@ -142,18 +142,15 @@ namespace BlueGraph
         /// <summary>
         /// Find all nodes on the Graph of, or inherited from, the given type. 
         /// </summary>
-        public T[] GetNodes<T>() where T : Node
+        public IEnumerable<T> GetNodes<T>() where T : Node
         {
-            var matches = new List<T>();
             for (int i = 0; i < nodes.Count; i++)
             {
                 if (typeof(T).IsAssignableFrom(nodes[i].GetType()))
                 {
-                    matches.Add(nodes[i] as T);
+                    yield return nodes[i] as T;
                 }
             }
-
-            return matches.ToArray();
         }
         
         /// <summary>
