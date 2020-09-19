@@ -5,8 +5,8 @@
     /// </summary>
     public class EventTestNode : Node
     {
-        public int onAddedToGraphCount = 0;
-        public int onRemovedFromGraphCount = 0;
+        public int onEnableCount = 0;
+        public int onDisableCount = 0;
         public int onBeforeSerializeCount = 0;
         public int onAfterDeserializeCount = 0;
     
@@ -18,16 +18,16 @@
             AddPort(new OutputPort<float> { Name = "Output" });
         }
 
-        public override void OnAddedToGraph()
+        public override void OnEnable()
         {
-            onAddedToGraphCount++;
-            base.OnAddedToGraph();
+            onEnableCount++;
+            base.OnEnable();
         }
 
-        public override void OnRemovedFromGraph()
+        public override void OnDisable()
         {
-            onRemovedFromGraphCount++;
-            base.OnRemovedFromGraph();
+            onDisableCount++;
+            base.OnDisable();
         }
 
         public override void OnBeforeSerialize()

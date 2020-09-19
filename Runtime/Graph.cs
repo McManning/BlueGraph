@@ -52,25 +52,61 @@ namespace BlueGraph
         private int assetVersion = 1;
 
         /// <summary>
-        /// Automatically convert nodes with a [Deprecated] attribute to their replacement.
+        /// Propagate OnDisable to all nodes.
         /// </summary>
-        private void UpgradeDeprecatedNodes()
+        private void OnDisable()
         {
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                if (Attribute.GetCustomAttribute(nodes[i].GetType(), typeof(DeprecatedAttribute)) is DeprecatedAttribute deprecated)
-                {
-                    Debug.LogWarning(
-                        $"{nodes[i].GetType().Name} is deprecated. " +
-                        $"Upgrading to {deprecated.ReplaceWith.Name}."
-                    );
+            OnGraphDisable();
 
-                    // Gross workaround that abuses JSON serialization for recasting
-                    string json = JsonUtility.ToJson(nodes[i]);
-                    nodes[i] = JsonUtility.FromJson(json, deprecated.ReplaceWith) as Node;
-                }
+            foreach (var node in Nodes)
+            {
+                node.Disable();
             }
         }
+        
+        /// <summary>
+        /// Propagate OnEnable to all nodes.
+        /// </summary>
+        private void OnEnable()
+        {
+            OnGraphEnable();
+
+            foreach (var node in Nodes)
+            {
+                node.Enable();
+            }
+        }
+        
+        /// <summary>
+        /// Propagate OnValidate to all nodes.
+        /// </summary>
+        private void OnValidate()
+        {
+            OnGraphValidate();
+
+            foreach (var node in Nodes)
+            {
+                node.Validate();
+            }
+        }
+        
+        /// <summary>
+        /// Called during Unity's <c>OnDisable</c> event and before 
+        /// <c>OnDisable</c> of all nodes on the graph.
+        /// </summary>
+        protected virtual void OnGraphDisable() { }
+
+        /// <summary>
+        /// Called during Unity's <c>OnEnable</c> event and before 
+        /// <c>OnEnable</c> of all nodes on the graph.
+        /// </summary>
+        protected virtual void OnGraphEnable() { }
+        
+        /// <summary>
+        /// Called during Unity's <c>OnValidate</c> event and before 
+        /// <c>OnValidate</c> of all nodes on the graph.
+        /// </summary>
+        public virtual void OnGraphValidate() { }
 
         /// <summary>
         /// Find a node on the Graph by unique ID 
@@ -108,27 +144,28 @@ namespace BlueGraph
         /// <summary>
         /// Add a new node to the Graph.
         /// 
-        /// Once added, the node's <c>OnAddedToGraph()</c> method will be called.
+        /// Once added, the node's <c>OnEnable()</c> method will be called.
         /// </summary>
         public void AddNode(Node node)
         {
             node.Graph = this;
             nodes.Add(node);
             node.OnAddedToGraph();
+            node.OnEnable();
         }
         
         /// <summary>
         /// Remove a node from the Graph.
         /// 
-        /// Once removed, the node's <c>OnRemovedFromGraph()</c> method will be called.
+        /// Once removed, the node's <c>OnDisable()</c> method will be called.
         /// </summary>
         public void RemoveNode(Node node)
         {
             node.DisconnectAllPorts();
             nodes.Remove(node);
-
-            node.Graph = null;
+            node.OnDisable();
             node.OnRemovedFromGraph();
+            node.Graph = null;
         }
 
         /// <summary>
@@ -137,6 +174,7 @@ namespace BlueGraph
         public void AddEdge(Port output, Port input)
         {
             output.Connect(input);
+            output.Node.Validate();
         }
 
         /// <summary>
@@ -145,6 +183,8 @@ namespace BlueGraph
         public void RemoveEdge(Port output, Port input)
         {
             output.Disconnect(input);
+            output.Node.Validate();
+            input.Node.Validate();
         }
     }
 }

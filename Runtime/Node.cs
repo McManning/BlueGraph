@@ -7,6 +7,9 @@ namespace BlueGraph
     [Serializable]
     public abstract class Node : ISerializationCallbackReceiver
     {
+        public event Action OnValidateEvent;
+        public event Action OnErrorEvent;
+        
         [SerializeField] private string id;
 
         public string ID 
@@ -47,7 +50,7 @@ namespace BlueGraph
         /// <summary>
         /// Accessor for ports and their connections to/from this node.
         /// </summary>
-        public IReadOnlyCollection<Port> Ports 
+        public IList<Port> Ports 
         { 
             get { return ports.AsReadOnly(); } 
         }
@@ -63,31 +66,81 @@ namespace BlueGraph
             if (Graph == null)
             {
                 throw new Exception(
-                    $"[{Name} - {ID}] Node deserialized without a graph reference. " +
+                    $"[{Name} - {ID}] Node OnEnable without a graph reference. " +
                     $"This could point to a potential memory leak"
                 );
-            }
-            
-            // Add a backref to each child port of this node.
-            // We don't store this in the serialized copy to avoid cyclic refs.
-            for (int i = 0; i < ports.Count; i++)
-            {
-                ports[i].Node = this;
             }
         }
 
         public virtual void OnBeforeSerialize() { }
 
+        public void Enable()
+        {
+            // Ports are enabled first to ensure they're fully loaded
+            // prior to enabling the node itself, in case the node needs
+            // to query port data during OnEnable.
+            foreach (var port in ports)
+            {
+                // Add a backref to each child port of this node.
+                // We don't store this in the serialized copy to avoid cyclic refs.
+                port.Node = this;
+                port.OnEnable();
+            }
+
+            OnEnable();
+        }
+
         /// <summary>
-        /// Called when the node is added to a Graph via <c>Graph.AddNode</c>
+        /// Called when the Graph's ScriptableObject gets the OnEnable message
+        /// or when the node is added to the graph via <c>Graph.AddNode</c>
+        /// </summary>
+        public virtual void OnEnable() { }
+        
+        public void Disable()
+        {
+            OnDisable();
+        }
+        
+        /// <summary>
+        /// Called when the Graph's ScriptableObject gets the OnDisable message
+        /// or when the node is removed from the graph via <c>Graph.RemoveNode</c>
+        /// </summary>
+        public virtual void OnDisable() { }
+
+        public void Validate()
+        {
+            // Same as Enable(), we do ports first to make sure
+            // everything is ready for the node's OnValidate
+            foreach (var port in ports)
+            {
+                port.Node = this;
+                port.OnValidate();
+            }
+            
+            OnValidate();
+            OnValidateEvent?.Invoke();
+        }
+
+        /// <summary>
+        /// Called in the editor when the node or graph is revalidated. 
+        /// </summary>
+        public virtual void OnValidate() { }
+
+        /// <summary>
+        /// Called when added via <c>Graph.AddNode</c>. 
+        /// 
+        /// This comes <b>before</b> <c>OnEnable</c>
         /// </summary>
         public virtual void OnAddedToGraph() { }
 
         /// <summary>
-        /// Called when the node is removed from a Graph via <c>Graph.RemoveNode</c>
+        /// Called when added via <c>Graph.RemoveNode</c>. 
+        /// 
+        /// This comes <b>after</b> <c>OnDisable</c>. 
+        /// 
+        /// <c>Node.Graph</c> property is still valid during this call. 
         /// </summary>
-        public virtual void OnRemovedFromGraph() { }
-    
+        public virtual void OnRemovedFromGraph() { } 
         /// <summary>
         /// Resolve the return value associated with the given port. 
         /// </summary>
@@ -139,7 +192,7 @@ namespace BlueGraph
                 port.DisconnectAll();
             }
         }
-        
+
         /// <summary>
         /// Get the value returned by an output port connected to the given port.
         /// 

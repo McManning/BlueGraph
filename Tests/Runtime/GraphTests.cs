@@ -90,7 +90,7 @@ namespace BlueGraph.Tests
             graph.AddNode(new TestNodeA());
             graph.AddNode(new TestNodeB());
             
-            TestNodeA[] actual = graph.GetNodes<TestNodeA>();
+            TestNodeA[] actual = graph.GetNodes<TestNodeA>().ToArray();
 
             Assert.AreEqual(2, actual.Length);
 
@@ -153,7 +153,7 @@ namespace BlueGraph.Tests
         }
         
         // [Test]
-        public void OnRemovedFromGraphExecutes()
+        public void OnDisableExecutes()
         {
             var graph = ScriptableObject.CreateInstance<TestGraph>();
             

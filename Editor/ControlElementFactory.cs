@@ -63,6 +63,7 @@ namespace BlueGraph.Editor
                 field.RegisterValueChangedCallback((change) =>
                 {
                     fieldInfo.SetValue(view.Target, (LayerMask)change.newValue);
+                    view.Target.Validate();
                     view.OnPropertyChange();
                 });
 

@@ -101,6 +101,8 @@ namespace BlueGraph.Editor
         /// </summary>
         public void OnUpdate()
         {
+            portName = Target.Name;
+
             if (connected && editorField != null && HideEditorFieldOnConnection)
             {
                 editorField.style.display = DisplayStyle.None;

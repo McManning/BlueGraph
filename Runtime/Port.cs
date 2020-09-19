@@ -72,7 +72,10 @@ namespace BlueGraph
         public string Name
         {
             get { return name; }
-            set { name = value; }
+            set { 
+                name = value; 
+                RefreshInboundConnections();
+            }
         }
         
         [SerializeField] private string type;
@@ -124,7 +127,6 @@ namespace BlueGraph
         { 
             get 
             {
-                HydratePorts();
                 for (var i = 0; i < connections.Count; i++)
                 {
                     yield return connections[i].Port;
@@ -163,7 +165,6 @@ namespace BlueGraph
             // value from connected port. 
             if (Direction == PortDirection.Input)
             {
-                HydratePorts();
                 if (connections.Count > 0)
                 {
                     return connections[0].Port.GetValue<T>();
@@ -208,8 +209,6 @@ namespace BlueGraph
         /// </summary>
         public virtual IEnumerable<T> GetValues<T>()
         {
-            HydratePorts();
-
             if (connections.Count > 0)
             {
                 for (var i = 0; i < connections.Count; i++)
@@ -294,23 +293,26 @@ namespace BlueGraph
         }
         
         /// <summary>
-        /// Load Port class instances from the Graph for each connection.
+        /// Load Port class instances from the Graph for each connection,
+        /// invalidating any connections that no longer exist.
         /// </summary>
-        /// <remarks>
-        /// This is implemented as an on-demand post-deserialize
-        /// operation in order to avoid serializing cyclic references
-        /// </remarks>
-        internal void HydratePorts()
+        internal void UpdateConnections()
         {
-            var graph = Node.Graph;
+            if (hasLoadedConnections)
+            {
+                return;
+            }
 
+            var graph = Node.Graph;
             for (var i = 0; i < connections.Count; i++)
             {
                 var edge = connections[i];
                 var connected = graph.GetNodeById(edge.NodeID);
                 if (connected == null)
                 {
-                    Debug.LogWarning($"Could not locate connected node {edge.NodeID} from port {Name} of {Node.Name}");
+                    Debug.LogError(
+                        $"Could not locate connected node {edge.NodeID} from port {Name} of {Node.Name}"
+                    );
                 }
                 else
                 {
@@ -318,6 +320,48 @@ namespace BlueGraph
                     connections[i] = edge;
                 }
             }
+
+            hasLoadedConnections = true;
+        }
+
+        // Explicit non-serialized so that editor reloads wipe it
+        [NonSerialized] private bool hasLoadedConnections;
+
+        internal void OnEnable()
+        {
+            UpdateConnections();
+        }
+
+        internal void OnValidate()
+        {
+            UpdateConnections();
+        }
+
+        /// <summary>
+        /// Update PortName on inbound connections to match an updated <c>Name</c>
+        /// </summary>
+        private void RefreshInboundConnections()
+        {
+            for (var i = 0; i < connections.Count; i++)
+            {
+                var port = connections[i].Port;
+                
+                // This is inbound, so we need to update the connection
+                // entry for the *other* port.
+                foreach (var edge in port.connections)
+                {
+                    if (edge.Port == this)
+                    {
+                        edge.NodeID = Node.ID;
+                        edge.PortName = Name;
+                    }
+                }
+            }
+        }
+        
+        public override string ToString()
+        {
+            return $"{GetType()}({Name}, {Node?.ID})";
         }
     }
 }

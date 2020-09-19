@@ -49,10 +49,15 @@ namespace BlueGraph.Editor
             }
             
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
-            RegisterCallback<DetachFromPanelEvent>((e) => OnDestroy());
+            RegisterCallback<DetachFromPanelEvent>((e) => Destroy());
             RegisterCallback<TooltipEvent>(OnTooltip);
-
-            UpdatePorts();
+            
+            node.OnErrorEvent += RefreshErrorState;
+            node.OnValidateEvent += OnValidate;
+            
+            ReloadPorts();
+            ReloadEditables();
+            RefreshErrorState();
 
             OnInitialize();
         }
@@ -63,15 +68,33 @@ namespace BlueGraph.Editor
         /// </summary>
         protected virtual void OnInitialize() { }
         
+        internal void Destroy()
+        {
+            OnDestroy();
+            Target.OnErrorEvent -= RefreshErrorState;
+            Target.OnValidateEvent -= OnValidate;
+        }
+
         /// <summary>
         /// Executed when we're about to detach this element from the graph. 
         /// </summary>
         protected virtual void OnDestroy() { }
         
+
+        /// <summary>
+        /// Called after the target node's <c>OnError</c> property is executed.
+        /// </summary>
+        protected virtual void OnError() { }
+        
+        /// <summary>
+        /// Called after the target node's <c>OnValidate</c> is executed.
+        /// </summary>
+        protected virtual void OnValidate() { }
+
         /// <summary>
         /// Make sure our list of PortViews and editable controls sync up with our NodePorts
         /// </summary>
-        protected void UpdatePorts()
+        protected void ReloadPorts()
         {
             foreach (var port in Target.Ports)
             {
@@ -164,6 +187,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public virtual void OnPropertyChange()
         {
+            Target.Validate();
             Canvas?.Dirty(this);
         }
         
