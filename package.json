@@ -3,7 +3,7 @@
     "displayName": "BlueGraph",
     "version": "1.0.0",
     "unity": "2019.3",
-    "description": "Visual Scripting Framework for Unity.\n\nWhen installing samples, be sure to install the \"Common\" sample first.",
+    "description": "Visual Scripting Framework for Unity.",
     "type": "tool",
     "repository": {
         "type": "git",
@@ -14,32 +14,5 @@
         "name": "Chase McManning",
         "email": "cmcmanning@gmail.com",
         "url": "https://github.com/McManning"
-    },
-    "samples": [
-        {
-            "displayName": "Common",
-            "description": "Common nodes used within multiple samples",
-            "path": "Samples~/Common"
-        },
-        {
-            "displayName": "Terrain Generator",
-            "description": "Procedurally generate a Terrain heightmap by blending a series of nodes",
-            "path": "Samples~/Terrain Generator"
-        },
-        {
-            "displayName": "Dialog Tree",
-            "description": "Using nodes to control the flow of an RPG-style dialog tree",
-            "path": "Samples~/Dialog Tree"
-        },
-        {
-            "displayName": "Execution Flow",
-            "description": "Respond to MonoBehaviour events by executing a series of nodes",
-            "path": "Samples~/Execution Flow"
-        },
-        {
-            "displayName": "Experimental",
-            "description": "Various use cases not quite fully formed yet.",
-            "path": "Samples~/Experimental"
-        }
-    ]
+    }
 }
