@@ -11,6 +11,11 @@ namespace BlueGraph.Editor
     /// </summary>
     public class DefaultSearchProvider : ISearchProvider
     {
+        public bool IsSupported(IGraph graph)
+        {
+            return true;
+        }
+
         public IEnumerable<SearchResult> GetSearchResults(SearchFilter filter)
         {
             foreach (var entry in NodeReflection.GetNodeTypes())

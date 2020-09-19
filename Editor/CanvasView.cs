@@ -41,7 +41,6 @@ namespace BlueGraph.Editor
             
             edgeConnectorListener = new EdgeConnectorListener(this);
             searchWindow = ScriptableObject.CreateInstance<SearchWindow>();
-            searchWindow.AddSearchProvider(new DefaultSearchProvider());
             searchWindow.Target = this;
 
             SetupZoom(0.05f, ContentZoomer.DefaultMaxScale);
@@ -79,7 +78,7 @@ namespace BlueGraph.Editor
 
         private void OnUndoRedo()
         {
-            Refresh();
+            Reload();
         }
         
         private void OnGraphMouseMove(MouseMoveEvent evt)
@@ -230,9 +229,19 @@ namespace BlueGraph.Editor
             AddNodeViews(graph.Nodes);
             AddCommentViews(graph.Comments);
 
-            // Reset the lookup to a new set of whitelisted modules
+            // Reset the search to a new set of tags and providers
+            searchWindow.ClearSearchProviders();
             searchWindow.ClearTags();
 
+            foreach (var provider in NodeReflection.SearchProviders)
+            {
+                if (provider.IsSupported(graph))
+                {
+                    searchWindow.AddSearchProvider(provider);
+                }
+            }
+
+            // TODO: Move into reflection
             var attrs = graph.GetType().GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
@@ -399,20 +408,13 @@ namespace BlueGraph.Editor
         }
         
         /// <summary>
-        /// Sync nodes and edges on the canvas with the modified graph.
+        /// Reload a fresh serialized copy of the graph.
         /// </summary>
-        private void Refresh()
+        public void Reload()
         {
-            // TODO: Smart diff - if we start seeing performance issues. 
-            // It gets complicated due to how we bind serialized objects though.
-            
-            // For now, we just nuke everything and start over.
-
-            // Clear serialized graph first so that change events aren't undo tracked
             serializedGraph = null;
 
             DeleteElements(graphElements.ToList());
-
             Load(Graph);
         }
         

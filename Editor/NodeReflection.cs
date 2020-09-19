@@ -302,6 +302,25 @@ namespace BlueGraph.Editor
         private static Dictionary<Type, Type> cachedEditorMap = null;
         
         /// <summary>
+        /// All search providers in the application that could be 
+        /// registered in the CanvasView for a graph
+        /// </summary>
+        private static List<ISearchProvider> cachedSearchProviders = null;
+        
+        public static List<ISearchProvider> SearchProviders
+        {
+            get
+            {
+                if (cachedSearchProviders == null)
+                {
+                    LoadSearchProviders();
+                }
+
+                return cachedSearchProviders;
+            }
+        }
+
+        /// <summary>
         /// Retrieve reflection data for a given node class type
         /// </summary>
         public static NodeReflectionData GetNodeType(Type type)
@@ -412,6 +431,36 @@ namespace BlueGraph.Editor
             }
 
             cachedEditorMap = nodeEditors;
+        }
+        
+        private static void LoadSearchProviders()
+        {
+            // TODO: Combine with LoadNodeEditorTypes / GetNodeTypes 
+            // for a single assemblies scan. All three are typically
+            // ran at the same time.
+            cachedSearchProviders = new List<ISearchProvider>();
+
+            var baseType = typeof(ISearchProvider);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        if (!type.IsAbstract && baseType.IsAssignableFrom(type))
+                        {
+                            cachedSearchProviders.Add(
+                                Activator.CreateInstance(type) as ISearchProvider
+                            );
+                        }
+                    }
+                } 
+                catch (ReflectionTypeLoadException)
+                { 
+                    // noop
+                }
+            }
         }
 
         /// <summary>
