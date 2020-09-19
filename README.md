@@ -1,62 +1,46 @@
 
 # BlueGraph
 
-A generic visual scripting framework built on top of Unity's experimental GraphView components. Heavily inspired by [xNode](https://github.com/Siccity/xNode) and UE4's Blueprints. 
+Check out [BlueGraph-Samples](https://github.com/McManning/BlueGraph-Samples) for a starter project with a suite of different use cases and examples. 
 
 ![BlueGraph Preview](Documentation~/Preview.png)
 
-
-## Work in Progress
-
-The master branch is unstable and API still in active development.
-
-If you are still interested for trying it for yourself, feel free to provide feedback. 
-
-Documentation is coming... eventually...
-
+The core framework is built to be simple and extendable - supporting different workflows and requirements for different types of graphs. 
 
 ## Features
 
 * Node-based visual editor built on top of Unity's modern UI framework
+* Strict data types for ports and safe cast support
 * Simple node development process through C# attributes on fields 
-* Modularization of nodes and grouping related nodes into searchable subcategories
-* Easily extendable for different use cases
+* Modular design - use features that you need or extend to add additional features
 
+
+# Getting Started
+
+If you want to play around with different examples, check out the [BlueGraph-Samples](https://github.com/McManning/BlueGraph-Samples) project. 
 
 ## Requirements
 
-Requires Unity version 2019.3 or above. 
+Requires Unity version 2019.3 or above.
 
->The framework makes use of Unity's [[SerializeReference]](https://docs.unity3d.com/ScriptReference/SerializeReference.html) attribute for native polymorphic serialization support introduced in 2019.3.
+## Installing with Unity Package Manager
 
-
-# Installing with Unity Package Manager
-
-To install this project as a Git dependency using the Unity Package Manager, add the following line to your project's manifest.json:
+In *Package Manager* click *Add package from git URL* and use the following:
 
 ```
-"com.github.mcmanning.bluegraph": "https://github.com/McManning/BlueGraph.git"
+https://github.com/McManning/BlueGraph.git
 ```
 
+You can also download one of the release versions and add that to your Packages directory.
 
-# Samples
+## Creating Graphs and Nodes
 
-The core framework is built to be lightweight and support different workflows and requirements for projects that require a node-based editor. 
+Check out [Getting Started](https://github.com/McManning/BlueGraph/wiki/Getting-Started) on the wiki.
 
-The package samples contains various use cases and more complex implementations that you can use as a starter for your own project.
 
-## Basic
+# Similar Projects
 
-<img align="right" src="Documentation~/MeshPreview.png">
+[xNode](https://github.com/Siccity/xNode) is the original inspiration for this project and has a similar API.
 
-Examples showing the basic features of BlueGraph and different strategies for implementing different types of nodes for your own project.
+[Bolt](https://assetstore.unity.com/packages/tools/visual-scripting/bolt-163802) is a general purpose scripting platform supported by Unity Technologies. 
 
-## Advanced
-
-Examples of how to add UE4 Blueprints style flow control to graphs via a custom execution port. 
-
-## Subgraph
-
-Example of creating a subgraph asset with specific IO ports (as defined by IO nodes within the graph) and executing that subgraph from within another graph asset.
-
-*Requires the Advanced sample to be imported alongside it*
