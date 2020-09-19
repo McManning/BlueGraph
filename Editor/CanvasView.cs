@@ -17,7 +17,8 @@ namespace BlueGraph.Editor
     /// </summary>
     public class CanvasView : GraphView
     {
-        public EditorWindow EditorWindow { get; private set; }
+        public GraphEditorWindow EditorWindow { get; private set; }
+
         public Graph Graph { get; private set; }
         
         private readonly Label title;
@@ -30,7 +31,7 @@ namespace BlueGraph.Editor
 
         private Vector2 lastMousePosition;
 
-        public CanvasView(EditorWindow window)
+        public CanvasView(GraphEditorWindow window)
         {
             EditorWindow = window;
             name = "bluegraph-canvas";
