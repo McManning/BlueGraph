@@ -25,7 +25,7 @@ namespace BlueGraph.Editor
 
         protected CanvasView Canvas { get; set; }
         
-        public void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
+        internal void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.ID;
             Target = node;
