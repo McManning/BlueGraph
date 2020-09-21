@@ -30,6 +30,9 @@ namespace BlueGraph.Editor
 
         protected virtual void Update()
         {
+            if (Canvas == null)
+                return;
+
             Canvas.Update();
         }
 
