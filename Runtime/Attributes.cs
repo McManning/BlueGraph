@@ -161,9 +161,9 @@ namespace BlueGraph
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class RequireNodeAttribute : Attribute
     {
-        public Type type;
-        public string nodeName = "";
-        public Vector2 position = Vector2.zero;
+        public Type type { get; private set; }
+        public string nodeName { get; private set; }
+        public Vector2 position { get; private set; }
 
         /// <summary>
         /// NodeType Required
