@@ -149,6 +149,13 @@ namespace BlueGraph
         public T GetNode<T>() where T : Node
         {
             return nodes.Find((node) => typeof(T).IsAssignableFrom(node.GetType())) as T;
+        } 
+        /// <summary>
+          /// Find the first node on the Graph of, or inherited from, the given type. 
+          /// </summary>
+        public Node GetNode(Type type)
+        {
+            return nodes.Find((node) => type.IsAssignableFrom(node.GetType()));
         }
 
         /// <summary>

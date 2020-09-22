@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -469,6 +470,14 @@ namespace BlueGraph.Editor
         public static T Instantiate<T>() where T : Node
         {
             return GetNodeType(typeof(T)).CreateInstance() as T;
+        }
+
+        /// <summary>
+        /// Instantiate a new node by type
+        /// </summary>
+        public static Node Instantiate(Type type)
+        {
+            return GetNodeType(type).CreateInstance();
         }
     }
 }

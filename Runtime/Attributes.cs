@@ -149,7 +149,22 @@ namespace BlueGraph
             Tags = tags;
         }
     }
-    
+
+    /// <summary>
+    /// Required node for a given Graph. 
+    /// 
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class RequireNodeAttribute : Attribute
+    {
+        public Type type;
+
+        public RequireNodeAttribute(Type type)
+        {
+            this.type = type;
+        }
+    }
+
     /// <summary>
     /// Mark a node as deprecated and automatically migrate instances
     /// to a new class when encountered in the editor.
