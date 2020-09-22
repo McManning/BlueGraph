@@ -245,6 +245,8 @@ namespace BlueGraph.Editor
 
             // TODO: Move into reflection
             var attrs = graph.GetType().GetCustomAttributes(true);
+
+
             foreach (var attr in attrs)
             {
                 //Add Tags for search provider
@@ -263,9 +265,13 @@ namespace BlueGraph.Editor
                         {
                             node = NodeReflection.Instantiate(required.type);
                             node.Graph = graph;
-                            AddNodeFromSearch(node, Vector2.zero);
+                            node.Name = required.nodeName;
+                            node.Position = required.position;
+                            AddNodeFromSearch(node, node.Position, null, false);
+
                         }
                     }
+
                 }
             }
         }
@@ -273,11 +279,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Create a new node from reflection data and insert into the Graph.
         /// </summary>
-        internal void AddNodeFromSearch(
-            Node node,
-            Vector2 screenPosition,
-            PortView connectedPort = null
-        )
+        internal void AddNodeFromSearch(Node node, Vector2 screenPosition, PortView connectedPort = null, bool registerUndo = true)
         {
             // Calculate where to place this node on the graph
             var windowRoot = EditorWindow.rootVisualElement;
@@ -289,7 +291,8 @@ namespace BlueGraph.Editor
             var graphMousePosition = contentViewContainer.WorldToLocal(windowMousePosition);
 
             // Track undo and add to the graph
-            Undo.RegisterCompleteObjectUndo(Graph, $"Add Node {node.Name}");
+            if (registerUndo)
+                Undo.RegisterCompleteObjectUndo(Graph, $"Add Node {node.Name}");
 
             node.Position = graphMousePosition;
 

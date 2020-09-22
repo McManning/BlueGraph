@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace BlueGraph
 {
@@ -29,13 +30,13 @@ namespace BlueGraph
         /// Can this node be deleted from the graph.
         /// </summary>
         public bool Deletable { get; set; } = true;
-        
+
         public NodeAttribute(string name = null)
         {
             Name = name;
         }
     }
-    
+
     /// <summary>
     /// Tags associated with a Node. Can be used by a Graph's <c>[IncludeTags]</c>
     /// attribute to restrict what nodes can be added to the graph. 
@@ -50,7 +51,7 @@ namespace BlueGraph
             this.Tags = tags;
         }
     }
-    
+
     /// <summary>
     /// An input port exposed on a Node
     /// </summary>
@@ -73,13 +74,13 @@ namespace BlueGraph
         /// Can the associated field be directly modified when there are no connections.
         /// </summary>
         public bool Editable { get; set; } = true;
-        
+
         public InputAttribute(string name = null)
         {
             Name = name;
         }
     }
-    
+
     /// <summary>
     /// An output port exposed on a Node.
     /// 
@@ -94,7 +95,7 @@ namespace BlueGraph
         /// If not supplied, this will default to the field name.
         /// </summary>
         public string Name { get; set; }
-        
+
         /// <summary>
         /// Can this output go to multiple inputs at once.
         /// </summary>
@@ -126,13 +127,13 @@ namespace BlueGraph
         /// If not supplied, this will be inferred based on the field name.
         /// </summary>
         public string Name { get; set; }
-        
+
         public EditableAttribute(string name = null)
         {
             Name = name;
         }
     }
-    
+
     /// <summary>
     /// Supported node tags for a given Graph. 
     /// 
@@ -152,17 +153,86 @@ namespace BlueGraph
 
     /// <summary>
     /// Required node for a given Graph. 
-    /// 
+    /// this node will be created automatically in the chart when it is created.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class RequireNodeAttribute : Attribute
     {
         public Type type;
+        public string nodeName = "";
+        public Vector2 position = Vector2.zero;
 
+        /// <summary>
+        /// NodeType Required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
         public RequireNodeAttribute(Type type)
         {
             this.type = type;
+
         }
+        /// <summary>
+        /// NodeType required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
+        /// <param name="nodeName">Header title name of the node at graph</param>
+        public RequireNodeAttribute(Type type, string nodeName = "")
+        {
+            this.type = type;
+            this.nodeName = nodeName;
+
+        }
+        /// <summary>
+        /// NodeType required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
+        /// <param name="nodeName">Header title name of the node at graph</param>
+        /// <param name="randonPosition">If true, the node will be created at random position at graph. Default X: (-100,100) Y:(-100,100)</param>
+        public RequireNodeAttribute(Type type, string nodeName = "", bool randonPosition = false)
+        {
+            this.type = type;
+            this.nodeName = nodeName;
+            if (randonPosition)
+            {
+                position = new Vector2(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100));
+            }
+        }
+        /// <summary>
+        /// NodeType required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
+        /// <param name="nodeName">Header title name of the node at graph</param>
+        /// <param name="xPos">y position to creating</param>
+        /// <param name="yPos">x position to creating</param>
+        /// <param name="randonPosition">If true, the node will be created at random position at graph. Default X: (-xPos,xPos) Y:(-yPos,yPos)</param>
+        public RequireNodeAttribute(Type type, string nodeName = "", float xPos = 0, float yPos = 0, bool randonPosition = false)
+        {
+            this.type = type;
+            this.nodeName = nodeName;
+            if (randonPosition)
+            {
+                float[] x_min_max = GetMinMax(xPos);
+                float[] y_min_max = GetMinMax(yPos);
+
+                position = new Vector2(UnityEngine.Random.Range(x_min_max[0], x_min_max[1]), UnityEngine.Random.Range(y_min_max[0], y_min_max[1]));
+            }
+            else
+            {
+                position = new Vector2(xPos, yPos);
+            }
+        }
+
+        private float[] GetMinMax(float current)
+        {
+            float min = 0; float max = 0;
+
+            //Set random range -x to x and -y to y
+            if (current < 0) { min = current; max = current * -1; }
+            else { min = current * -1; max = current; }
+
+            return new float[] { min, max };
+        }
+
     }
 
     /// <summary>
@@ -186,7 +256,7 @@ namespace BlueGraph
 
         public CustomNodeViewAttribute(Type nodeType)
         {
-            NodeType = nodeType; 
+            NodeType = nodeType;
         }
     }
 }
