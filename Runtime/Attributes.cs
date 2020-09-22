@@ -30,7 +30,10 @@ namespace BlueGraph
         /// Can this node be deleted from the graph.
         /// </summary>
         public bool Deletable { get; set; } = true;
-
+        /// <summary>
+        /// Can this node be moved in the graph.
+        /// </summary>
+        public bool MoveAble { get; set; } = true;
         public NodeAttribute(string name = null)
         {
             Name = name;
