@@ -349,54 +349,61 @@ namespace BlueGraph.Editor
         /// </summary>
         public void AddEdge(GraphViewEdge edge, bool registerAsNewUndo)
         {
-            if (edge.input == null || edge.output == null)
+            try
             {
-                return;
-            }
-
-            if (registerAsNewUndo)
-            {
-                Undo.RegisterCompleteObjectUndo(Graph, "Add Edge");
-            }
-
-            // Handle single connection ports on either end. 
-            var edgesToRemove = new List<GraphViewEdge>();
-            if (edge.input.capacity == GraphViewPort.Capacity.Single)
-            {
-                foreach (var conn in edge.input.connections)
+                if (edge.input == null || edge.output == null)
                 {
-                    edgesToRemove.Add(conn);
+                    return;
                 }
-            }
 
-            if (edge.output.capacity == GraphViewPort.Capacity.Single)
-            {
-                foreach (var conn in edge.output.connections)
+                if (registerAsNewUndo)
                 {
-                    edgesToRemove.Add(conn);
+                    Undo.RegisterCompleteObjectUndo(Graph, "Add Edge");
                 }
-            }
 
-            foreach (var edgeToRemove in edgesToRemove)
+                // Handle single connection ports on either end. 
+                var edgesToRemove = new List<GraphViewEdge>();
+                if (edge.input.capacity == GraphViewPort.Capacity.Single)
+                {
+                    foreach (var conn in edge.input.connections)
+                    {
+                        edgesToRemove.Add(conn);
+                    }
+                }
+
+                if (edge.output.capacity == GraphViewPort.Capacity.Single)
+                {
+                    foreach (var conn in edge.output.connections)
+                    {
+                        edgesToRemove.Add(conn);
+                    }
+                }
+
+                foreach (var edgeToRemove in edgesToRemove)
+                {
+                    RemoveEdge(edgeToRemove, false);
+                }
+
+                var input = edge.input as PortView;
+                var output = edge.output as PortView;
+
+                // Connect the ports in the model
+                Graph.AddEdge(input.Target, output.Target);
+                serializedGraph.Update();
+                EditorUtility.SetDirty(Graph);
+
+                // Add a matching edge view onto the canvas
+                var newEdge = input.ConnectTo(output);
+                AddElement(newEdge);
+
+                // Dirty the affected node views
+                Dirty(input.node as NodeView);
+                Dirty(output.node as NodeView);
+            }
+            catch (Exception ex)
             {
-                RemoveEdge(edgeToRemove, false);
+                Debug.LogException(ex);
             }
-
-            var input = edge.input as PortView;
-            var output = edge.output as PortView;
-
-            // Connect the ports in the model
-            Graph.AddEdge(input.Target, output.Target);
-            serializedGraph.Update();
-            EditorUtility.SetDirty(Graph);
-
-            // Add a matching edge view onto the canvas
-            var newEdge = input.ConnectTo(output);
-            AddElement(newEdge);
-
-            // Dirty the affected node views
-            Dirty(input.node as NodeView);
-            Dirty(output.node as NodeView);
         }
 
         /// <summary>
@@ -459,11 +466,16 @@ namespace BlueGraph.Editor
                 {
                     foreach (var conn in port.connections)
                     {
+                        //InfinityLoop FIX
+                        if (dirtyElements.Contains(conn.input.node as NodeView))
+                            continue;
+
                         Dirty(conn.input.node as NodeView);
                     }
                 }
             }
         }
+
 
         /// <summary>
         /// Dirty all nodes on the canvas for a complete refresh
