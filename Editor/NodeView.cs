@@ -57,7 +57,7 @@ namespace BlueGraph.Editor
             {
                 capabilities &= ~Capabilities.Deletable;
             }
-            if (!ReflectionData.MoveAble)
+            if (!ReflectionData.Moveable)
             {
                 capabilities &= ~Capabilities.Movable;
             }

@@ -115,7 +115,7 @@ namespace BlueGraph.Editor
         /// <summary>
         /// Can this node be moved in from graph
         /// </summary>
-        public bool MoveAble { get; set; }
+        public bool Moveable { get; set; }
 
         public List<PortReflectionData> Ports { get; set; } = new List<PortReflectionData>();
 
@@ -133,7 +133,7 @@ namespace BlueGraph.Editor
             Path = nodeAttr.Path?.Split('/');
             Help = nodeAttr.Help;
             Deletable = nodeAttr.Deletable;
-            MoveAble = nodeAttr.Moveable;
+            Moveable = nodeAttr.Moveable;
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
