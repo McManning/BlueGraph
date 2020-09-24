@@ -185,21 +185,7 @@ namespace BlueGraph
             this.nodeName = nodeName;
 
         }
-        /// <summary>
-        /// NodeType required
-        /// </summary>
-        /// <param name="type">Type of the node</param>
-        /// <param name="nodeName">Header title name of the node at graph</param>
-        /// <param name="randonPosition">If true, the node will be created at random position at graph. Default X: (-100,100) Y:(-100,100)</param>
-        public RequireNodeAttribute(Type type, string nodeName = "", bool randonPosition = false)
-        {
-            this.type = type;
-            this.nodeName = nodeName;
-            if (randonPosition)
-            {
-                position = new Vector2(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100));
-            }
-        }
+
         /// <summary>
         /// NodeType required
         /// </summary>
@@ -207,34 +193,15 @@ namespace BlueGraph
         /// <param name="nodeName">Header title name of the node at graph</param>
         /// <param name="xPos">y position to creating</param>
         /// <param name="yPos">x position to creating</param>
-        /// <param name="randonPosition">If true, the node will be created at random position at graph. Default X: (-xPos,xPos) Y:(-yPos,yPos)</param>
-        public RequireNodeAttribute(Type type, string nodeName = "", float xPos = 0, float yPos = 0, bool randonPosition = false)
+        public RequireNodeAttribute(Type type, string nodeName = "", float xPos = 0, float yPos = 0)
         {
             this.type = type;
             this.nodeName = nodeName;
-            if (randonPosition)
-            {
-                float[] x_min_max = GetMinMax(xPos);
-                float[] y_min_max = GetMinMax(yPos);
+            position = new Vector2(xPos, yPos);
 
-                position = new Vector2(UnityEngine.Random.Range(x_min_max[0], x_min_max[1]), UnityEngine.Random.Range(y_min_max[0], y_min_max[1]));
-            }
-            else
-            {
-                position = new Vector2(xPos, yPos);
-            }
         }
 
-        private float[] GetMinMax(float current)
-        {
-            float min = 0; float max = 0;
 
-            //Set random range -x to x and -y to y
-            if (current < 0) { min = current; max = current * -1; }
-            else { min = current * -1; max = current; }
-
-            return new float[] { min, max };
-        }
 
     }
 

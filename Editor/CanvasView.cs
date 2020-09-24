@@ -258,18 +258,17 @@ namespace BlueGraph.Editor
                 //Add Required nodes from GraphAttributes
                 if (attr is RequireNodeAttribute required)
                 {
-                    if (searchWindow.IncludeTags.Contains(required.type.Namespace.ToString()))
-                    {
-                        Node node = graph.GetNode(required.type);
-                        if (node == null)
-                        {
-                            node = NodeReflection.Instantiate(required.type);
-                            node.Graph = graph;
-                            node.Name = required.nodeName;
-                            node.Position = required.position;
-                            AddNodeFromSearch(node, node.Position, null, false);
 
-                        }
+                    Node node = graph.GetNode(required.type);
+                    if (node == null)
+                    {
+                        node = NodeReflection.Instantiate(required.type);
+                        node.Graph = graph;
+                        node.Name = required.nodeName;
+                        node.Position = required.position;
+                        AddNodeFromSearch(node, node.Position, null, false);
+
+
                     }
 
                 }
