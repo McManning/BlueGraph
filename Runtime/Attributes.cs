@@ -33,7 +33,7 @@ namespace BlueGraph
         /// <summary>
         /// Can this node be moved in the graph.
         /// </summary>
-        public bool MoveAble { get; set; } = true;
+        public bool Moveable { get; set; } = true;
         public NodeAttribute(string name = null)
         {
             Name = name;

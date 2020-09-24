@@ -133,7 +133,7 @@ namespace BlueGraph.Editor
             Path = nodeAttr.Path?.Split('/');
             Help = nodeAttr.Help;
             Deletable = nodeAttr.Deletable;
-            MoveAble = nodeAttr.MoveAble;
+            MoveAble = nodeAttr.Moveable;
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
