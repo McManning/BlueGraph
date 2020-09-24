@@ -292,7 +292,9 @@ namespace BlueGraph.Editor
 
             // Track undo and add to the graph
             if (registerUndo)
+            {
                 Undo.RegisterCompleteObjectUndo(Graph, $"Add Node {node.Name}");
+            }
 
             node.Position = graphMousePosition;
 
