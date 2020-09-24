@@ -156,7 +156,7 @@ namespace BlueGraph
 
     /// <summary>
     /// Required node for a given Graph. 
-    /// this node will be created automatically in the chart when it is created.
+    /// Will automatically instantiate the node when the graph is first created.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class RequireNodeAttribute : Attribute
