@@ -468,11 +468,11 @@ namespace BlueGraph.Editor
                 {
                     foreach (var conn in port.connections)
                     {
-                        //InfinityLoop FIX
-                        if (dirtyElements.Contains(conn.input.node as NodeView))
-                            continue;
+                        if (!dirtyElements.Contains(conn.input.node as NodeView))
+                        {
+                            Dirty(conn.input.node as NodeView);
+                        }
 
-                        Dirty(conn.input.node as NodeView);
                     }
                 }
             }
