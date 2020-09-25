@@ -32,6 +32,18 @@ namespace BlueGraph
         {
             get { return "BLUEGRAPH"; }
         }
+        /// <summary>
+        /// Retrieve the min zoom value scale used by CanvasView
+        /// 
+        /// Override to provide other value for the min zoom scale of the CanvasView
+        /// </summary>
+        public virtual float ZoomMinScale { get { return UnityEditor.Experimental.GraphView.ContentZoomer.DefaultMinScale; } }
+        /// <summary>
+        /// Retrieve the max zoom value scale used by CanvasView
+        /// 
+        /// Override to provide other value for the max zoom scale of the CanvasView
+        /// </summary>
+        public virtual float ZoomMaxScale { get { return UnityEditor.Experimental.GraphView.ContentZoomer.DefaultMaxScale; } }
 
         /// <summary>
         /// Retrieve all nodes on this graph
@@ -137,6 +149,13 @@ namespace BlueGraph
         public T GetNode<T>() where T : Node
         {
             return nodes.Find((node) => typeof(T).IsAssignableFrom(node.GetType())) as T;
+        } 
+        /// <summary>
+          /// Find the first node on the Graph of, or inherited from, the given type. 
+          /// </summary>
+        public Node GetNode(Type type)
+        {
+            return nodes.Find((node) => type.IsAssignableFrom(node.GetType()));
         }
 
         /// <summary>

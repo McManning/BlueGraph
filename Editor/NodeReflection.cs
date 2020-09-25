@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -111,6 +112,10 @@ namespace BlueGraph.Editor
         /// Can this node be deleted from the graph 
         /// </summary>
         public bool Deletable { get; set; }
+        /// <summary>
+        /// Can this node be moved in from graph
+        /// </summary>
+        public bool Moveable { get; set; }
 
         public List<PortReflectionData> Ports { get; set; } = new List<PortReflectionData>();
 
@@ -128,7 +133,7 @@ namespace BlueGraph.Editor
             Path = nodeAttr.Path?.Split('/');
             Help = nodeAttr.Help;
             Deletable = nodeAttr.Deletable;
-
+            Moveable = nodeAttr.Moveable;
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
@@ -469,6 +474,14 @@ namespace BlueGraph.Editor
         public static T Instantiate<T>() where T : Node
         {
             return GetNodeType(typeof(T)).CreateInstance() as T;
+        }
+
+        /// <summary>
+        /// Instantiate a new node by type
+        /// </summary>
+        public static Node Instantiate(Type type)
+        {
+            return GetNodeType(type).CreateInstance();
         }
     }
 }

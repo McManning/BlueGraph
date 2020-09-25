@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace BlueGraph.Editor
 {
@@ -18,10 +19,10 @@ namespace BlueGraph.Editor
         public virtual void Load(Graph graph)
         {
             Graph = graph;
-            
+           
             Canvas = new CanvasView(this);
             Canvas.Load(graph);
-            
+            Canvas.StretchToParentSize();
             rootVisualElement.Add(Canvas);
         
             titleContent = new GUIContent(graph.name);
@@ -30,6 +31,9 @@ namespace BlueGraph.Editor
 
         protected virtual void Update()
         {
+            if (Canvas == null)
+                return;
+
             Canvas.Update();
         }
 

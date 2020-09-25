@@ -57,7 +57,11 @@ namespace BlueGraph.Editor
             {
                 capabilities &= ~Capabilities.Deletable;
             }
-            
+            if (!ReflectionData.Moveable)
+            {
+                capabilities &= ~Capabilities.Movable;
+            }
+
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
             RegisterCallback<DetachFromPanelEvent>((e) => Destroy());
             RegisterCallback<TooltipEvent>(OnTooltip);

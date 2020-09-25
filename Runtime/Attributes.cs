@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace BlueGraph
 {
@@ -29,13 +30,16 @@ namespace BlueGraph
         /// Can this node be deleted from the graph.
         /// </summary>
         public bool Deletable { get; set; } = true;
-        
+        /// <summary>
+        /// Can this node be moved in the graph.
+        /// </summary>
+        public bool Moveable { get; set; } = true;
         public NodeAttribute(string name = null)
         {
             Name = name;
         }
     }
-    
+
     /// <summary>
     /// Tags associated with a Node. Can be used by a Graph's <c>[IncludeTags]</c>
     /// attribute to restrict what nodes can be added to the graph. 
@@ -50,7 +54,7 @@ namespace BlueGraph
             this.Tags = tags;
         }
     }
-    
+
     /// <summary>
     /// An input port exposed on a Node
     /// </summary>
@@ -73,13 +77,13 @@ namespace BlueGraph
         /// Can the associated field be directly modified when there are no connections.
         /// </summary>
         public bool Editable { get; set; } = true;
-        
+
         public InputAttribute(string name = null)
         {
             Name = name;
         }
     }
-    
+
     /// <summary>
     /// An output port exposed on a Node.
     /// 
@@ -94,7 +98,7 @@ namespace BlueGraph
         /// If not supplied, this will default to the field name.
         /// </summary>
         public string Name { get; set; }
-        
+
         /// <summary>
         /// Can this output go to multiple inputs at once.
         /// </summary>
@@ -126,13 +130,13 @@ namespace BlueGraph
         /// If not supplied, this will be inferred based on the field name.
         /// </summary>
         public string Name { get; set; }
-        
+
         public EditableAttribute(string name = null)
         {
             Name = name;
         }
     }
-    
+
     /// <summary>
     /// Supported node tags for a given Graph. 
     /// 
@@ -149,7 +153,58 @@ namespace BlueGraph
             Tags = tags;
         }
     }
-    
+
+    /// <summary>
+    /// Required node for a given Graph. 
+    /// Will automatically instantiate the node when the graph is first created.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class RequireNodeAttribute : Attribute
+    {
+        public Type type { get; private set; }
+        public string nodeName { get; private set; }
+        public Vector2 position { get; private set; }
+
+        /// <summary>
+        /// NodeType Required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
+        public RequireNodeAttribute(Type type)
+        {
+            this.type = type;
+
+        }
+        /// <summary>
+        /// NodeType required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
+        /// <param name="nodeName">Header title name of the node at graph</param>
+        public RequireNodeAttribute(Type type, string nodeName = "")
+        {
+            this.type = type;
+            this.nodeName = nodeName;
+
+        }
+
+        /// <summary>
+        /// NodeType required
+        /// </summary>
+        /// <param name="type">Type of the node</param>
+        /// <param name="nodeName">Header title name of the node at graph</param>
+        /// <param name="xPos">y position to creating</param>
+        /// <param name="yPos">x position to creating</param>
+        public RequireNodeAttribute(Type type, string nodeName = "", float xPos = 0, float yPos = 0)
+        {
+            this.type = type;
+            this.nodeName = nodeName;
+            position = new Vector2(xPos, yPos);
+
+        }
+
+
+
+    }
+
     /// <summary>
     /// Mark a node as deprecated and automatically migrate instances
     /// to a new class when encountered in the editor.
@@ -171,7 +226,7 @@ namespace BlueGraph
 
         public CustomNodeViewAttribute(Type nodeType)
         {
-            NodeType = nodeType; 
+            NodeType = nodeType;
         }
     }
 }
