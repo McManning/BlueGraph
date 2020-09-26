@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -26,7 +27,7 @@ namespace BlueGraph.Editor
         /// Display name for this port
         /// </summary>
         public string Name { get; set; }
-        
+
         public Type Type { get; set; }
 
         public PortDirection Direction { get; set; }
@@ -39,7 +40,7 @@ namespace BlueGraph.Editor
         /// Is this.name just the this.field or set via the attribute
         /// </summary>
         public bool IsUsingFieldName { get; set; }
-        
+
         /// <summary>
         /// Create a VisualElement for this port's inline editor based on the field data type.
         /// 
@@ -65,7 +66,7 @@ namespace BlueGraph.Editor
         public string Name { get; set; }
 
         public FieldInfo Field { get; set; }
-        
+
         /// <summary>
         /// Create a VisualElement for this editable field's inline editor based on the field data type.
         /// 
@@ -120,7 +121,7 @@ namespace BlueGraph.Editor
         public List<PortReflectionData> Ports { get; set; } = new List<PortReflectionData>();
 
         public List<EditableReflectionData> Editables { get; set; } = new List<EditableReflectionData>();
-    
+
         /// <summary>
         /// Cache of FieldInfo entries on the node class
         /// </summary>
@@ -165,7 +166,7 @@ namespace BlueGraph.Editor
             foreach (var port in Ports)
             {
                 if (port.Direction == PortDirection.Output) continue;
-       
+
                 // Cast direction type -> port input
                 if (type.IsCastableTo(port.Type, true))
                 {
@@ -181,7 +182,7 @@ namespace BlueGraph.Editor
             foreach (var port in Ports)
             {
                 if (port.Direction == PortDirection.Input) continue;
-       
+
                 // Cast direction port output -> type
                 if (port.Type.IsCastableTo(type, true))
                 {
@@ -191,7 +192,7 @@ namespace BlueGraph.Editor
 
             return false;
         }
-        
+
         /// <summary>
         /// Add ports based on attributes on the class fields.
         /// 
@@ -203,7 +204,7 @@ namespace BlueGraph.Editor
             Fields.AddRange(type.GetFields(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
             ));
-        
+
             // Extract port and editable metadata from each tagged field
             for (int i = 0; i < Fields.Count; i++)
             {
@@ -255,11 +256,12 @@ namespace BlueGraph.Editor
         {
             var node = Activator.CreateInstance(Type) as Node;
             node.Name = Name;
-            
+
             // Create runtime ports from reflection data
             foreach (var port in Ports)
             {
-                node.AddPort(new Port {
+                node.AddPort(new Port
+                {
                     Type = port.Type,
                     Node = node,
                     Name = port.Name,
@@ -296,22 +298,74 @@ namespace BlueGraph.Editor
             return $"<{Name}, IN: {string.Join(", ", inputs)}, OUT: {string.Join(", ", outputs)}>";
         }
     }
-    
+
+    public class NodeReflectionCacheTypeInfo
+    {
+        /// <summary>
+        /// Node Type
+        /// </summary>
+        public Type type;
+        /// <summary>
+        /// Implemented Script of the node.
+        /// </summary>
+        public MonoScript nodeScript;
+        /// <summary>
+        /// NodeView Base of the implementations of node
+        /// </summary>
+        public MonoScript nodeViewScript;
+        /// <summary>
+        /// All <seealso cref="MethodInfo"/>'s and <seealso cref="ContextMethodAttribute"/>'s of the type node.
+        /// </summary>
+        public Dictionary<ContextMethodAttribute, MethodInfo> contextMethods;
+
+        public NodeReflectionCacheTypeInfo(Type type)
+        {
+            this.type = type;
+            contextMethods = new Dictionary<ContextMethodAttribute, MethodInfo>();
+        }
+    }
+
     public static class NodeReflection
     {
         private static Dictionary<string, NodeReflectionData> cachedReflectionMap = null;
-        
+
         /// <summary>
         /// Mapping between an AbstractNode type (key) and a custom editor type (value)
         /// </summary>
         private static Dictionary<Type, Type> cachedEditorMap = null;
-        
+
+        /// <summary>
+        /// Get Utils properties from nodes
+        /// </summary>
+        private static Dictionary<Type, NodeReflectionCacheTypeInfo> cacheNodeTypeUtils = new Dictionary<Type, NodeReflectionCacheTypeInfo>();
+
         /// <summary>
         /// All search providers in the application that could be 
         /// registered in the CanvasView for a graph
         /// </summary>
         private static List<ISearchProvider> cachedSearchProviders = null;
-        
+
+        static NodeReflection()
+        {
+            foreach (var nodeType in TypeCache.GetTypesDerivedFrom<Node>())
+            {
+                if (nodeType.IsAbstract == false)
+                {
+                    AddNodeType(nodeType);
+                    AddNodeContexMethods(nodeType);
+                }
+            }
+
+            foreach (var nodeViewType in TypeCache.GetTypesDerivedFrom<NodeView>())
+            {
+
+                if (!nodeViewType.IsAbstract)
+                {
+                    AddNodeViewType(nodeViewType);
+                }
+            }
+        }
+
         public static List<ISearchProvider> SearchProviders
         {
             get
@@ -365,7 +419,7 @@ namespace BlueGraph.Editor
                     }
                 }
             }
-        
+
             cachedReflectionMap = nodes;
             return cachedReflectionMap;
         }
@@ -376,7 +430,7 @@ namespace BlueGraph.Editor
             {
                 LoadNodeEditorTypes();
             }
-            
+
             cachedEditorMap.TryGetValue(type, out Type editorType);
             if (editorType != null)
             {
@@ -387,7 +441,7 @@ namespace BlueGraph.Editor
             while (type != typeof(Node))
             {
                 type = type.BaseType;
-                
+
                 cachedEditorMap.TryGetValue(type, out editorType);
                 if (editorType != null)
                 {
@@ -408,7 +462,7 @@ namespace BlueGraph.Editor
             var baseType = typeof(NodeView);
             var types = new List<Type>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            
+
             foreach (var assembly in assemblies)
             {
                 try
@@ -416,15 +470,15 @@ namespace BlueGraph.Editor
                     types.AddRange(assembly.GetTypes().Where(
                         (t) => !t.IsAbstract && baseType.IsAssignableFrom(t)
                     ).ToArray());
-                } 
+                }
                 catch (ReflectionTypeLoadException)
-                { 
+                {
                     // noop
                 }
             }
-            
+
             var nodeEditors = new Dictionary<Type, Type>();
-            foreach (var t in types) 
+            foreach (var t in types)
             {
                 // We only look at direct attributes here for associations.
                 // GetNodeEditorType() handles walking up the inheritance tree.
@@ -437,7 +491,7 @@ namespace BlueGraph.Editor
 
             cachedEditorMap = nodeEditors;
         }
-        
+
         private static void LoadSearchProviders()
         {
             // TODO: Combine with LoadNodeEditorTypes / GetNodeTypes 
@@ -460,12 +514,90 @@ namespace BlueGraph.Editor
                             );
                         }
                     }
-                } 
+                }
                 catch (ReflectionTypeLoadException)
-                { 
+                {
                     // noop
                 }
             }
+        }
+
+        private static void AddNodeType(Type type)
+        {
+            var attrs = type.GetCustomAttributes(typeof(NodeAttribute), false) as NodeAttribute[];
+
+            if (attrs != null && attrs.Length > 0)
+            {               
+
+                var nodeScriptAsset = FindScriptFromClassName(type.Name);
+
+                // Try find the class name with Node name at the end
+                if (nodeScriptAsset == null)
+                    nodeScriptAsset = FindScriptFromClassName(type.Name + "Node");
+                if (nodeScriptAsset != null)
+                {
+                    if (cacheNodeTypeUtils.ContainsKey(type) == false) cacheNodeTypeUtils.Add(type, new NodeReflectionCacheTypeInfo(type));
+                    cacheNodeTypeUtils[type].nodeScript = nodeScriptAsset;
+                }
+            }
+        }
+        private static void AddNodeViewType(Type type)
+        {
+            var attrs = type.GetCustomAttributes(typeof(CustomNodeViewAttribute), false) as CustomNodeViewAttribute[];
+
+            if (attrs != null && attrs.Length > 0)
+            {
+                // Try find the class name with View Or NodeView name at the end
+                var nodeViewScriptAsset = FindScriptFromClassName(type.Name);
+                if (nodeViewScriptAsset == null)
+                    nodeViewScriptAsset = FindScriptFromClassName(type.Name + "View");
+                if (nodeViewScriptAsset == null)
+                    nodeViewScriptAsset = FindScriptFromClassName(type.Name + "NodeView");
+                if (nodeViewScriptAsset != null)
+                {
+                    if (cacheNodeTypeUtils.ContainsKey(type) == false) cacheNodeTypeUtils.Add(type, new NodeReflectionCacheTypeInfo(type));
+                    cacheNodeTypeUtils[type].nodeViewScript = nodeViewScriptAsset;
+                }
+            }
+        }
+        private static void AddNodeContexMethods(Type type)
+        {
+            bool attrs = type.GetCustomAttributes().Any(c => c is NodeAttribute || c is CustomNodeViewAttribute);
+
+            if (attrs)
+            {
+                foreach (var method in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    ContextMethodAttribute contexAttr = method.GetCustomAttribute<ContextMethodAttribute>();
+
+                    if (method.GetCustomAttribute<HideInInspector>() == null && contexAttr != null)
+                    {
+                        if (cacheNodeTypeUtils.ContainsKey(type) == false) cacheNodeTypeUtils.Add(type, new NodeReflectionCacheTypeInfo(type));
+                        cacheNodeTypeUtils[type].contextMethods.Add(contexAttr, method);
+                    }
+                }
+            }
+        }
+
+        private static MonoScript FindScriptFromClassName(string className)
+        {
+            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
+
+            if (scriptGUIDs.Length == 0)
+                return null;
+
+            foreach (var scriptGUID in scriptGUIDs)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(scriptGUID);
+                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+
+                if (script != null && String.Equals(className, Path.GetFileNameWithoutExtension(assetPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    return script;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -482,6 +614,22 @@ namespace BlueGraph.Editor
         public static Node Instantiate(Type type)
         {
             return GetNodeType(type).CreateInstance();
+        }
+
+        public static MonoScript GetNodeScript(Type type)
+        {
+            cacheNodeTypeUtils.TryGetValue(type, out var script);
+            return script.nodeScript;
+        }
+        public static MonoScript GetNodeViewScript(Type type)
+        {
+            cacheNodeTypeUtils.TryGetValue(type, out var script);
+            return script.nodeViewScript;
+        }
+        public static Dictionary<ContextMethodAttribute, MethodInfo> GetContexMethods(Type type)
+        {
+            cacheNodeTypeUtils.TryGetValue(type, out var script);
+            return script.contextMethods;
         }
     }
 }

@@ -140,7 +140,7 @@ namespace BlueGraph
         }
         
         public void OnBeforeSerialize()
-        {
+        {            
             type = Type.AssemblyQualifiedName;
         }
 
