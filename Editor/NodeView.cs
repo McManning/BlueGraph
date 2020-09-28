@@ -277,7 +277,7 @@ namespace BlueGraph.Editor
             evt.menu.AppendAction("Edit/Node View Script", (e) => EditNodeViewScript(), GetNodeViewScriptStatus);
             
             //Add ContextMethos by Attributes from node
-            Dictionary<ContextMethodAttribute, System.Reflection.MethodInfo> contexMethods = NodeReflection.GetContexMethods(Target.GetType());
+            Dictionary<ContextMethodAttribute, System.Reflection.MethodInfo> contexMethods = ReflectionData.TypeInfoData.contextMethods;
             foreach (ContextMethodAttribute attr in contexMethods.Keys)
             {
                 string title = string.IsNullOrEmpty(attr.title) ? contexMethods[attr].Name : attr.title;
@@ -291,7 +291,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public void EditNodeScript()
         {
-            var script = NodeReflection.GetNodeScript(Target.GetType());
+            var script = ReflectionData.TypeInfoData.nodeScript;
 
             if (script != null)
                 AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
@@ -301,7 +301,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public void EditNodeViewScript()
         {
-            var script = NodeReflection.GetNodeViewScript(this.GetType());
+            var script = ReflectionData.TypeInfoData.nodeViewScript;
 
             if (script != null)
                 AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
@@ -309,14 +309,14 @@ namespace BlueGraph.Editor
 
         private Status GetNodeScriptStatus(DropdownMenuAction action)
         {
-            if (NodeReflection.GetNodeScript(Target.GetType()) != null)
+            if (ReflectionData.TypeInfoData.nodeScript != null)
                 return Status.Normal;
             return Status.Disabled;
         }
         //Used by BuildContextualMenu Function to get ennable or disable contextmenu item
         private Status GetNodeViewScriptStatus(DropdownMenuAction action)
         {
-            if (NodeReflection.GetNodeViewScript(GetType()) != null)
+            if (ReflectionData.TypeInfoData.nodeViewScript)
                 return Status.Normal;
             return Status.Disabled;
         }
