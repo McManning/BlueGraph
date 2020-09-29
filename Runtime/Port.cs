@@ -137,15 +137,19 @@ namespace BlueGraph
         public Port()
         {
             connections = new List<Connection>();
-        }
+        } 
         
         public void OnBeforeSerialize()
-        {            
-            type = Type.AssemblyQualifiedName;
+        {
+            if (string.IsNullOrEmpty(name)) 
+                return;
+            type = Type.AssemblyQualifiedName; 
         }
 
         public void OnAfterDeserialize()
         {
+            if (string.IsNullOrEmpty(name))
+                return;
             Type = Type.GetType(type);
         }
 
@@ -329,11 +333,17 @@ namespace BlueGraph
 
         internal void OnEnable()
         {
+            if (string.IsNullOrEmpty(name))
+                return;
+
             UpdateConnections();
         }
 
         internal void OnValidate()
         {
+            if (string.IsNullOrEmpty(name))
+                return;
+
             UpdateConnections();
         }
 

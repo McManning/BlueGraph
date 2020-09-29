@@ -82,6 +82,8 @@ namespace BlueGraph
 
         public virtual void OnAfterDeserialize()
         {
+            if (string.IsNullOrEmpty(Name))
+                return;
             if (Graph == null)
             {
                 throw new Exception(
@@ -95,6 +97,9 @@ namespace BlueGraph
 
         public void Enable()
         {
+            if (string.IsNullOrEmpty(Name))
+                return;
+
             // Ports are enabled first to ensure they're fully loaded
             // prior to enabling the node itself, in case the node needs
             // to query port data during OnEnable.
@@ -117,6 +122,8 @@ namespace BlueGraph
 
         public void Disable()
         {
+            if (string.IsNullOrEmpty(Name))
+                return;
             OnDisable();
         }
 
@@ -128,6 +135,8 @@ namespace BlueGraph
 
         public void Validate()
         {
+            if (string.IsNullOrEmpty(Name))
+                return;
             // Same as Enable(), we do ports first to make sure
             // everything is ready for the node's OnValidate
             foreach (var port in ports)
@@ -201,7 +210,7 @@ namespace BlueGraph
         /// </summary>
         public void RemovePort(Port port)
         {
-            port.DisconnectAll();
+            port.DisconnectAll(); 
             port.Node = null;
 
             ports.Remove(port);
@@ -322,6 +331,8 @@ namespace BlueGraph
 
         public override string ToString()
         {
+            if (string.IsNullOrEmpty(Name))
+                return "NullNode";
             return $"{GetType()}({Name}, {ID})";
         }
     }
