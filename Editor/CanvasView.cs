@@ -738,11 +738,7 @@ namespace BlueGraph.Editor
             Undo.RegisterCompleteObjectUndo(Graph, "Paste Subgraph");
 
             var cpg = CopyPasteGraph.Deserialize(data, searchWindow.IncludeTags);
-
-            foreach (var node in cpg.Nodes)
-            {
-                Graph.AddNode(node);
-            }
+            Graph.AddNodes(cpg.Nodes);
 
             foreach (var comment in cpg.Comments)
             {

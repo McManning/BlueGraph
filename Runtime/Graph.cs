@@ -195,27 +195,63 @@ namespace BlueGraph
         /// <summary>
         /// Add a new node to the Graph.
         /// 
-        /// Once added, the node's <c>OnEnable()</c> method will be called.
+        /// <para>
+        ///     <see cref="Node.OnAddedToGraph"/> and <see cref="Node.OnEnable"/> 
+        ///     will be called <b>after</b> it has been added, in that order.
+        /// </para>
         /// </summary>
         public void AddNode(Node node)
         {
             node.Graph = this;
             nodes.Add(node);
+
             node.OnAddedToGraph();
-            node.OnEnable();
+            node.Enable();
+        }
+
+        /// <summary>
+        /// Add a set of new nodes to the Graph.
+        /// 
+        /// <para>
+        ///     <see cref="Node.OnAddedToGraph"/> and <see cref="Node.OnEnable"/> 
+        ///     will be called per-node <b>after</b> they've all been added, in that order.
+        /// </para>
+        /// </summary>
+        /// <param name="nodes"></param>
+        public void AddNodes(IEnumerable<Node> newNodes)
+        {
+            foreach (var node in newNodes)
+            {
+                node.Graph = this;
+                nodes.Add(node);
+            }
+
+            foreach (var node in newNodes)
+            {
+                node.OnAddedToGraph();
+            }
+
+            foreach (var node in newNodes)
+            {
+                node.Enable();
+            }
         }
         
         /// <summary>
         /// Remove a node from the Graph.
         /// 
-        /// Once removed, the node's <c>OnDisable()</c> method will be called.
+        /// <para>
+        ///     <see cref="Node.OnDisable"/> and <see cref="Node.OnRemovedFromGraph"/> 
+        ///     will be called <b>before</b> it has been removed, in that order.
+        /// </para>
         /// </summary>
         public void RemoveNode(Node node)
         {
+            node.Disable();
+            node.OnRemovedFromGraph();
+
             node.DisconnectAllPorts();
             nodes.Remove(node);
-            node.OnDisable();
-            node.OnRemovedFromGraph();
             node.Graph = null;
         }
 
