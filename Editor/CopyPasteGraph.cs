@@ -119,7 +119,7 @@ namespace BlueGraph.Editor
             // that were to nodes outside of the subset of pasted nodes
             foreach (var node in graph.Nodes)
             {
-                foreach (var port in node.Ports)
+                foreach (var port in node.Ports.Values)
                 {
                     var edges = new List<Connection>(port.Connections);
                     port.Connections.Clear();

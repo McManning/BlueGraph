@@ -125,7 +125,7 @@ namespace BlueGraph.Editor
         /// </summary>
         protected void ReloadPorts()
         {
-            foreach (var port in Target.Ports)
+            foreach (var port in Target.Ports.Values)
             {
                 if (port.Direction == PortDirection.Input)
                 {

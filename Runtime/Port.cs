@@ -75,6 +75,7 @@ namespace BlueGraph
             set { 
                 name = value; 
                 RefreshInboundConnections();
+                Node?.RefreshPortLookup();
             }
         }
         
@@ -224,10 +225,8 @@ namespace BlueGraph
         internal void DisconnectAll()
         {
             // Remove ourselves from all other connected ports
-            for (var i = 0; i < connections.Count; i++)
+            foreach (var port in ConnectedPorts)
             {
-                var port = connections[i].Port;
-                
                 port.connections.RemoveAll((edge) => 
                     edge.NodeID == Node.ID && edge.PortName == Name
                 );
@@ -311,7 +310,7 @@ namespace BlueGraph
                 if (connected == null)
                 {
                     Debug.LogError(
-                        $"Could not locate connected node {edge.NodeID} from port {Name} of {Node.Name}"
+                        $"Could not locate connected node `{edge.NodeID}` from port `{Name}` of `{Node.Name}`"
                     );
                 }
                 else
