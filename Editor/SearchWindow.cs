@@ -2,11 +2,13 @@
 using System.Linq;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.Experimental;
 
 namespace BlueGraph.Editor
 {
     public class SearchWindow : ScriptableObject, ISearchWindowProvider
     {
+
         public CanvasView Target { get; set; }
 
         public PortView SourcePort { get; set; }
@@ -107,6 +109,8 @@ namespace BlueGraph.Editor
     
     internal class SearchGroup
     {
+        private static Texture folderIcon = EditorResources.Load<Texture>("d_Folder Icon");
+
         public SearchGroup(int depth)
         {
             Depth = depth;
@@ -125,7 +129,8 @@ namespace BlueGraph.Editor
             // Add subgroups
             foreach (var group in Subgroups)
             {
-                entry = new SearchTreeGroupEntry(new GUIContent(group.Key))
+                GUIContent content = new GUIContent(" " + group.Key, folderIcon);
+                entry = new SearchTreeGroupEntry(content)
                 {
                     level = Depth
                 };
@@ -137,7 +142,8 @@ namespace BlueGraph.Editor
             // Add nodes
             foreach (var result in Results)
             {
-                entry = new SearchTreeEntry(new GUIContent(result.Name))
+                GUIContent content = new GUIContent("      " + result.Name);
+                entry = new SearchTreeEntry(content)
                 {
                     level = Depth,
                     userData = result
