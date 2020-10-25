@@ -559,7 +559,7 @@ namespace BlueGraph.Editor
             // and try to just refactor this whole thing tbh
             foreach (var node in nodeMap)
             {
-                foreach (var port in node.Key.Ports)
+                foreach (var port in node.Key.Ports.Values)
                 {
                     if (port.Direction == PortDirection.Output)
                     {
@@ -568,7 +568,7 @@ namespace BlueGraph.Editor
 
                     foreach (var conn in port.ConnectedPorts)
                     {
-                        var connectedNode = conn.Node;
+                        var connectedNode = conn?.Node;
                         if (connectedNode == null)
                         {
                             Debug.LogError(
@@ -738,11 +738,7 @@ namespace BlueGraph.Editor
             Undo.RegisterCompleteObjectUndo(Graph, "Paste Subgraph");
 
             var cpg = CopyPasteGraph.Deserialize(data, searchWindow.IncludeTags);
-
-            foreach (var node in cpg.Nodes)
-            {
-                Graph.AddNode(node);
-            }
+            Graph.AddNodes(cpg.Nodes);
 
             foreach (var comment in cpg.Comments)
             {

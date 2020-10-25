@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlueGraph
 {
     [Serializable]
-    public abstract class Node : ISerializationCallbackReceiver
+    public abstract class Node
     {
         public event Action OnValidateEvent;
         public event Action OnErrorEvent;
@@ -45,8 +46,25 @@ namespace BlueGraph
             set { position = value; }
         }
 
-        [SerializeField] private List<Port> ports;
-        
+        [SerializeField] private Port[] ports;
+        [NonSerialized] private Dictionary<string, Port> portLookup;
+
+        /// <summary>
+        /// Accessor for ports and their connections to/from this node.
+        /// </summary>
+        public IReadOnlyDictionary<string, Port> Ports
+        { 
+            get {
+                if (portLookup == null)
+                {
+                    portLookup = new Dictionary<string, Port>();
+                    RefreshPortLookup();
+                }
+
+                return portLookup;
+            } 
+        }
+
         [NonSerialized] private string error;
 
         /// <summary>
@@ -64,43 +82,21 @@ namespace BlueGraph
             }
         }
 
-        /// <summary>
-        /// Accessor for ports and their connections to/from this node.
-        /// </summary>
-        public IList<Port> Ports 
-        { 
-            get { return ports.AsReadOnly(); } 
-        }
-
         public Node()
         {
             ID = Guid.NewGuid().ToString();
-            ports = new List<Port>();
+            portLookup = new Dictionary<string, Port>();
         }
-
-        public virtual void OnAfterDeserialize()
-        {
-            if (Graph == null)
-            {
-                throw new Exception(
-                    $"[{Name} - {ID}] Node OnEnable without a graph reference. " +
-                    $"This could point to a potential memory leak"
-                );
-            }
-        }
-
-        public virtual void OnBeforeSerialize() { }
 
         public void Enable()
         {
+            // RefreshPortDictionary();
+            
             // Ports are enabled first to ensure they're fully loaded
             // prior to enabling the node itself, in case the node needs
             // to query port data during OnEnable.
             foreach (var port in ports)
             {
-                // Add a backref to each child port of this node.
-                // We don't store this in the serialized copy to avoid cyclic refs.
-                port.Node = this;
                 port.OnEnable();
             }
 
@@ -109,7 +105,7 @@ namespace BlueGraph
 
         /// <summary>
         /// Called when the Graph's ScriptableObject gets the OnEnable message
-        /// or when the node is added to the graph via <c>Graph.AddNode</c>
+        /// or when the node is added to the graph via <see cref="Graph.AddNode(Node)" />
         /// </summary>
         public virtual void OnEnable() { }
         
@@ -120,7 +116,7 @@ namespace BlueGraph
         
         /// <summary>
         /// Called when the Graph's ScriptableObject gets the OnDisable message
-        /// or when the node is removed from the graph via <c>Graph.RemoveNode</c>
+        /// or when the node is removed from the graph via <see cref="Graph.RemoveNode(Node)" />
         /// </summary>
         public virtual void OnDisable() { }
 
@@ -144,23 +140,19 @@ namespace BlueGraph
         public virtual void OnValidate() { }
 
         /// <summary>
-        /// Called when added via <c>Graph.AddNode</c>. 
-        /// 
-        /// This comes <b>before</b> <c>OnEnable</c>
+        /// Called after this node is added to a Graph via <see cref="Graph.AddNode(Node)"/> 
+        /// and before <see cref="OnEnable"/>.
         /// </summary>
         public virtual void OnAddedToGraph() { }
 
         /// <summary>
-        /// Called when added via <c>Graph.RemoveNode</c>. 
-        /// 
-        /// This comes <b>after</b> <c>OnDisable</c>. 
-        /// 
-        /// <c>Node.Graph</c> property is still valid during this call. 
+        /// Called before this node is removed from a Graph via 
+        /// <see cref="Graph.RemoveNode(Node)"/> and after <see cref="OnDisable"/>.
         /// </summary>
         public virtual void OnRemovedFromGraph() { } 
 
         /// <summary>
-        /// Called when the <c>Error</c> property is modified.
+        /// Called when the <see cref="Error"/> property is modified.
         /// </summary>
         public virtual void OnError() { } 
 
@@ -174,7 +166,9 @@ namespace BlueGraph
         /// </summary>
         public Port GetPort(string name)
         {
-            return ports.Find((port) => port.Name == name);
+            Ports.TryGetValue(name, out Port value);
+
+            return value;
         }
         
         /// <summary>
@@ -189,9 +183,14 @@ namespace BlueGraph
                     $"<b>[{Name}]</b> A port named `{port.Name}` already exists"
                 );
             }
-
-            ports.Add(port);
+            
             port.Node = this;
+
+            portLookup[port.Name] = port;
+
+            // Update the serializable port list
+            ports = new Port[Ports.Count];
+            portLookup.Values.CopyTo(ports, 0);
         }
         
         /// <summary>
@@ -202,15 +201,39 @@ namespace BlueGraph
             port.DisconnectAll();
             port.Node = null;
 
-            ports.Remove(port);
+            portLookup.Remove(port.Name);
+            
+            // Update the serializable port list
+            ports = new Port[Ports.Count];
+            portLookup.Values.CopyTo(ports, 0);
         }
-        
+
+        /// <summary>
+        /// Rebuild the fast lookup map between names and <see cref="Port"/> instances.
+        /// </summary>
+        internal void RefreshPortLookup()
+        {
+            portLookup.Clear();
+            if (ports != null)
+            {
+                foreach (var port in ports)
+                {
+                    // Copy port references to our fast lookup dictionary
+                    portLookup[port.Name] = port;
+                
+                    // Add a backref to each child port of this node.
+                    // We don't store this in the serialized copy to avoid cyclic refs.
+                    port.Node = this;
+                }
+            }
+        }
+
         /// <summary>
         /// Safely remove every edge going in and out of this node.
         /// </summary>
         public void DisconnectAllPorts()
         {
-            foreach (var port in ports)
+            foreach (var port in Ports.Values)
             {
                 port.DisconnectAll();
             }

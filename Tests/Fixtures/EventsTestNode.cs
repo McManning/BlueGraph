@@ -7,8 +7,6 @@
     {
         public int onEnableCount = 0;
         public int onDisableCount = 0;
-        public int onBeforeSerializeCount = 0;
-        public int onAfterDeserializeCount = 0;
     
         public EventTestNode() : base()
         {
@@ -28,18 +26,6 @@
         {
             onDisableCount++;
             base.OnDisable();
-        }
-
-        public override void OnBeforeSerialize()
-        {
-            onBeforeSerializeCount++;
-            base.OnBeforeSerialize();
-        }
-
-        public override void OnAfterDeserialize()
-        {
-            onAfterDeserializeCount++;
-            base.OnAfterDeserialize();
         }
 
         public override object OnRequestValue(Port port)
