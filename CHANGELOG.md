@@ -1,3 +1,9 @@
+# 1.0.0 (2020-10-26)
+
+
+### Features
+
+* Initial 1.0 release ([d8773fe](https://github.com/McManning/BlueGraph/commit/d8773fecc053ef74fc6000ed76bbd9c2d2dc99b8))
 
 # Changelog
 All notable changes to this project will be documented in this file.
