@@ -79,156 +79,6 @@ namespace BlueGraph.Editor
     }
 
     /// <summary>
-    /// Provide useful methods and variables for working with nodes from their type.
-    /// </summary>
-    public class NodeTypeInfoData
-    {
-        private Dictionary<ContextMethodAttribute, MethodInfo> contextMethods;
-
-        /// <summary>
-        /// Implemented Node Type
-        /// </summary>
-        public Type Type { get; private set; }
-
-        /// <summary>
-        /// Implemented NodeView Type.
-        /// <para>
-        /// Null if there is none NodeView implemented for this node <see cref="Type"/>
-        /// </para>
-        /// </summary>
-        public Type EditorType { get; private set; }
-
-        /// <summary>
-        /// Implemented Script of the node <seealso cref="Type"/>.
-        ///
-        /// You can use GetClass() to get the implemented class of the script
-        /// </summary>
-        public MonoScript NodeScript { get; private set; }
-
-        /// <summary>
-        /// NodeView Base of the implementations of node.
-        ///
-        /// You can use GetClass() to get the implemented class of the script
-        ///
-        /// <para>
-        /// Returns null if there is no NodeView implemented for this node <see cref="Type"/>
-        /// </para>
-        /// </summary>
-        public MonoScript NodeViewScript { get; private set; }
-
-        /// <summary>
-        /// All <seealso cref="MethodInfo"/>'s and <seealso cref="ContextMethodAttribute"/>'s of the node.
-        ///
-        /// Use this to see all methods that using ContexMethos Atrribute it this node type
-        /// <para></para>
-        /// If there are none, an empty Dictionary will be returned
-        /// </summary>
-        public IReadOnlyDictionary<ContextMethodAttribute, MethodInfo> ContextMethods {
-            get {
-                return contextMethods;
-            }
-        }
-
-        public NodeTypeInfoData(Type type)
-        {
-            Type = type;
-            EditorType = NodeReflection.GetNodeEditorType(type);
-            contextMethods = new Dictionary<ContextMethodAttribute, MethodInfo>();
-
-            SetScriptNodeType();
-            SetScriptNodeViewType();
-            LoadContextMethods();
-        }
-
-        private void SetScriptNodeType()
-        {
-            NodeScript = FindScriptFromClassName(Type.Name);
-
-            if (NodeScript == null)
-            {
-                NodeScript = FindScriptFromClassName(Type.Name + "Node");
-            }
-        }
-
-        private void SetScriptNodeViewType()
-        {
-            if (EditorType == null)
-            {
-                return;
-            }
-
-            // Try find the class name with View Or NodeView name at the end
-            NodeViewScript = FindEditorScriptFromClassName(EditorType.Name);
-            if (NodeViewScript == null)
-            {
-                NodeViewScript = FindEditorScriptFromClassName(EditorType.Name + "View");
-            }
-
-            if (NodeViewScript == null)
-            {
-                NodeViewScript = FindEditorScriptFromClassName(EditorType.Name + "NodeView");
-            }
-        }
-
-        private void LoadContextMethods()
-        {
-            foreach (var method in Type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                var contextAttr = method.GetCustomAttribute<ContextMethodAttribute>();
-                if (contextAttr != null)
-                {
-                    contextMethods.Add(contextAttr, method);
-                }
-            }
-        }
-
-        private MonoScript FindScriptFromClassName(string className)
-        {
-            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
-
-            if (scriptGUIDs.Length == 0)
-                return null;
-
-            foreach (var scriptGUID in scriptGUIDs)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(scriptGUID);
-                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
-
-                if (script != null && String.Equals(className, Path.GetFileNameWithoutExtension(assetPath), StringComparison.OrdinalIgnoreCase))
-                {
-                    if (script.GetClass().Namespace == Type.Namespace)
-                        return script;
-                }
-            }
-
-            return null;
-        }
-
-        private MonoScript FindEditorScriptFromClassName(string className)
-        {
-            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
-
-            if (scriptGUIDs.Length == 0)
-                return null;
-
-            foreach (var scriptGUID in scriptGUIDs)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(scriptGUID);
-                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
-
-                if (script != null && String.Equals(className, Path.GetFileNameWithoutExtension(assetPath), StringComparison.OrdinalIgnoreCase))
-                {
-                    if (script.GetClass().Namespace == EditorType.Namespace)
-                        return script;
-                }
-            }
-
-            return null;
-        }
-
-    }
-
-    /// <summary>
     /// Reflection data for a class with a [Node] attribute
     /// </summary>
     public class NodeReflectionData
@@ -268,30 +118,74 @@ namespace BlueGraph.Editor
         /// </summary>
         public bool Moveable { get; set; }
 
+        /// <summary>
+        /// Metadata about ports declared through <see cref="InputAttribute"/>
+        /// and <see cref="OutputAttribute"/> on fields.
+        /// </summary>
         public List<PortReflectionData> Ports { get; set; } = new List<PortReflectionData>();
 
+        /// <summary>
+        /// Metadata about editables declared through <see cref="EditableAttribute"/> on fields.
+        /// </summary>
         public List<EditableReflectionData> Editables { get; set; } = new List<EditableReflectionData>();
 
         /// <summary>
         /// Cache of FieldInfo entries on the node class
         /// </summary>
         public List<FieldInfo> Fields { get; set; } = new List<FieldInfo>();
+
         /// <summary>
-        /// It provides useful methods and variables for working with nodes from their type.
-        ///
-        /// Use this to Get All methods from <seealso cref="ContextMethodAttribute"/> or to get
-        /// the assigned script of this node or this nodeView.
+        /// Implemented NodeView Type.
+        /// <para>
+        /// Null if there is no NodeView implemented for this node <see cref="Type"/>
+        /// </para>
         /// </summary>
-        public NodeTypeInfoData TypeInfoData { get; set; }
+        public Type EditorType { get; private set; }
+
+        /// <summary>
+        /// Implemented Script of the node <seealso cref="Type"/>.
+        ///
+        /// You can use GetClass() to get the implemented class of the script
+        /// </summary>
+        public MonoScript NodeScript { get; private set; }
+
+        /// <summary>
+        /// NodeView Base of the implementations of node.
+        ///
+        /// You can use GetClass() to get the implemented class of the script
+        ///
+        /// <para>
+        /// Returns null if there is no NodeView implemented for this node <see cref="Type"/>
+        /// </para>
+        /// </summary>
+        public MonoScript NodeViewScript { get; private set; }
+
+        private Dictionary<ContextMethodAttribute, MethodInfo> contextMethods;
+
+        /// <summary>
+        /// All <seealso cref="MethodInfo"/>'s and <seealso cref="ContextMethodAttribute"/>'s of the node.
+        ///
+        /// Use this to see all methods that using ContexMethos Atrribute it this node type
+        /// <para></para>
+        /// If there are none, an empty Dictionary will be returned
+        /// </summary>
+        public IReadOnlyDictionary<ContextMethodAttribute, MethodInfo> ContextMethods {
+            get {
+                return contextMethods;
+            }
+        }
 
         public NodeReflectionData(Type type, NodeAttribute nodeAttr)
         {
-            this.Type = type;
+            Type = type;
             Name = nodeAttr.Name ?? ObjectNames.NicifyVariableName(type.Name);
             Path = nodeAttr.Path?.Split('/');
             Help = nodeAttr.Help;
             Deletable = nodeAttr.Deletable;
             Moveable = nodeAttr.Moveable;
+            EditorType = NodeReflection.GetNodeEditorType(type);
+            contextMethods = new Dictionary<ContextMethodAttribute, MethodInfo>();
+
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)
             {
@@ -316,8 +210,9 @@ namespace BlueGraph.Editor
 
             // Load additional data from class fields
             AddFieldsFromClass(type);
-            // Load additional data from NodeTypeInfoData. Util to work with MonoScript
-            TypeInfoData = new NodeTypeInfoData(type);
+            SetScriptNodeType();
+            SetScriptNodeViewType();
+            LoadContextMethods();
         }
 
         public bool HasInputOfType(Type type)
@@ -437,6 +332,92 @@ namespace BlueGraph.Editor
             return Ports.Find((port) => port.Name == name);
         }
 
+        private void SetScriptNodeType()
+        {
+            NodeScript = FindScriptFromClassName(Type.Name);
+
+            if (NodeScript == null)
+            {
+                NodeScript = FindScriptFromClassName(Type.Name + "Node");
+            }
+        }
+
+        private void SetScriptNodeViewType()
+        {
+            if (EditorType == null)
+            {
+                return;
+            }
+
+            // Try find the class name with View Or NodeView name at the end
+            NodeViewScript = FindEditorScriptFromClassName(EditorType.Name);
+            if (NodeViewScript == null)
+            {
+                NodeViewScript = FindEditorScriptFromClassName(EditorType.Name + "View");
+            }
+
+            if (NodeViewScript == null)
+            {
+                NodeViewScript = FindEditorScriptFromClassName(EditorType.Name + "NodeView");
+            }
+        }
+
+        private void LoadContextMethods()
+        {
+            foreach (var method in Type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                var contextAttr = method.GetCustomAttribute<ContextMethodAttribute>();
+                if (contextAttr != null)
+                {
+                    contextMethods.Add(contextAttr, method);
+                }
+            }
+        }
+
+        private MonoScript FindScriptFromClassName(string className)
+        {
+            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
+
+            if (scriptGUIDs.Length == 0)
+                return null;
+
+            foreach (var scriptGUID in scriptGUIDs)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(scriptGUID);
+                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+
+                if (script != null && string.Equals(className, System.IO.Path.GetFileNameWithoutExtension(assetPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (script.GetClass().Namespace == Type.Namespace)
+                        return script;
+                }
+            }
+
+            return null;
+        }
+
+        private MonoScript FindEditorScriptFromClassName(string className)
+        {
+            var scriptGUIDs = AssetDatabase.FindAssets($"t:script {className}");
+
+            if (scriptGUIDs.Length == 0)
+                return null;
+
+            foreach (var scriptGUID in scriptGUIDs)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(scriptGUID);
+                var script = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+
+                if (script != null && string.Equals(className, System.IO.Path.GetFileNameWithoutExtension(assetPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (script.GetClass().Namespace == EditorType.Namespace)
+                        return script;
+                }
+            }
+
+            return null;
+        }
+
         public override string ToString()
         {
             var inputs = new List<string>();
@@ -466,11 +447,6 @@ namespace BlueGraph.Editor
         /// Mapping between an AbstractNode type (key) and a custom editor type (value)
         /// </summary>
         private static Dictionary<Type, Type> cachedEditorMap = null;
-
-        /// <summary>
-        /// Get Utils properties from nodes
-        /// </summary>
-        private static Dictionary<Type, NodeTypeInfoData> cacheNodeTypeUtils = new Dictionary<Type, NodeTypeInfoData>();
 
         /// <summary>
         /// All search providers in the application that could be

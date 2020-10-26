@@ -277,7 +277,7 @@ namespace BlueGraph.Editor
             evt.menu.AppendAction("Edit/Node View Script", (e) => EditNodeViewScript(), GetNodeViewScriptStatus);
 
             //Add ContextMethods by Attributes from node
-            var contextMethods = ReflectionData.TypeInfoData.ContextMethods;
+            var contextMethods = ReflectionData.ContextMethods;
 
             foreach (var attr in contextMethods.Keys)
             {
@@ -293,7 +293,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public void EditNodeScript()
         {
-            var script = ReflectionData.TypeInfoData.NodeScript;
+            var script = ReflectionData.NodeScript;
 
             if (script != null)
                 AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
@@ -304,7 +304,7 @@ namespace BlueGraph.Editor
         /// </summary>
         public void EditNodeViewScript()
         {
-            var script = ReflectionData.TypeInfoData.NodeViewScript;
+            var script = ReflectionData.NodeViewScript;
 
             if (script != null)
                 AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
@@ -312,7 +312,7 @@ namespace BlueGraph.Editor
 
         private Status GetNodeScriptStatus(DropdownMenuAction action)
         {
-            if (ReflectionData.TypeInfoData.NodeScript != null)
+            if (ReflectionData.NodeScript != null)
                 return Status.Normal;
             return Status.Disabled;
         }
@@ -324,7 +324,7 @@ namespace BlueGraph.Editor
         /// <returns></returns>
         private Status GetNodeViewScriptStatus(DropdownMenuAction action)
         {
-            if (ReflectionData.TypeInfoData.NodeViewScript)
+            if (ReflectionData.NodeViewScript)
                 return Status.Normal;
             return Status.Disabled;
         }
