@@ -6,17 +6,18 @@ using UnityEditor;
 
 using UnityEditor.Experimental.GraphView;
 using GraphViewNode = UnityEditor.Experimental.GraphView.Node;
+using static UnityEngine.UIElements.DropdownMenuAction;
 
 namespace BlueGraph.Editor
 {
     public class NodeView : GraphViewNode, ICanDirty
     {
         public Node Target { get; private set; }
-        
+
         public List<PortView> Inputs { get; set; } = new List<PortView>();
 
         public List<PortView> Outputs { get; set; } = new List<PortView>();
-        
+
         protected EdgeConnectorListener ConnectorListener { get; set; }
 
         protected SerializedProperty SerializedNode { get; set; }
@@ -26,7 +27,7 @@ namespace BlueGraph.Editor
         protected CanvasView Canvas { get; set; }
 
         private Label errorMessage;
-        
+
         internal void Initialize(Node node, CanvasView canvas, EdgeConnectorListener connectorListener)
         {
             viewDataKey = node.ID;
@@ -34,16 +35,16 @@ namespace BlueGraph.Editor
             Canvas = canvas;
             ReflectionData = NodeReflection.GetNodeType(node.GetType());
             ConnectorListener = connectorListener;
-            
+
             styleSheets.Add(Resources.Load<StyleSheet>("BlueGraphEditor/NodeView"));
             AddToClassList("nodeView");
-            
+
             // Add a class name matching the node's name (e.g. `.node-My-Branch`)
             var ussSafeName = Regex.Replace(Target.Name, @"[^a-zA-Z0-9]+", "-").Trim('-');
             AddToClassList($"node-{ussSafeName}");
-            
+
             var errorContainer = new VisualElement { name = "error" };
-            errorContainer.Add(new VisualElement { name = "error-icon" } );
+            errorContainer.Add(new VisualElement { name = "error-icon" });
 
             errorMessage = new Label { name = "error-label" };
             errorContainer.Add(errorMessage);
@@ -65,10 +66,10 @@ namespace BlueGraph.Editor
             // Custom OnDestroy() handler via https://forum.unity.com/threads/request-for-visualelement-ondestroy-or-onremoved-event.718814/
             RegisterCallback<DetachFromPanelEvent>((e) => Destroy());
             RegisterCallback<TooltipEvent>(OnTooltip);
-            
+
             node.OnErrorEvent += RefreshErrorState;
             node.OnValidateEvent += OnValidate;
-            
+
             ReloadPorts();
             ReloadEditables();
             RefreshErrorState();
@@ -81,7 +82,7 @@ namespace BlueGraph.Editor
         /// but before being added to the graph. 
         /// </summary>
         protected virtual void OnInitialize() { }
-        
+
         internal void Destroy()
         {
             OnDestroy();
@@ -93,14 +94,14 @@ namespace BlueGraph.Editor
         /// Executed when we're about to detach this element from the graph. 
         /// </summary>
         protected virtual void OnDestroy() { }
-        
+
         protected void RefreshErrorState()
         {
             if (string.IsNullOrEmpty(Target.Error))
             {
                 RemoveFromClassList("hasError");
                 errorMessage.text = "";
-            } 
+            }
             else
             {
                 AddToClassList("hasError");
@@ -114,7 +115,7 @@ namespace BlueGraph.Editor
         /// Called after the target node's <c>OnError</c> property is executed.
         /// </summary>
         protected virtual void OnError() { }
-        
+
         /// <summary>
         /// Called after the target node's <c>OnValidate</c> is executed.
         /// </summary>
@@ -136,7 +137,7 @@ namespace BlueGraph.Editor
                     AddOutputPort(port);
                 }
             }
-            
+
             // Update state classes
             EnableInClassList("hasInputs", Inputs.Count > 0);
             EnableInClassList("hasOutputs", Outputs.Count > 0);
@@ -145,7 +146,7 @@ namespace BlueGraph.Editor
         protected void ReloadEditables()
         {
             var reflectionData = NodeReflection.GetNodeType(Target.GetType());
-            if (reflectionData != null) 
+            if (reflectionData != null)
             {
                 foreach (var editable in reflectionData.Editables)
                 {
@@ -165,7 +166,7 @@ namespace BlueGraph.Editor
         protected virtual void AddInputPort(Port port)
         {
             var view = PortView.Create(port, ConnectorListener);
-            
+
             // If we're exposing a control element via reflection: include it in the view
             var reflection = NodeReflection.GetNodeType(Target.GetType());
             var element = reflection.GetPortByName(port.Name)?.GetControlElement(this);
@@ -186,7 +187,7 @@ namespace BlueGraph.Editor
         protected virtual void AddOutputPort(Port port)
         {
             var view = PortView.Create(port, ConnectorListener);
-            
+
             Outputs.Add(view);
             outputContainer.Add(view);
         }
@@ -200,12 +201,12 @@ namespace BlueGraph.Editor
         {
             return Outputs.Find((port) => port.portName == name);
         }
-        
+
         public PortView GetCompatibleInputPort(PortView output)
-        { 
+        {
             return Inputs.Find((port) => port.IsCompatibleWith(output));
         }
-    
+
         public PortView GetCompatibleOutputPort(PortView input)
         {
             return Outputs.Find((port) => port.IsCompatibleWith(input));
@@ -219,11 +220,11 @@ namespace BlueGraph.Editor
             Target.Validate();
             Canvas?.Dirty(this);
         }
-        
+
         public void Dirty()
         {
             OnDirty();
-            
+
             // Dirty all ports so they can refresh their state
             Inputs.ForEach(port => port.OnDirty());
             Outputs.ForEach(port => port.OnDirty());
@@ -232,7 +233,7 @@ namespace BlueGraph.Editor
         public void Update()
         {
             OnUpdate();
-            
+
             // Propagate update to all ports
             Inputs.ForEach(port => port.OnUpdate());
             Outputs.ForEach(port => port.OnUpdate());
@@ -258,7 +259,7 @@ namespace BlueGraph.Editor
             {
                 return position;
             }
-            
+
             return new Rect(Target.Position, Vector2.one);
         }
 
@@ -267,7 +268,64 @@ namespace BlueGraph.Editor
             base.SetPosition(newPos);
             Target.Position = newPos.position;
         }
-        
+
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            //Add Edit Node Script and Edit Node View Script to context menu of the Node
+            evt.menu.AppendSeparator("Edit");
+            evt.menu.AppendAction("Edit/Node Script", (e) => EditNodeScript(), GetNodeScriptStatus);
+            evt.menu.AppendAction("Edit/Node View Script", (e) => EditNodeViewScript(), GetNodeViewScriptStatus);
+            
+            //Add ContextMethos by Attributes from node
+            Dictionary<ContextMethodAttribute, System.Reflection.MethodInfo> contexMethods = ReflectionData.TypeInfoData.contextMethods;
+            foreach (ContextMethodAttribute attr in contexMethods.Keys)
+            {
+                string title = string.IsNullOrEmpty(attr.title) ? contexMethods[attr].Name : attr.title;
+                System.Reflection.MethodInfo info = contexMethods[attr];
+                evt.menu.AppendAction(title, (e) => OnContextMenuSelected(info));
+            }         
+        }
+
+        /// <summary>
+        /// Open NodeScript at Script Editor
+        /// </summary>
+        public void EditNodeScript()
+        {
+            var script = ReflectionData.TypeInfoData.nodeScript;
+
+            if (script != null)
+                AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
+        }
+        /// <summary>
+        /// Open NodeViewScript at Script Editor
+        /// </summary>
+        public void EditNodeViewScript()
+        {
+            var script = ReflectionData.TypeInfoData.nodeViewScript;
+
+            if (script != null)
+                AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
+        }
+
+        private Status GetNodeScriptStatus(DropdownMenuAction action)
+        {
+            if (ReflectionData.TypeInfoData.nodeScript != null)
+                return Status.Normal;
+            return Status.Disabled;
+        }
+        //Used by BuildContextualMenu Function to get ennable or disable contextmenu item
+        private Status GetNodeViewScriptStatus(DropdownMenuAction action)
+        {
+            if (ReflectionData.TypeInfoData.nodeViewScript)
+                return Status.Normal;
+            return Status.Disabled;
+        }
+        //Event trigger by click at contextMethod menuItem
+        private void OnContextMenuSelected(System.Reflection.MethodInfo info)
+        {
+            info.Invoke(Target, null);
+        }
+
         protected void OnTooltip(TooltipEvent evt)
         {
             // TODO: Better implementation that can be styled
@@ -275,15 +333,16 @@ namespace BlueGraph.Editor
             {
                 var typeData = NodeReflection.GetNodeType(Target.GetType());
                 evt.tooltip = typeData?.Help;
-                
+
                 // Float the tooltip above the node title bar
                 var bound = titleContainer.worldBound;
                 bound.x = 0;
                 bound.y = 0;
                 bound.height *= -1;
-                
+
                 evt.rect = titleContainer.LocalToWorld(bound);
             }
         }
+
     }
 }

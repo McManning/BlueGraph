@@ -229,4 +229,23 @@ namespace BlueGraph
             NodeType = nodeType;
         }
     }
+
+    /// <summary>
+    /// Use this attribute in a node method to generate and executed through a node's context menu on the graph
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class ContextMethodAttribute : Attribute
+    {
+        /// <summary>
+        /// This name will appear in the menu title. 
+        /// You can also use a path followed by the name to create categories
+        /// <para>Example: "path/title"</para>
+        /// </summary>
+        public string title { get; set; }
+
+        public ContextMethodAttribute(string title)
+        {
+            this.title = title;
+        }
+    }
 }
