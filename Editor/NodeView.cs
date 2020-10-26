@@ -281,7 +281,7 @@ namespace BlueGraph.Editor
 
             foreach (var attr in contextMethods.Keys)
             {
-                string title = string.IsNullOrEmpty(attr.title) ? contextMethods[attr].Name : attr.title;
+                string title = string.IsNullOrEmpty(attr.menuItem) ? contextMethods[attr].Name : attr.menuItem;
                 var info = contextMethods[attr];
 
                 evt.menu.AppendAction(title, (e) => OnContextMenuSelected(info));

@@ -10,8 +10,8 @@ namespace BlueGraph
     public class NodeAttribute : Attribute
     {
         /// <summary>
-        /// Display name of the node. 
-        /// 
+        /// Display name of the node.
+        ///
         /// If not supplied, this will be inferred based on the class name.
         /// </summary>
         public string Name { get; set; }
@@ -42,7 +42,7 @@ namespace BlueGraph
 
     /// <summary>
     /// Tags associated with a Node. Can be used by a Graph's <c>[IncludeTags]</c>
-    /// attribute to restrict what nodes can be added to the graph. 
+    /// attribute to restrict what nodes can be added to the graph.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class TagsAttribute : Attribute
@@ -63,7 +63,7 @@ namespace BlueGraph
     {
         /// <summary>
         /// Display name of the input slot.
-        /// 
+        ///
         /// If not supplied, this will default to the field name.
         /// </summary>
         public string Name { get; set; }
@@ -86,15 +86,15 @@ namespace BlueGraph
 
     /// <summary>
     /// An output port exposed on a Node.
-    /// 
-    /// This can either be defined on the class or associated with a specific field. 
+    ///
+    /// This can either be defined on the class or associated with a specific field.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class, AllowMultiple = true)]
     public class OutputAttribute : Attribute
     {
         /// <summary>
         /// Display name of the output slot.
-        /// 
+        ///
         /// If not supplied, this will default to the field name.
         /// </summary>
         public string Name { get; set; }
@@ -106,7 +106,7 @@ namespace BlueGraph
 
         /// <summary>
         /// If defined as a class attribute, this is the output type.
-        /// 
+        ///
         /// When defined on a field, the output will automatically be inferred by the field.
         /// </summary>
         public Type Type { get; set; }
@@ -125,8 +125,8 @@ namespace BlueGraph
     public class EditableAttribute : Attribute
     {
         /// <summary>
-        /// Display name of the editable field. 
-        /// 
+        /// Display name of the editable field.
+        ///
         /// If not supplied, this will be inferred based on the field name.
         /// </summary>
         public string Name { get; set; }
@@ -138,10 +138,10 @@ namespace BlueGraph
     }
 
     /// <summary>
-    /// Supported node tags for a given Graph. 
-    /// 
-    /// If defined, only nodes with a <c>[Tags]</c> attribute including 
-    /// one or more of these tags may be added to the Graph. 
+    /// Supported node tags for a given Graph.
+    ///
+    /// If defined, only nodes with a <c>[Tags]</c> attribute including
+    /// one or more of these tags may be added to the Graph.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class IncludeTagsAttribute : Attribute
@@ -155,7 +155,7 @@ namespace BlueGraph
     }
 
     /// <summary>
-    /// Required node for a given Graph. 
+    /// Required node for a given Graph.
     /// Will automatically instantiate the node when the graph is first created.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
@@ -217,7 +217,7 @@ namespace BlueGraph
 
     /// <summary>
     /// Mark a class inherited from <c>NodeView</c> as the primary view
-    /// for a specific type of node. 
+    /// for a specific type of node.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CustomNodeViewAttribute : Attribute
@@ -227,25 +227,6 @@ namespace BlueGraph
         public CustomNodeViewAttribute(Type nodeType)
         {
             NodeType = nodeType;
-        }
-    }
-
-    /// <summary>
-    /// Use this attribute in a node method to generate and executed through a node's context menu on the graph
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class ContextMethodAttribute : Attribute
-    {
-        /// <summary>
-        /// This name will appear in the menu title. 
-        /// You can also use a path followed by the name to create categories
-        /// <para>Example: "path/title"</para>
-        /// </summary>
-        public string title { get; set; }
-
-        public ContextMethodAttribute(string title)
-        {
-            this.title = title;
         }
     }
 }

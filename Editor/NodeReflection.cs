@@ -160,16 +160,16 @@ namespace BlueGraph.Editor
         /// </summary>
         public MonoScript NodeViewScript { get; private set; }
 
-        private Dictionary<ContextMethodAttribute, MethodInfo> contextMethods;
+        private Dictionary<ContextMenu, MethodInfo> contextMethods;
 
         /// <summary>
-        /// All <seealso cref="MethodInfo"/>'s and <seealso cref="ContextMethodAttribute"/>'s of the node.
+        /// All <seealso cref="MethodInfo"/>'s and <seealso cref="ContextMenu"/>'s of the node.
         ///
         /// Use this to see all methods that using ContexMethos Atrribute it this node type
         /// <para></para>
         /// If there are none, an empty Dictionary will be returned
         /// </summary>
-        public IReadOnlyDictionary<ContextMethodAttribute, MethodInfo> ContextMethods {
+        public IReadOnlyDictionary<ContextMenu, MethodInfo> ContextMethods {
             get {
                 return contextMethods;
             }
@@ -184,7 +184,7 @@ namespace BlueGraph.Editor
             Deletable = nodeAttr.Deletable;
             Moveable = nodeAttr.Moveable;
             EditorType = NodeReflection.GetNodeEditorType(type);
-            contextMethods = new Dictionary<ContextMethodAttribute, MethodInfo>();
+            contextMethods = new Dictionary<ContextMenu, MethodInfo>();
 
             var attrs = type.GetCustomAttributes(true);
             foreach (var attr in attrs)
@@ -366,7 +366,7 @@ namespace BlueGraph.Editor
         {
             foreach (var method in Type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                var contextAttr = method.GetCustomAttribute<ContextMethodAttribute>();
+                var contextAttr = method.GetCustomAttribute<ContextMenu>();
                 if (contextAttr != null)
                 {
                     contextMethods.Add(contextAttr, method);
