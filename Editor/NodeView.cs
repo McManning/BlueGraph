@@ -79,7 +79,7 @@ namespace BlueGraph.Editor
 
         /// <summary>
         /// Executed after receiving a node target and initial configuration
-        /// but before being added to the graph. 
+        /// but before being added to the graph.
         /// </summary>
         protected virtual void OnInitialize() { }
 
@@ -91,7 +91,7 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// Executed when we're about to detach this element from the graph. 
+        /// Executed when we're about to detach this element from the graph.
         /// </summary>
         protected virtual void OnDestroy() { }
 
@@ -213,7 +213,7 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// A property has been updated, either by a port or a connection 
+        /// A property has been updated, either by a port or a connection
         /// </summary>
         public virtual void OnPropertyChange()
         {
@@ -240,13 +240,13 @@ namespace BlueGraph.Editor
         }
 
         /// <summary>
-        /// Dirty this node in response to a change in connectivity or internal state. 
-        /// Invalidate any cache in prep for an OnUpdate() call. 
+        /// Dirty this node in response to a change in connectivity or internal state.
+        /// Invalidate any cache in prep for an OnUpdate() call.
         /// </summary>
         public virtual void OnDirty() { }
 
         /// <summary>
-        /// Called when this node was dirtied and the UI is redrawing. 
+        /// Called when this node was dirtied and the UI is redrawing.
         /// </summary>
         public virtual void OnUpdate() { }
 
@@ -275,15 +275,17 @@ namespace BlueGraph.Editor
             evt.menu.AppendSeparator("Edit");
             evt.menu.AppendAction("Edit/Node Script", (e) => EditNodeScript(), GetNodeScriptStatus);
             evt.menu.AppendAction("Edit/Node View Script", (e) => EditNodeViewScript(), GetNodeViewScriptStatus);
-            
-            //Add ContextMethos by Attributes from node
-            Dictionary<ContextMethodAttribute, System.Reflection.MethodInfo> contexMethods = ReflectionData.TypeInfoData.contextMethods;
-            foreach (ContextMethodAttribute attr in contexMethods.Keys)
+
+            //Add ContextMethods by Attributes from node
+            var contextMethods = ReflectionData.TypeInfoData.ContextMethods;
+
+            foreach (var attr in contextMethods.Keys)
             {
-                string title = string.IsNullOrEmpty(attr.title) ? contexMethods[attr].Name : attr.title;
-                System.Reflection.MethodInfo info = contexMethods[attr];
+                string title = string.IsNullOrEmpty(attr.title) ? contextMethods[attr].Name : attr.title;
+                var info = contextMethods[attr];
+
                 evt.menu.AppendAction(title, (e) => OnContextMenuSelected(info));
-            }         
+            }
         }
 
         /// <summary>
@@ -291,17 +293,18 @@ namespace BlueGraph.Editor
         /// </summary>
         public void EditNodeScript()
         {
-            var script = ReflectionData.TypeInfoData.nodeScript;
+            var script = ReflectionData.TypeInfoData.NodeScript;
 
             if (script != null)
                 AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
         }
+
         /// <summary>
         /// Open NodeViewScript at Script Editor
         /// </summary>
         public void EditNodeViewScript()
         {
-            var script = ReflectionData.TypeInfoData.nodeViewScript;
+            var script = ReflectionData.TypeInfoData.NodeViewScript;
 
             if (script != null)
                 AssetDatabase.OpenAsset(script.GetInstanceID(), 0, 0);
@@ -309,18 +312,27 @@ namespace BlueGraph.Editor
 
         private Status GetNodeScriptStatus(DropdownMenuAction action)
         {
-            if (ReflectionData.TypeInfoData.nodeScript != null)
+            if (ReflectionData.TypeInfoData.NodeScript != null)
                 return Status.Normal;
             return Status.Disabled;
         }
-        //Used by BuildContextualMenu Function to get ennable or disable contextmenu item
+
+        /// <summary>
+        /// Utility method for <see cref="BuildContextualMenu(ContextualMenuPopulateEvent)"/> to toggle the context menu item
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
         private Status GetNodeViewScriptStatus(DropdownMenuAction action)
         {
-            if (ReflectionData.TypeInfoData.nodeViewScript)
+            if (ReflectionData.TypeInfoData.NodeViewScript)
                 return Status.Normal;
             return Status.Disabled;
         }
-        //Event trigger by click at contextMethod menuItem
+
+        /// <summary>
+        /// Event triggered when a contexxt method is clicked
+        /// </summary>
+        /// <param name="info"></param>
         private void OnContextMenuSelected(System.Reflection.MethodInfo info)
         {
             info.Invoke(Target, null);
@@ -343,6 +355,5 @@ namespace BlueGraph.Editor
                 evt.rect = titleContainer.LocalToWorld(bound);
             }
         }
-
     }
 }
