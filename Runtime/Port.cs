@@ -75,7 +75,7 @@ namespace BlueGraph
             set { 
                 name = value; 
                 RefreshInboundConnections();
-                Node?.RefreshPortLookup();
+                Node?.RefreshPortMap();
             }
         }
         

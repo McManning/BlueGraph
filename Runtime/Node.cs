@@ -47,21 +47,21 @@ namespace BlueGraph
         }
 
         [SerializeField] private Port[] ports;
-        [NonSerialized] private Dictionary<string, Port> portLookup;
-
+        [NonSerialized] private Dictionary<string, Port> portMap;
+        
         /// <summary>
         /// Accessor for ports and their connections to/from this node.
         /// </summary>
         public IReadOnlyDictionary<string, Port> Ports
         { 
             get {
-                if (portLookup == null)
+                if (portMap == null)
                 {
-                    portLookup = new Dictionary<string, Port>();
-                    RefreshPortLookup();
+                    portMap = new Dictionary<string, Port>();
+                    RefreshPortMap();
                 }
 
-                return portLookup;
+                return portMap;
             } 
         }
 
@@ -81,11 +81,11 @@ namespace BlueGraph
                 OnErrorEvent?.Invoke();
             }
         }
-
+        
         public Node()
         {
             ID = Guid.NewGuid().ToString();
-            portLookup = new Dictionary<string, Port>();
+            portMap = new Dictionary<string, Port>();
         }
 
         public void Enable()
@@ -186,11 +186,11 @@ namespace BlueGraph
             
             port.Node = this;
 
-            portLookup[port.Name] = port;
+            portMap[port.Name] = port;
 
             // Update the serializable port list
             ports = new Port[Ports.Count];
-            portLookup.Values.CopyTo(ports, 0);
+            portMap.Values.CopyTo(ports, 0);
         }
         
         /// <summary>
@@ -201,25 +201,25 @@ namespace BlueGraph
             port.DisconnectAll();
             port.Node = null;
 
-            portLookup.Remove(port.Name);
+            portMap.Remove(port.Name);
             
             // Update the serializable port list
             ports = new Port[Ports.Count];
-            portLookup.Values.CopyTo(ports, 0);
+            portMap.Values.CopyTo(ports, 0);
         }
 
         /// <summary>
         /// Rebuild the fast lookup map between names and <see cref="Port"/> instances.
         /// </summary>
-        internal void RefreshPortLookup()
+        internal void RefreshPortMap()
         {
-            portLookup.Clear();
+            portMap.Clear();
             if (ports != null)
             {
                 foreach (var port in ports)
                 {
                     // Copy port references to our fast lookup dictionary
-                    portLookup[port.Name] = port;
+                    portMap[port.Name] = port;
                 
                     // Add a backref to each child port of this node.
                     // We don't store this in the serialized copy to avoid cyclic refs.
@@ -233,7 +233,7 @@ namespace BlueGraph
         /// </summary>
         public void DisconnectAllPorts()
         {
-            foreach (var port in Ports.Values)
+            foreach (var port in portMap.Values)
             {
                 port.DisconnectAll();
             }
