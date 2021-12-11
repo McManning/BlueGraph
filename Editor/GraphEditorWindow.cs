@@ -19,20 +19,25 @@ namespace BlueGraph.Editor
         public virtual void Load(Graph graph)
         {
             Graph = graph;
-           
+
             Canvas = new CanvasView(this);
             Canvas.Load(graph);
             Canvas.StretchToParentSize();
             rootVisualElement.Add(Canvas);
-        
+
             titleContent = new GUIContent(graph.name);
             Repaint();
         }
 
         protected virtual void Update()
         {
+            // Canvas can be invalidated when the Unity Editor
+            // is closed and reopened with this editor window persisted.
             if (Canvas == null)
+            {
+                Close();
                 return;
+            }
 
             Canvas.Update();
         }
