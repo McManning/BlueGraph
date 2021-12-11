@@ -15,7 +15,13 @@ namespace BlueGraph
 
         public string ID
         {
-            get { return id; }
+            get {
+                if (id == null)
+                {
+                    id = Guid.NewGuid().ToString();
+                }
+                return id;
+            }
             set { id = value; }
         }
 
@@ -57,7 +63,6 @@ namespace BlueGraph
             get {
                 if (portMap == null)
                 {
-                    portMap = new Dictionary<string, Port>();
                     RefreshPortMap();
                 }
 
@@ -82,12 +87,6 @@ namespace BlueGraph
                 OnError();
                 OnErrorEvent?.Invoke();
             }
-        }
-
-        public Node()
-        {
-            ID = Guid.NewGuid().ToString();
-            portMap = new Dictionary<string, Port>();
         }
 
         public void Enable()
@@ -215,7 +214,7 @@ namespace BlueGraph
         /// </summary>
         internal void RefreshPortMap()
         {
-            portMap.Clear();
+            portMap = new Dictionary<string, Port>();
             if (ports != null)
             {
                 foreach (var port in ports)

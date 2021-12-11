@@ -46,8 +46,8 @@ namespace BlueGraph
 
         [NonSerialized] private Port port;
 
-        public Port Port 
-        { 
+        public Port Port
+        {
             get { return port; }
             internal set { port = value; }
         }
@@ -58,12 +58,12 @@ namespace BlueGraph
     {
         [NonSerialized] private Node node;
 
-        public Node Node 
+        public Node Node
         {
             get { return node; }
             internal set { node = value; }
         }
-        
+
         [SerializeField] private string name;
 
         /// <summary>
@@ -72,13 +72,13 @@ namespace BlueGraph
         public string Name
         {
             get { return name; }
-            set { 
-                name = value; 
+            set {
+                name = value;
                 RefreshInboundConnections();
                 Node?.RefreshPortMap();
             }
         }
-        
+
         [SerializeField] private string type;
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace BlueGraph
         [SerializeField] private PortCapacity capacity = PortCapacity.Single;
 
         /// <summary>
-        /// Whether or not multiple edges can be connected 
+        /// Whether or not multiple edges can be connected
         /// between this port and other ports.
         /// </summary>
         public PortCapacity Capacity
@@ -118,15 +118,15 @@ namespace BlueGraph
         {
             get { return connections; }
         }
-        
-        [SerializeField] private List<Connection> connections;
+
+        [SerializeField] private List<Connection> connections = new List<Connection>();
 
         /// <summary>
         /// Enumerate all ports connected by edges to this port
         /// </summary>
-        public IEnumerable<Port> ConnectedPorts 
-        { 
-            get 
+        public IEnumerable<Port> ConnectedPorts
+        {
+            get
             {
                 for (var i = 0; i < connections.Count; i++)
                 {
@@ -135,13 +135,8 @@ namespace BlueGraph
             }
         }
 
-        public Port()
-        {
-            connections = new List<Connection>();
-        }
-        
         public void OnBeforeSerialize()
-        {            
+        {
             type = Type.AssemblyQualifiedName;
         }
 
@@ -152,18 +147,18 @@ namespace BlueGraph
 
         /// <summary>
         /// Resolve the value on this port.
-        /// 
+        ///
         /// If this is an input port that accepts multiple connections,
         /// only the first connection's output value will be returned.
-        /// 
+        ///
         /// If this is an output port, then the node's <c>OnRequestValue()</c>
         /// will be executed and best effort will be made to convert
-        /// to the requested type. 
+        /// to the requested type.
         /// </summary>
         public virtual T GetValue<T>(T defaultValue = default)
         {
-            // If this is an input port, consume the  
-            // value from connected port. 
+            // If this is an input port, consume the
+            // value from connected port.
             if (Direction == PortDirection.Input)
             {
                 if (connections.Count > 0)
@@ -173,7 +168,7 @@ namespace BlueGraph
 
                 return defaultValue;
             }
-            
+
             // Otherwise, attempt resolution from the parent node.
             object value = Node.OnRequestValue(this);
 
@@ -218,7 +213,7 @@ namespace BlueGraph
                 }
             }
         }
-        
+
         /// <summary>
         /// Remove all edges connected connected to this port.
         /// </summary>
@@ -227,28 +222,28 @@ namespace BlueGraph
             // Remove ourselves from all other connected ports
             foreach (var port in ConnectedPorts)
             {
-                port.connections.RemoveAll((edge) => 
+                port.connections.RemoveAll((edge) =>
                     edge.NodeID == Node.ID && edge.PortName == Name
                 );
             }
 
             connections.Clear();
         }
-        
+
         /// <summary>
         /// Add an edge between this and the given Port.
-        /// 
+        ///
         /// Use <c>Graph.AddEdge()</c> over this.
         /// </summary>
         internal void Connect(Port port)
         {
             // Skip if we're already connected
-            if (GetConnection(port) != null) 
+            if (GetConnection(port) != null)
             {
                 return;
             }
 
-            connections.Add(new Connection() 
+            connections.Add(new Connection()
             {
                 Port = port,
                 NodeID = port.Node.ID,
@@ -268,29 +263,29 @@ namespace BlueGraph
         /// </summary>
         internal Connection GetConnection(Port port)
         {
-            return connections.Find((edge) => 
+            return connections.Find((edge) =>
                 edge.NodeID == port.Node.ID && edge.PortName == port.Name
             );
         }
-        
+
         /// <summary>
         /// Remove any edges between this and the given Port.
-        /// 
+        ///
         /// Use <c>Graph.RemoveEdge()</c> externally
         /// </summary>
         internal void Disconnect(Port port)
         {
             // Remove all outbound connections to the other port
-            connections.RemoveAll((edge) => 
+            connections.RemoveAll((edge) =>
                 edge.NodeID == port.Node.ID && edge.PortName == port.Name
             );
-            
+
             // Remove inbound connections to the other port
-            port.connections.RemoveAll((edge) => 
+            port.connections.RemoveAll((edge) =>
                 edge.NodeID == Node.ID && edge.PortName == Name
             );
         }
-        
+
         /// <summary>
         /// Load Port class instances from the Graph for each connection,
         /// invalidating any connections that no longer exist.
@@ -344,7 +339,7 @@ namespace BlueGraph
             for (var i = 0; i < connections.Count; i++)
             {
                 var port = connections[i].Port;
-                
+
                 // This is inbound, so we need to update the connection
                 // entry for the *other* port.
                 foreach (var edge in port.connections)
@@ -357,7 +352,7 @@ namespace BlueGraph
                 }
             }
         }
-        
+
         public override string ToString()
         {
             return $"{GetType()}({Name}, {Node?.ID})";

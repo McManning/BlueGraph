@@ -317,7 +317,6 @@ namespace BlueGraph.Editor
                 node.AddPort(new Port
                 {
                     Type = port.Type,
-                    Node = node,
                     Name = port.Name,
                     Capacity = port.Capacity,
                     Direction = port.Direction
