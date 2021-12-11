@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/McManning/BlueGraph/compare/v1.0.0...v1.0.1) (2021-12-11)
+
+
+### Bug Fixes
+
+* **editor:** Fixed NullReferenceException when a graph editor window is persisted while restarting the Unity Editor (closes [#52](https://github.com/McManning/BlueGraph/issues/52)) ([9059dbe](https://github.com/McManning/BlueGraph/commit/9059dbef79ed43d748603d3ec5389bb01ecad5c1))
+* **runtime:** Fixed ports not being mapped in Unity versions that call ctors for SerializeReferenced objects (closes [#51](https://github.com/McManning/BlueGraph/issues/51)) ([9a7cc6c](https://github.com/McManning/BlueGraph/commit/9a7cc6cc80f8d07f392b433569a10667a9465a07))
+
 # 1.0.0 (2020-10-26)
 
 
